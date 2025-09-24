@@ -1,0 +1,19 @@
+{
+  "name": "notadez",
+  "version": "1.0.0",
+  "description": "Sistema de gerenciamento de turma e nota do Projeto Integrador II do Curso de Eng. Software - PUC Campinas",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nota"
+  ],
+  "author": "grupo 3",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "express": "^5.1.0"
+  }
+}
