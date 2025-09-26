@@ -1,0 +1,47 @@
+@import url('/frontend/src/styles/base/typography.css');
+@import url('/frontend/src/styles/base/variables.css');
+
+
+body{
+    background-color: var(-background-);
+    margin: 0;
+    padding: 20px;
+    font-family: var(--font-family-principal);
+}
+.header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 16px;
+
+}
+
+.logo{
+    display: flex;
+    align-items: center;
+}
+
+.h1{
+    font-family: var(--font-family-principal);
+}
+
+.user-info{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 40px;
+}
+
+.nome{
+    font-family: var(--font-family-principal);
+}
+
+button{
+    background-color: white;
+
+    border: 1px solid var(-button-border-);
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: var(--font-family-principal);
+}
