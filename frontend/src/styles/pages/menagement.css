@@ -1,9 +1,29 @@
-body {
+  body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f9fafd;
     margin: 20px;
     color: #202024;
   }
+  
+  .header {
+    padding: 16px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 20px;
+  }
+  
+  .title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #222;
+    margin: 0 0 4px 0;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+  }
+  
   
   button, .btn {
     cursor: pointer;
