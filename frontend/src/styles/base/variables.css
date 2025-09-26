@@ -1,5 +1,7 @@
 :root{
     --button-border-: #85bbf9;
+    --gray-: rgb(120, 119, 119);
+    --default-shadow-box--: 0 5px 10px rgba(0, 0, 0, 0.1);
     --color-text: #333;
     --color-input-border: #a9a9a9;
     --color-input-backgrounf: #dedddd;
