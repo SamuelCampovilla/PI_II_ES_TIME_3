@@ -89,9 +89,13 @@ form a {
     font-weight: 550;
 }
 form a:hover{
-    text-decoration: underline;
+    text-decoration: none;
     color: black;
     opacity: 1.0;
+    background-color: #f1f1f1;
+    padding: 8px 6px;
+    border-radius: 6px;
+    transition: 0.2s;
 }
 
 form input[type="submit"] {
