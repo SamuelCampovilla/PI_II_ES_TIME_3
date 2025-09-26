@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Entrar - NotaDez</title>
+        <link rel="stylesheet" href="styles/main.css">
+
+    </head>
+    <body>
+        <img src="assets/images/PI - Logo.webp" id="logo">
+        <section class="wrapper">
+            <div class="form login">
+                <header>Login</header>
+                <form action="#">
+                    <input  type="text" placeholder="Email address" required />
+                    <input type="password" placeholder="Password" required />
+                    <a href="#">Esqueceu a senha?</a>
+                    <input type="submit" value="Login" />
+                </form>
+            </div>
+            <div class="form signup">
+                <header>Signup</header>
+                <form action="#">
+                    <input type="text" placeholder="Full name" required />
+                    <input  type="text" placeholder="Email address" required />
+                    <input type="password" placeholder="Password" required />
+                    <div class="checkbox">
+                        <input type="checkbox" id="signupCheck"/>
+                        <label for="signupCheck">Eu li e aceito todos os termos e condições</label>
+                    </div>
+                    <input type="submit" value="Signup" />
+                </form>
+            </div>
+
+            <script>
+                const wrapper = document.querySelector(".wrapper"),
+                loginHeader = document.querySelector(".login header"),
+                signupHeader = document.querySelector(".signup header");
+
+                signupHeader.addEventListener("click", () => {
+                   wrapper.classList.add("active"); 
+                } )
+                loginHeader.addEventListener("click", () => {
+                   wrapper.classList.remove("active"); 
+                } )
+            </script>
+        </section>
+    </body>
+</html>
