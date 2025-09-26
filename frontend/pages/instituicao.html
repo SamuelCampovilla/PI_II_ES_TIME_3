@@ -28,7 +28,7 @@
         </header>
         <main>
             <div class="message">
-                <h1 class="welcome"><strong>Bem-vindo, Professor!</strong></h1>
+                <h1 class="welcome"><strong>Bem-vindo, |NOME|!</strong></h1>
                 <p class="welcome_message">Gerencie suas instituições de forma fácil e eficiente.</p>
                 <button class="add_instituition">
                     <p>+</p>
@@ -38,15 +38,36 @@
             <section>
                 <div class="card_container">
                     <div class="card">
-                        <img src="../src/assets/images/icon_institution.png" alt="institution icon">
-                        <h1 class="institution_name">Universidade Federal de São Paulo</h1>
+                        <div class="institution_info">
+                            <img src="../src/assets/images/icon_institution.png" alt="institution icon">
+                            <h2 class="institution_name">Universidade Federal de São Paulo</h1>
+                                <button type="button" aria-label="Editar item">
+                                    <img src="/frontend/src/assets/images/pencil.png" alt="">
+                                </button>
+
+                                <button type="button" aria-label="Excluir item">
+                                    <img src="/frontend/src/assets/images/trash.png" alt="">
+                                </button>
+                        </div>
+                        <div class="info"> 
+                            <div>
+                                <img src="../src/assets/images/book.png" alt="book image">
+                                <p class="courses">Cursos</p>
+                            </div>
+                            <p>3</p>
+                        </div>
+                        <div class="info"> 
+                            <div>
+                                <img src="/frontend/src/assets/images/people_icon.png" alt="book image">
+                                <p class="courses">Cursos</p>
+                            </div>
+                            <p>75</p>
+                        </div>
+                        <button>Gerenciar</button>
                     </div>
                 </div>
-
             </section>
         </main>
-
-
     
 </body>
 </html>

@@ -48,6 +48,10 @@ body{
     margin-right: 40px;
 }
 
+.user-info > button:hover{
+    background-color: rgb(203, 201, 201);
+}
+
 .nome{
     font-family: var(--font-family-principal);
 }
@@ -70,6 +74,17 @@ main{
     display: flex;
     flex-direction: column;
     gap: 10px;
+    
+}
+
+.message > button{
+    font-family: var(--font-family-principal);
+    font-size: 1.1em;
+}
+.message > button:hover{
+    background-color: black;
+    color: white;
+
 }
 
 .welcome{
@@ -87,3 +102,67 @@ main{
     display: flex;
     gap: 10px;
 }
+
+.card_container{
+    display: grid;
+    margin-top: 25px;
+}
+
+.card{
+    box-shadow: var(--default-shadow-box--);
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    justify-content: center;
+    border-radius: 16px;
+
+}
+
+
+
+.institution_info{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 0 45px 0;
+}
+
+.institution_info h2{
+    font-weight: 600;
+    font-size: 1.1em;
+    font-family: var(--font-family-principal);
+}
+
+.institution_info > button{
+    border: none;
+    width: 0.5%;
+}
+
+
+.info{
+    display: flex;
+    justify-content: space-between;
+    margin: 18px 0 0 0;
+    font-family: var(--font-family-principal);
+}
+
+.info > div{
+    display: flex;
+    gap: 10px;
+}
+
+
+.card > button{
+    margin-top: 25px;
+    border: solid 1px rgb(0, 110, 255);
+    background-color: none;
+}
+
+.card > button:hover{
+    color: white;
+    border: solid 1px rgb(0, 110, 255);
+    background-color: rgb(0, 110, 255);
+}
+
