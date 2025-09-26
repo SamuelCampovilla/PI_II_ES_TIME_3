@@ -1,4 +1,6 @@
 /*Estilos para as páginas de autenticação (login e sigin) - Samuel Campovilla*/
+@import url(/frontend/src/styles/main.css);
+
 body {
     min-height: 100vh;
     display: flex;
@@ -7,6 +9,7 @@ body {
     background-color: white;
 }
 .text p {
+    font-family: var(--font-family-principal);
     text-align: center;
     font-size: 28px;
     font-weight: 600;
@@ -24,6 +27,7 @@ body {
 
 }
 .wrapper {
+    font-family: var(--font-family-principal);
     position: relative;
     max-width: 470px;
     width: 100%;
@@ -60,6 +64,7 @@ body {
 }
 
 form input{
+    font-family: var(--font-family-principal);
     height: 40px;
     outline: none;
     border: none;
