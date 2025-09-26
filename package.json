@@ -13,7 +13,9 @@
   "author": "grupo 3",
   "license": "ISC",
   "dependencies": {
-    "@supabase/supabase-js": "^2.57.4",
-    "express": "^5.1.0"
+    "@supabase/supabase-js": "^2.58.0",
+    "express": "^5.1.0",
+    "tsc": "^2.0.4",
+    "typescript": "^5.9.2"
   }
 }
