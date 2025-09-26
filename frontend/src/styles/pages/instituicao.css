@@ -1,29 +1,45 @@
-@import url('/frontend/src/styles/base/typography.css');
-@import url('/frontend/src/styles/base/variables.css');
+@import url('../main.css');
+@import url('../base/variables.css');
 
+*{
+    font-family: var(--font-family-principal)
+}
 
 body{
-    background-color: var(-background-);
+  
     margin: 0;
     padding: 20px;
     font-family: var(--font-family-principal);
 }
 .header{
+    margin: 10px 5px 0px 5px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-radius: 16px;
-
+    background-color: white;
+    box-shadow: var(--default-shadow-box--);
+    padding: 20px;
 }
 
 .logo{
     display: flex;
     align-items: center;
+    gap: 10px;
 }
 
-.h1{
+.name{
+    font-family: var(--font-family-principal);
+    font-weight: 500;
+    font-size: 1.5em;
+}
+
+
+.initial_text{
+    color: var(--gray-);
     font-family: var(--font-family-principal);
 }
+
 
 .user-info{
     display: flex;
@@ -38,10 +54,36 @@ body{
 
 button{
     background-color: white;
-
     border: 1px solid var(-button-border-);
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
     font-family: var(--font-family-principal);
+}
+
+main{
+    margin-left: 3%;
+    margin-top: 3%;
+}
+
+.message{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.welcome{
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+.welcome_message{
+   color: var(--gray-);
+}
+
+.add_instituition  {
+    margin-top: 20px;
+    width: 13%;
+    display: flex;
+    gap: 10px;
 }

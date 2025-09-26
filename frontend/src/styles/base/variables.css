@@ -1,4 +1,5 @@
 :root{
-    --background-: rgb(218, 203, 203);
     --button-border-: #85bbf9;
+    --gray-: rgb(120, 119, 119);
+    --default-shadow-box--: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
