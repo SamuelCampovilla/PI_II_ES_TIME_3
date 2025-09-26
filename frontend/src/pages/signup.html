@@ -1,0 +1,61 @@
+<!--Página de SignUp ( Cadastro ) - Samuel Campovilla-->
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Entrar - NotaDez</title>
+        <link rel="stylesheet" href="../main.css"> 
+        <link rel="stylesheet" href="../styles/pages/auth.css">
+    </head>
+    <body>
+        <section class="wrapper">
+            <a href="/frontend/src/index.html" class="back-link" aria-label="Back to login">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            </a>
+            <img src="../assets/images/PI - Logo.PNG" id="logo">
+            <div class="form signup">
+                <div class="text">
+                    <p>NotaDez</p>
+                </div>
+                <header>Crie sua Conta</header>
+                <div id="subtext_1">
+                    <p>Preencha os dados para começar</p>
+                </div>
+                <form action="#">
+                    <label for="name">Nome: <span>*</span></label>
+                    <input  type="text" placeholder="Nome completo" required />
+                    <label for="email">Email: <span>*</span></label>
+                    <input  type="text" placeholder="Endereço de email" required />
+                    <label for="institution">Instituição: <span>*</span></label>
+                    <input  type="text" placeholder="Nome da instituição" required />
+                    <label for="telephone">Telefone: <span>*</span></label>
+                    <input
+                    id="telephone"
+                    name="telephone"
+                    type="tel"
+                    inputmode="numeric"
+                    autocomplete="tel"
+                    placeholder="(xx) xxxxx-xxxx"
+                    maxlength="15"
+                    required 
+                    />
+                    <label for="password">Senha: <span>*</span></label>
+                    <input type="password" placeholder="Digite sua senha" required />
+                    <label for="confirm_password">Confirmar Senha: <span>*</span></label>
+                    <input type="password" placeholder="Confirme sua senha" required />
+                    <div class="checkbox">
+                        <input type="checkbox" id="conditions"/>
+                        <a id="conditions_popup">
+                            Eu li e aceito todos os termos e condições
+                        </a>
+                    </div>
+                    <input id="signup_btn" class="btn btn--primary"  type="submit" value="Cadastrar" />
+                </form>
+            </div>
+        </section>
+    </body>
+</html>
