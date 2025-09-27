@@ -1,4 +1,4 @@
-
+// Espera todo o HTML da página carregar antes de rodar o script
 document.addEventListener('DOMContentLoaded', () => {
 
     const botaoAbrir = document.querySelector('.add_instituition');
