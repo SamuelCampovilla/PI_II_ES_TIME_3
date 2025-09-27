@@ -21,3 +21,20 @@ button#add-course:hover {
     background-color: #18181b;
   }
   
+/* Modal button para pop up cards - Samuel Campovilla*/
+.modal_btn{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 20px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  background: black;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
