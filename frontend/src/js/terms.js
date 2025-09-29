@@ -1,3 +1,4 @@
+/* Samuel Campovilla */
 // Aguarda todo o HTML ser carregado antes de rodar o script
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -16,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // Ao clicar no link "Eu li e aceito...", abre o modal
+  // Ao clicar no link "Eu li e aceito...", abre o modal ( mostra o container )
   openBtn.addEventListener('click', (e) => {
     e.preventDefault();               // impede a navegação do <a href="#">
     modal.classList.add('active');    // adiciona a classe que deixa o modal visível
