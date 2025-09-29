@@ -6,8 +6,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Entrar - NotaDez</title>
-        <link rel="stylesheet" href="../main.css"> 
-        <link rel="stylesheet" href="../styles/pages/auth.css">
+        <link rel="stylesheet" href="/frontend/src/main.css"> 
+        <link rel="stylesheet" href="/frontend/src/styles/pages/auth.css">
     </head>
     <body>
         <section class="wrapper">
@@ -16,7 +16,7 @@
                 <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             </a>
-            <img src="../assets/images/PI - Logo.PNG" id="logo">
+            <img src="/frontend/src/assets/images/PI - Logo.PNG" id="logo">
             <div class="form signup">
                 <div class="text">
                     <p>NotaDez</p>
@@ -49,13 +49,26 @@
                     <input type="password" placeholder="Confirme sua senha" required />
                     <div class="checkbox">
                         <input type="checkbox" id="conditions"/>
-                        <a id="conditions_popup">
+                        <a id="conditions_popup" href="#">
                             Eu li e aceito todos os termos e condições
                         </a>
                     </div>
                     <input id="signup_btn" class="btn btn--primary"  type="submit" value="Cadastrar" />
                 </form>
             </div>
+            <div class="modal" id="terms_modal">
+                <div class="modal_content">
+                    <h2>Termos e Condições</h2>
+                    <p>1. Aceitação dos Termos<br>
+                    Ao acessar e utilizar este site/sistema/aplicativo, você concorda em cumprir e estar sujeito a estes Termos e Condições. Caso não concorde, recomendamos que não utilize nossos serviços.</p>
+                    <p>2. Definições<br><ul>
+                        <li><strong>Usuário:</strong> qualquer pessoa que acesse ou utilize o sistema.</li>
+                        <li><strong>Plataforma:</strong> refere-se ao site/aplicativo/sistema disponibilizado.</li>
+                    </ul></p>
+                    <button id="close_modal" class="modal_btn" type="button">Fechar</button>
+                </div>
+            </div>
         </section>
+        <script src="/frontend/src/js/terms.js"></script>
     </body>
 </html>

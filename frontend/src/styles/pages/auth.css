@@ -1,5 +1,6 @@
 /*Estilos para as páginas de autenticação (login e sigin) - Samuel Campovilla*/
 @import url(/frontend/src/styles/base/typography.css);
+@import url(/frontend/src/styles/components/buttons.css);
 
 body {
     min-height: 100vh;
@@ -182,4 +183,41 @@ form .checkbox { text-align: center; }
 
 #conditions_popup {
     cursor: pointer;
+}
+
+/* PopUp configs - Samuel Campovilla  */
+
+#terms_modal{
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  background: rgba(0,0,0,0.35);
+  transition: 0.25s ease;
+  z-index: 999;
+}
+
+#terms_modal.active{
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.modal_content{
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: auto;
+
+  background: #fff;
+  color: #333;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
