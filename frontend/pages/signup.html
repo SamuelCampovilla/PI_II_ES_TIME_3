@@ -25,11 +25,11 @@
                 <div id="subtext_1">
                     <p>Preencha os dados para começar</p>
                 </div>
-                <form action="#">
+                <form action="#" id="signup-form">
                     <label for="name">Nome: <span>*</span></label>
                     <input  type="text" placeholder="Nome completo" required />
                     <label for="email">Email: <span>*</span></label>
-                    <input  type="text" placeholder="Endereço de email" required />
+                    <input id="email" type="text" placeholder="Endereço de email" required />
                     <label for="telephone">Telefone: <span>*</span></label>
                     <input
                     id="telephone"
@@ -42,7 +42,7 @@
                     required 
                     />
                     <label for="password">Senha: <span>*</span></label>
-                    <input type="password" placeholder="Digite sua senha" required />
+                    <input id="password" type="password" placeholder="Digite sua senha" required />
                     <label for="confirm_password">Confirmar Senha: <span>*</span></label>
                     <input type="password" placeholder="Confirme sua senha" required />
                     <div class="checkbox">
@@ -51,7 +51,7 @@
                             Eu li e aceito todos os termos e condições
                         </a>
                     </div>
-                    <input id="signup_btn" class="btn btn--primary"  type="submit" value="Cadastrar" />
+                    <input id="signup_btn" onclick="" class="btn btn--primary"  type="submit" value="Cadastrar" />
                 </form>
             </div>
             <div class="modal" id="terms_modal">
@@ -109,5 +109,6 @@
             </div>
         </section>
         <script src="/frontend/src/js/terms.js"></script>
+        <script type="module" src="../../backend/src/sing_in.js"></script>
     </body>
 </html>
