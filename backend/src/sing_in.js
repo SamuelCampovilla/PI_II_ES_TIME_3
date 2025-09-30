@@ -7,10 +7,14 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // A sintaxe async/await pode ser usada diretamente em navegadores modernos
-async function signUpUser(email, password) {
+async function signUpUser(email, password, name, phone) {
     const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
+            user_metadata: {
+                name: name,
+                phone: phone
+            }
     });
 
     if (error) {
@@ -19,8 +23,8 @@ async function signUpUser(email, password) {
     return { success: true, user: data.user };
 }
 
-async function handleSignUp(email, password) {
-    const result = await signUpUser(email, password);
+async function handleSignUp(email, password, name, phone) {
+    const result = await signUpUser(email, password, name, phone);
     if (result.success) {
         // Redireciona para a página de sucesso
         window.location.href = '../../frontend/pages/instituicao.html';
@@ -40,7 +44,9 @@ if (signUpForm) {
 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
+        const name = document.getElementById('name').value;
+        const phone = document.getElementById('telephone').value;
 
-        await handleSignUp(email, password);
+        await handleSignUp(email, password, name, phone);
     });
 }
