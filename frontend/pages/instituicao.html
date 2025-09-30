@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/frontend/src/styles/pages/instituicao.css">
+    <link rel="stylesheet" href="/frontend/src/styles/base/reset.css">
+    <script src="/frontend/src/js/institution.js"></script>
+<!-- Dashboard de adicionar instituições a pagina --- Caio Polo -->
+    <title>NotaDez - Dashboard</title>
+<body>
+    </head>
+        <header>
+            <div class="header">
+                <div class="logo">
+                    <img src="/frontend/src/assets/images/PI - Logo.PNG" alt="Logo NotaDez" class="logo" width="70" height="70">
+                    <div>
+                        <h1 class="name"><strong>NotaDez</strong></h1>
+                        <p class="initial_text" >Dashboard Docente</p>
+                    </div>
+                    
+                </div>   
+                <div class="user-info">
+                    <p class="nome"><strong>Prof. Paulo Andrade</strong></p>
+                    <button><p>Sair</p></button>
+                </div>
+                
+            </div>
+        </header>
+        <main>
+            <div class="message">
+                <h1 class="welcome"><strong>Bem-vindo, |NOME|!</strong></h1>
+                <p class="welcome_message">Gerencie suas instituições de forma fácil e eficiente.</p>
+                <button class="add_instituition">
+                    <p>+</p>
+                    <p>Adicionar Instituição</p>
+                </button>
+            </div>
+            <div class="blurred-bg" id="blurred-bg">
+                
+            </div>
+            <div id="pop-up"> 
+                <button id="close-pop-up" aria-label="Fechar pop-up"><img src="/frontend/src/assets/images/cancel.png" alt=""></button>
+                <div>
+                    <h2>Adicionar instituição</h2>
+                    <input type="text" id="institution-name" placeholder="Nome da Instituição">
+                    <button>Adicionar</button>
+                </div>
+            </div>
+            <section>
+                <div class="card_container">
+                    <div class="card">
+                        <div class="institution_info">
+                            <img src="../src/assets/images/icon_institution.png" alt="institution icon">
+                            <h2 class="institution_name">Universidade Federal de São Paulo</h1>
+                                <button type="button" aria-label="Editar item">
+                                    <img src="/frontend/src/assets/images/pencil.png" alt="">
+                                </button>
+
+                                <button type="button" aria-label="Excluir item">
+                                    <img src="/frontend/src/assets/images/trash.png" alt="">
+                                </button>
+                        </div>
+                        <div class="info"> 
+                            <div>
+                                <img src="../src/assets/images/book.png" alt="book image">
+                                <p class="courses">Cursos</p>
+                            </div>
+                            <p>3</p>
+                        </div>
+                        <div class="info"> 
+                            <div>
+                                <img src="/frontend/src/assets/images/people_icon.png" alt="book image">
+                                <p class="courses">Cursos</p>
+                            </div>
+                            <p>75</p>
+                        </div>
+                        <button>Gerenciar</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+</body>
+</html>
