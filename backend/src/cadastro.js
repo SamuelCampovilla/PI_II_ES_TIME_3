@@ -7,7 +7,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 document.addEventListener('DOMContentLoaded', async () => {
     const { data, error } = await supabase
-        .from('instituicao')
+        .from('Instituicao')
         .select('*');
     if (error) {
         console.error('Erro ao buscar instituições:', error);
@@ -16,7 +16,13 @@ document.addEventListener('DOMContentLoaded', async () => {
    const institutionList = document.querySelector('.card_container');
     if (institutionList) {
         institutionList.innerHTML = '';
-data.forEach(institution => {
+    data.forEach( async institution => {
+        const { data: cursos, error } = await supabase
+    .from('Cursos')
+    .select('id_curso')
+    .eq('id_instituicao', institution.id_instituicao);
+
+    const cursosCount = cursos ? cursos.length : 0;
     const card = document.createElement('div');
     card.className = 'card';
 
@@ -36,26 +42,19 @@ data.forEach(institution => {
                 <img src="../src/assets/images/book.png" alt="book image">
                 <p class="courses">Cursos</p>
             </div>
-            <p>3</p>
-        </div>
-        <div class="info">
-            <div>
-                <img src="/frontend/src/assets/images/people_icon.png" alt="book image">
-                <p class="courses">Cursos</p>
-            </div>
-            <p>75</p>
+            <p>${cursosCount}</p>
         </div>
         <button>Gerenciar</button>
     `;
 
-    institutionList.appendChild(card);
+    institutionList.appendChild(card); 
 });
     }
 });
 
 async function recordInstitution(name){
     const { data, error } = await supabase
-        .from('instituicao')
+        .from('Instituicao')
         .insert([{ nome_instituicao: name }]);
 
     if (error) {
