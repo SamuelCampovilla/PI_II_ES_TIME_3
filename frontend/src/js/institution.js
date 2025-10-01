@@ -1,7 +1,7 @@
 // Espera todo o HTML da página carregar antes de rodar o script
 document.addEventListener('DOMContentLoaded', () => {
 
-    const botaoAbrir = document.querySelector('.add_instituition');
+    const botaoAbrir = document.getElementById('add_instituition');
     const botaoFechar = document.getElementById('close-pop-up');
     const fundoBlur = document.getElementById('blurred-bg'); 
     const popupConteudo = document.getElementById('pop-up'); 
