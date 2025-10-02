@@ -11,24 +11,17 @@ const messageEl = document.getElementById('message');
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
 
-  const newPassword = document.getElementById('new-password').value;
-  
-  // Limpa mensagens antigas
+  const email = document.getElementById('email').value;
+
   messageEl.textContent = '';
-  
-  // A função updateUser é usada para alterar dados do usuário autenticado,
-  // incluindo a senha.
-  const { data, error } = await supabase.auth.updateUser({
-    password: newPassword
-  });
+
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email);
 
   if (error) {
-    console.error('Erro ao atualizar a senha:', error.message);
-    messageEl.textContent = 'Erro ao atualizar a senha: ' + error.message;
+    messageEl.textContent = 'Erro ao enviar email de recuperação: ' + error.message;
     messageEl.style.color = 'red';
   } else {
-    console.log('Senha atualizada com sucesso!', data);
-    messageEl.textContent = 'Senha atualizada com sucesso!';
+    messageEl.textContent = 'Email de recuperação enviado!';
     messageEl.style.color = 'green';
     form.reset();
   }
