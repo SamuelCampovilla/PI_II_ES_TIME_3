@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <button type="button" aria-label="Editar item">
                 <img src="/frontend/src/assets/images/pencil.png" alt="">
             </button>
-            <button type="button" aria-label="Excluir item">
+            <button class = "btnExcluir" data-id="${institution.id_instituicao}" type="button" aria-label="Excluir item">
                 <img src="/frontend/src/assets/images/trash.png" alt="">
             </button>
         </div>
@@ -44,10 +44,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             <p>${cursosCount}</p>
         </div>
-        <button>Gerenciar</button>
+        <button class = "btnGerenciar" data-id="${institution.id_instituicao}">Gerenciar</button>
     `;
 
     institutionList.appendChild(card); 
+    const btnExcluir = card.querySelector('.btnExcluir');
+if (btnExcluir) {
+    btnExcluir.addEventListener('click', async () => {
+        const id = btnExcluir.getAttribute('data-id');
+        const { error } = await supabase
+            .from('Instituicao')
+            .delete()
+            .eq('id_instituicao', id);
+        if (error) {
+            alert('Erro ao excluir instituição: ' + error.message);
+        } else {
+            card.remove(); // Remove o card da tela
+        }
+    });
+}
+    const btnGerenciar = card.querySelector('.btnGerenciar');
+    if (btnGerenciar) {
+        btnGerenciar.addEventListener('click', () => {
+            const id = btnGerenciar.getAttribute('data-id');
+            window.location.href = `../../frontend/pages/menagementPage.html?id=${id}`;
+        }
+        );
+    }
 });
     }
 });
@@ -79,4 +102,12 @@ if(btnAdd){
         await recordInstitution(instituicao);
         location.reload();
     });
+
+    const btnSair = document.getElementById('btnSair');
+    btnSair.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        window.location.href = '../../frontend/src/index.html';
+    });
 }
+
+

@@ -6,93 +6,20 @@
     <title>Modelo de Cursos</title>
     <link rel="stylesheet" href="/frontend/src/styles/pages/menagement.css" />
     <link rel="stylesheet" href="/frontend/src/styles/components/exclusion_modal.css" />
-
     <script src="/frontend/src/js/exclusion_modal.js" defer></script>
   </head>
   <body>
     <header class="header">
-      <h1 class="title">Universidade Federal de São Paulo</h1>
+      <h1 id="nome_instituicao" class="title">Universidade Federal de São Paulo</h1>
       <p class="subtitle">Gerenciamento de Cursos e Disciplinas</p>
     </header>
-    
 
-  <button id="add-course">+ Adicionar Novo Curso</button>
+    <button id="add-course">+ Adicionar Novo Curso</button>
 
-  <div class="course">
-    <div class="course-header">
-      <span><img src="/frontend/src/assets/images/book.png" alt=""> Engenharia de Software</span>
-      <div class="btn-group">
-        <button class="btn btn-primary">+ Nova Disciplina</button>
-        <button class="btn-icon" title="Editar Curso"><img src="/frontend/src/assets/images/pencil.png" alt=""></button>
-        <button class="btn-icon" title="Excluir Curso"><img src="/frontend/src/assets/images/trash.png" alt=""></button>
-      </div>
-    </div>
+    <!-- Container dinâmico para cursos e disciplinas -->
+    <div id="lista_cursos"></div>
 
-    <div class="discipline">
-      <div class="discipline-header">
-        <span>Algoritmos e Estrutura de Dados</span>
-        <div class="btn-group">
-          <button class="btn-icon" title="Editar Disciplina"><img src="/frontend/src/assets/images/pencil.png" alt=""></button>
-          <button class="btn-icon" title="Excluir Disciplina"><img src="/frontend/src/assets/images/trash.png" alt=""></button>
-        </div>
-      </div>
-      <div class="discipline-subheader">
-        Código: AED001 &nbsp;&nbsp; Período: 2º Semestre
-      </div>
-      <div class="turmas">
-        <div class="turma">
-          <div>
-            <div class="turma-info">Turma A</div>
-            <div class="turma-students"><img src="/frontend/src/assets/images/people_icon.png" alt=""> 32 alunos</div>
-          </div>
-          <div class="turma-buttons">
-            <button class="btn-icon" title="Editar Turma"><img src="/frontend/src/assets/images/pencil.png" alt=""></button>
-            <button class="btn-icon" onclick="exclusion_modal();" title="Excluir Turma"><img src="/frontend/src/assets/images/trash.png" alt=""></button>
-          </div>
-        </div>
-
-        <div class="turma">
-          <div>
-            <div class="turma-info">Turma B</div>
-            <div class="turma-students"><img src="/frontend/src/assets/images/people_icon.png" alt=""> 28 alunos</div>
-          </div>
-          <div class="turma-buttons">
-            <button class="btn-icon" title="Editar Turma"><img src="/frontend/src/assets/images/pencil.png" alt=""></button>
-            <button class="btn-icon" title="Excluir Turma"><img src="/frontend/src/assets/images/trash.png" alt=""></button>
-          </div>
-        </div>
-      </div>
-      <div class="add-turma">+ Nova Turma</div>
-    </div>
-
-    <div class="discipline">
-      <div class="discipline-header">
-        <span>Banco de Dados</span>
-        <div class="btn-group">
-          <button class="btn-icon" title="Editar Disciplina"><img src="/frontend/src/assets/images/pencil.png" alt=""></button>
-          <button class="btn-icon" title="Excluir Disciplina"><img src="/frontend/src/assets/images/trash.png" alt=""></button>
-        </div>
-      </div>
-      <div class="discipline-subheader">
-        Código: BD001 &nbsp;&nbsp; Período: 4º Semestre
-      </div>
-      <div class="turmas">
-        <div class="turma">
-          <div>
-            <div class="turma-info">Turma Única</div>
-            <div class="turma-students"><img src="/frontend/src/assets/images/people_icon.png" alt=""> 45 alunos</div>
-          </div>
-          <div class="turma-buttons">
-            <button class="btn-icon" title="Editar Turma"><img src="/frontend/src/assets/images/pencil.png" alt=""></button>
-            <button class="btn-icon" title="Excluir Turma"><img src="/frontend/src/assets/images/trash.png" alt=""></button>
-          </div>
-        </div>
-      </div>
-      <div class="add-turma">+ Nova Turma</div>
-    </div>
-  </div>
-
-  <!-- Samuel Campovilla -->
+    <!-- Samuel Campovilla -->
     <div class="modal" id="exclusion_modal">
       <div class="modal_content">
         <h2>Excluir Turma</h2>
@@ -112,7 +39,6 @@
         </div>
       </div>
     </div>
-
-
+    <script type="module" src="../../backend/src/administracao_inst.js"></script>
   </body>
 </html>
