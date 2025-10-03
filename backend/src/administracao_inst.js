@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Buscar dados da instituição
     const { data: instituicao, error } = await supabase
-        .from('Instituicao')
+        .from('instituicao')
         .select('*')
         .eq('id_instituicao', id)
         .single();
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Buscar cursos da instituição
     const { data: cursos, error: errorCursos } = await supabase
-        .from('Cursos')
+        .from('cursos')
         .select('*')
         .eq('id_instituicao', id);
 
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Exemplo: buscar disciplinas do curso e adicionar dinamicamente
             supabase
-                .from('Disciplinas')
+                .from('disciplinas')
                 .select('*')
                 .eq('id_curso', curso.id_curso)
                 .then(({ data: disciplinas }) => {

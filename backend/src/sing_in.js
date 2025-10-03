@@ -3,7 +3,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 // Suas chaves do Supabase (mantenha como está)
 const supabaseUrl = 'https://ncordpjdmjxjxadnfeyg.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jb3JkcGpkbWp4anhhZG5mZXlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MzcwMjAsImV4cCI6MjA3NDMxMzAyMH0.krfcElHajJjdXBHplAPACaHnrSz3RMlVydw_Pa9rrsY';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jb3JkcGpkbWp4anhhZG5mZXlnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODczNzAyMCwiZXhwIjoyMDc0MzEzMDIwfQ.jJc4cLbeJDT0uGUkY_UbP17_4hAw4DcUMeKjfhU4O_o';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // A sintaxe async/await pode ser usada diretamente em navegadores modernos
@@ -11,9 +11,10 @@ async function signUpUser(email, password, name, phone) {
     const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
+        email_confirm: true,
             user_metadata: {
-                name: name,
-                phone: phone
+                nome: name,
+                telefone: phone
             }
     });
 
@@ -26,8 +27,12 @@ async function signUpUser(email, password, name, phone) {
 async function handleSignUp(email, password, name, phone) {
     const result = await signUpUser(email, password, name, phone);
     if (result.success) {
-        // Redireciona para a página de sucesso
-        window.location.href = '../../frontend/pages/instituicao.html';
+        const userId = result.user.id;
+
+        const { error } = await supabase
+            .from('docente')
+            .insert([{ id_docente: userId, nome: name, email: email,  senha: password, telefone: phone}]);
+            window.location.href = '../../frontend/pages/instituicao.html?id=' + userId;
     } else {
         // Exibe o erro
         alert(`Erro ao cadastrar: ${result.message}`);
