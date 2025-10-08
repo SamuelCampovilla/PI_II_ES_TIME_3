@@ -1,6 +1,5 @@
 /* Modal de exclusão de curso - Samuel Campovilla*/
 @import url(/frontend/src/styles/base/typography.css);
-@import url(/frontend/src/styles/components/buttons.css); 
 @import url(/frontend/src/styles/base/variables.css);
   #exclusion_modal{
   position: fixed;
@@ -57,7 +56,7 @@
   gap: 10px;
   margin-top: 20px;
 }
-.modal_buttons .btn{
+#exclusion_modal .modal_buttons .btn{
   display: flex;
   justify-content: center;
   align-items: center;
@@ -65,19 +64,20 @@
   font-size: 14px;
   width: 40%;
 }
-.modal_buttons .btn-cancel{
+#exclusion_modal .modal_buttons .btn-cancel{
   background: white;
   color: #333;
   border: solid 1px  rgb(0, 51, 255);
 }
-.modal_buttons .btn-cancel:hover{
+#exclusion_modal .modal_buttons .btn-cancel:hover{
   background: #a5c3ef;
 }
-.modal_buttons .btn-danger{
+#exclusion_modal .modal_buttons .btn-danger{
   background: rgb(255, 0, 0);
   color: #fff;
+  border: none;
 }
-.modal_buttons .btn-danger:hover{
+#exclusion_modal .modal_buttons .btn-danger:hover{
   background: rgb(179, 0, 0);
 }
 

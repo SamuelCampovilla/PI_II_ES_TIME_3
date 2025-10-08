@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/frontend/src/styles/pages/instituicao.css">
     <link rel="stylesheet" href="/frontend/src/styles/base/reset.css">
-
-    <script src="/frontend/src/js/institution.js"></script>
+    <link rel="stylesheet" href="/frontend/src/styles/components/exclusion_modal.css">
+    <link rel="stylesheet" href="/frontend/src/styles/pages/instituicao.css">
 <!-- Dashboard de adicionar instituições a pagina --- Caio Polo -->
     <title>NotaDez - Dashboard</title>
     </head>
@@ -83,6 +82,7 @@
             </section>
         </main>
 
+        <!-- Modal de exclusão de curso - Samuel Campovilla -->
     <div class="modal" id="exclusion_modal">
       <div class="modal_content">
         <div class="modal_top">
@@ -108,7 +108,7 @@
 
 
 
-        <script type="module" src="../../backend/src/cadastro.js"></script>
-
-</body>
+    <script type="module" src="../../backend/src/cadastro.js"></script>
+    <script src="/frontend/src/js/institution.js"></script>
+    </body>
 </html>
