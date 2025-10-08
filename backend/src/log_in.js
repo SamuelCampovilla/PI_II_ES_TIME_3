@@ -16,12 +16,10 @@ async function logInUser(email, password) {
         return { success: true, user: data.user };
     }
 }
-
 async function handleLogIn(email, password) {
     const result = await logInUser(email, password);
     if (result.success) {
-        // Redireciona para a página de sucesso
-        window.location.href = '../../frontend/pages/instituicao.html';
+        window.location.href = '../../frontend/pages/instituicao.html?id=' + result.user.id;
     } else {
         // Exibe o erro
         alert(`Erro ao logar: ${result.message}`);
