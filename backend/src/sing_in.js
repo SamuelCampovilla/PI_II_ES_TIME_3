@@ -52,6 +52,12 @@ if (signUpForm) {
         const name = document.getElementById('name').value;
         const phone = document.getElementById('telephone').value;
 
+        const btnAceito = document.getElementById('conditions');
+        if (!btnAceito.checked) {
+            alert('Você deve aceitar os termos e condições para se cadastrar.');
+            return;
+        }
+
         await handleSignUp(email, password, name, phone);
     });
 }

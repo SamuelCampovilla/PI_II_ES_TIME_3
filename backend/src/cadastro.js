@@ -8,6 +8,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     const idDocente = params.get('id');
     console.log("ID Docente:", idDocente);
+    const welcomeEl = document.getElementById('welcome');
+    const { data: docente, error: docenteError } = await supabase
+        .from('docente')
+        .select('nome')
+        .eq('id_docente', idDocente)
+        .single();
+    if (docenteError) {
+        console.error('Erro ao buscar nome do docente:', docenteError);
+    } else if (welcomeEl && docente) {
+        welcomeEl.textContent = `Bem-vindo, ${docente.nome}!`;
+    }
 
     if (!idDocente) return;
 
