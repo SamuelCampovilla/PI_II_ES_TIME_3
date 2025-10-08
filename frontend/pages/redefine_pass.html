@@ -1,10 +1,8 @@
-<!--Página de Esqueci a Senha - João Victor Pensado-->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/frontend/src/main.css"> 
-    <link rel="stylesheet" href="/frontend/src/styles/pages/auth.css">
+    <link href="../src/styles/pages/forgotpassword.css" rel="stylesheet"/>
     <title>NotaDez - Esqueci a Senha</title>
 </head>
     <body>
@@ -14,13 +12,15 @@
                 <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             </a>
-            <div>
+            <div class="form-container">
                 <img src="/frontend/src/assets/images/PI - Logo.PNG" id="logo">
-                <h1>Recuperação de Senha</h1>
-                <form action="forgotpassword" method="POST">
-                <label for="email">E-mail:  <span>*</span></label>
-                <input  type="text" placeholder="Endereço de email" required />
-                <input id="signup_btn" class="btn btn--primary"  type="submit" value="Enviar" />
+                <h1>Redefinir Senha</h1>
+                <form action="redefinepassword">
+                    <label for="email">Nova senha:  <span>*</span></label>
+                    <input  type="password" placeholder="" required />
+                    <label for="email">Confirmar senha:  <span>*</span></label>
+                    <input  type="password" placeholder="" required />
+                    <input id="signup_btn" class="btn btn--primary"  type="submit" value="Enviar" />
                 </form>
             </div>
         </section>

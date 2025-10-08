@@ -100,15 +100,39 @@ main{
     margin-top: 20px;
     width: 13%;
     display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
     gap: 10px;
 }
+
 
 .card_container{
     display: grid;
     grid-template-columns: repeat(3, 1fr); 
     gap: 24px;
     margin-top: 25px;
+    padding: 12px;
 }
+
+@media (max-width: 1024px) {
+    .card_container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 600px) {
+    .card_container {
+        grid-template-columns: 1fr; 
+    }
+    .add_instituition p:nth-child(2) {
+        display: none;
+    }   
+    
+    .add_instituition {
+        width: fit-content; 
+        padding: 10px;
+    }
+    }
 
 .card{
     box-shadow: var(--default-shadow-box--);
