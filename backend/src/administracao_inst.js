@@ -21,9 +21,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    const btnAddCurso = document.getElementById('add-course');
+    const btnAddCurso = document.getElementById('btnAdicionar');
     if (btnAddCurso) {
-        //ADICIONAR EVENT LISTENER PARA BOTÃO DE ADICIONAR CURSO
+        btnAddCurso.addEventListener('click', () => {
+            const courseName = document.getElementById('course-name').value;
+            if (!courseName.trim()) {
+                alert('Por favor, insira o nome do curso.');
+                return;
+            }
+            supabase
+                .from('cursos')
+                .insert([{ nome_curso: courseName, id_instituicao: id }])
+                .then(({ data, error }) => {
+                    if (error) {
+                        alert('Erro ao adicionar curso: ' + error.message);
+                    } else {
+                        alert('Curso adicionado com sucesso!');
+                        location.reload(); // Recarregar a página para mostrar o novo curso
+                    }
+                });
+        });
     }
 
     // Exibir nome da instituição
