@@ -21,6 +21,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    const btnAddCurso = document.getElementById('btnAdicionar');
+    if (btnAddCurso) {
+        btnAddCurso.addEventListener('click', () => {
+            const courseName = document.getElementById('course-name').value;
+            if (!courseName.trim()) {
+                alert('Por favor, insira o nome do curso.');
+                return;
+            }
+            supabase
+                .from('cursos')
+                .insert([{ nome_curso: courseName, id_instituicao: id }])
+                .then(({ data, error }) => {
+                    if (error) {
+                        alert('Erro ao adicionar curso: ' + error.message);
+                    } else {
+                        alert('Curso adicionado com sucesso!');
+                        location.reload(); // Recarregar a página para mostrar o novo curso
+                    }
+                });
+        });
+    }
+
     // Exibir nome da instituição
     const nomeEl = document.getElementById('nome_instituicao');
     if (nomeEl) {
@@ -41,18 +63,38 @@ document.addEventListener('DOMContentLoaded', async () => {
             div.className = 'course';
             div.innerHTML = `
                 <div class="course-header">
-                    <span><img src="/frontend/src/assets/images/book.png" alt=""> ${curso.nome_curso}</span>
+                    <span class="nome_curso"><img src="/frontend/src/assets/images/book.png" alt=""> ${curso.nome_curso}</span>
                     <div class="btn-group">
                         <button class="btn btn-primary">+ Nova Disciplina</button>
-                        <button class="btn-icon" title="Editar Curso"><img src="/frontend/src/assets/images/pencil.png" alt=""></button>
-                        <button class="btn-icon" title="Excluir Curso"><img src="/frontend/src/assets/images/trash.png" alt=""></button>
+                        <button class="btnEditarCurso btn-icon" title="Editar Curso"><img src="/frontend/src/assets/images/pencil.png" alt=""></button>
+                        <button class="btnExcluirCurso btn-icon" title="Excluir Curso"><img src="/frontend/src/assets/images/trash.png" alt=""></button>
                     </div>
                 </div>
                 <div class="disciplines"></div>
             `;
             cursosEl.appendChild(div);
 
-            // Exemplo: buscar disciplinas do curso e adicionar dinamicamente
+            // Listener para exclusão do curso
+            const btnExcluirCurso = div.querySelector('.btnExcluirCurso');
+            if (btnExcluirCurso) {
+                btnExcluirCurso.addEventListener('click', async () => {
+                    const confirmDelete = confirm('Tem certeza que deseja excluir este curso? Esta ação não pode ser desfeita.');
+                    if (confirmDelete) {
+                        const { error: deleteError } = await supabase
+                            .from('cursos')
+                            .delete()
+                            .eq('id_curso', curso.id_curso);
+                        if (deleteError) {
+                            alert('Erro ao excluir curso: ' + deleteError.message);
+                        } else {
+                            alert('Curso excluído com sucesso!');
+                            div.remove();
+                        }
+                    }
+                });
+            }
+
+            // Buscar disciplinas do curso e adicionar dinamicamente
             supabase
                 .from('disciplinas')
                 .select('*')
