@@ -1,3 +1,5 @@
+//Abrir e fechar pop-up ---- Caio
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const botaoAbrir = document.getElementById('add-course');
