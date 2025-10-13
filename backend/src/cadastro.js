@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else if (welcomeEl && docente) {
         welcomeEl.textContent = `Bem-vindo, ${docente.nome}!`;
     }
+        const nome_professor = document.getElementById('nome_professor');
+    if (nome_professor && docente) {
+        nome_professor.textContent = 'Prof. ' + docente.nome;
+    }
 
     if (!idDocente) return;
 
