@@ -1,7 +1,8 @@
-// pop-up de adicionar instituição ---- Caio Polo
+//Abrir e fechar pop-up ---- Caio
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    const botaoAbrir = document.getElementById('add_instituition');
+    const botaoAbrir = document.getElementById('add-course');
     const botaoFechar = document.getElementById('close-pop-up');
     const fundoBlur = document.getElementById('blurred-bg'); 
     const popupConteudo = document.getElementById('pop-up'); 
