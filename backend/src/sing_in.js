@@ -57,7 +57,7 @@ if (signUpForm) {
             alert('Você deve aceitar os termos e condições para se cadastrar.');
             return;
         }
-
+        
         await handleSignUp(email, password, name, phone);
     });
 }

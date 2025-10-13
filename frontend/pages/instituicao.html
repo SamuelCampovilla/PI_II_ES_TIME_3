@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/frontend/src/styles/pages/instituicao.css">
     <link rel="stylesheet" href="/frontend/src/styles/base/reset.css">
-
-    <script src="/frontend/src/js/institution.js"></script>
+    <link rel="stylesheet" href="/frontend/src/styles/components/exclusion_modal.css">
+    <link rel="stylesheet" href="/frontend/src/styles/pages/instituicao.css">
 <!-- Dashboard de adicionar instituições a pagina --- Caio Polo -->
     <title>NotaDez - Dashboard</title>
     </head>
@@ -59,7 +58,7 @@
                                     <img src="/frontend/src/assets/images/pencil.png" alt="">
                                 </button>
 
-                                <button class = "btnExcluir" type="button" aria-label="Excluir item">
+                                <button class = "btnExcluir" type="button"  onclick="" aria-label="Excluir item">
                                     <img src="/frontend/src/assets/images/trash.png" alt="">
                                 </button>
                         </div>
@@ -83,6 +82,7 @@
             </section>
         </main>
 
+        <!-- Modal de exclusão de curso - Samuel Campovilla -->
     <div class="modal" id="exclusion_modal">
       <div class="modal_content">
         <div class="modal_top">
@@ -107,8 +107,8 @@
     </div>
 
 
-
-        <script type="module" src="../../backend/src/cadastro.js"></script>
-
-</body>
+    <script src="/frontend/src/js/exclusion_modal.js"></script>
+    <script type="module" src="../../backend/src/cadastro.js"></script>
+    <script src="/frontend/src/js/institution.js"></script>
+    </body>
 </html>

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/frontend/src/styles/pages/menagement.css" />
     <link rel="stylesheet" href="/frontend/src/styles/components/exclusion_modal.css" />
     <script src="/frontend/src/js/exclusion_modal.js" defer></script>
+    <script src="/frontend/src/js/menagementPage.js"></script>
   </head>
   <body>
     <header class="header">
@@ -28,6 +29,19 @@
 
     <!-- Container dinâmico para cursos e disciplinas -->
     <div id="lista_cursos"></div>
+
+    
+    <!-- Pop - up para adicionar curso --- Caio Polo-->
+    <div id="blurred-bg">
+    <div id="pop-up"> 
+      <button id="close-pop-up" aria-label="Fechar pop-up"><img src="/frontend/src/assets/images/cancel.png" alt=""></button>
+        <div>
+          <h2>Adicionar Curso</h2>
+            <input type="text" id="course-name-pop-up" placeholder="Nome do Curso">
+              <button id = "btnAdicionar">Adicionar</button>
+        </div>
+    </div>
+
 
     <!-- Samuel Campovilla -->
     <div class="modal" id="exclusion_modal">
@@ -52,7 +66,6 @@
         </div>
       </div>
     </div>
-    <script type="module" src="../../backend/src/administracao_inst.js"></script>
-    <script type="module" src="../src/js/menagementpage.js"></script>
+    <script type="module" src="/backend/src/administracao_inst.js"></script>
   </body>
 </html>
