@@ -24,7 +24,18 @@
 
       <!-- Barra de Ações -->
       <div class="actions">
-        <button class="primary">+ Adicionar Aluno</button>
+        <button id="btnAddAluno" class="primary">+ Adicionar Aluno</button>
+        <div id="blurred-bg">
+            <div id="pop-up"> 
+                <button id="close-pop-up" aria-label="Fechar pop-up"><img src="/frontend/src/assets/images/cancel.png" alt=""></button>
+                <div>
+                    <h2>Adicionar Aluno</h2>
+                    <input type="text" id="ra_aluno" placeholder="Ra do Aluno">
+                    <input type="text" id="nome_aluno" placeholder="Nome do Aluno">
+                    <button id = "btnAdicionar">Adicionar</button>
+                </div>
+            </div>
+            </div>
         <button>Importar Alunos</button>
         <button>Componentes</button>
         <button>Fórmula</button>
@@ -105,5 +116,6 @@
     </aside>
   </div>
   <script type="module" src="../../backend/src/students.js"></script>
+  <script type="module" src="/frontend/src/js/studentsmodal.js"></script>
 </body>
 </html>
