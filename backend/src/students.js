@@ -1,67 +1,88 @@
+// ...existing code...
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import { createClient } from '@supabase/supabase-js';
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const app = express();
+app.use(cors());
+app.use(bodyParser.json({ limit: '10mb' }));
 
 const supabaseUrl = 'https://ncordpjdmjxjxadnfeyg.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jb3JkcGpkbWp4anhhZG5mZXlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MzcwMjAsImV4cCI6MjA3NDMxMzAyMH0.krfcElHajJjdXBHplAPACaHnrSz3RMlVydw_Pa9rrsY';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// popula a tabela do HTML (Matrícula, Nome, P1, P2, P3, Nota Final, Nota Final Ajustada)
-document.addEventListener('DOMContentLoaded', async () => {
-  const tbody = document.querySelector('.table-container table tbody');
-  if (!tbody) return;
+// util: chunk array
+function chunkArray(arr, size) {
+  const chunks = [];
+  for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
+  return chunks;
+}
 
-  tbody.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
-
-  const params = new URLSearchParams(window.location.search);
-  const idTurma = params.get('id_turma');
-
+// POST /import-students
+// body: { id_turma: number|string, alunos: [{ ra: string, nome: string }, ...] }
+app.post('/import-students', async (req, res) => {
   try {
-    let query = supabase
-      .from('matricula')
-      .select(`
-        ra_aluno,
-        componente_1,
-        componente_2,
-        componente_3,
-        nota_final,
-        nota_final_ajustada,
-        alunos ( ra, nome )
-      `);
-
-    if (idTurma) query = query.eq('id_turma', idTurma);
-
-    const { data: rows, error } = await query;
-    if (error) throw error;
-
-    if (!rows || rows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7">Nenhum aluno matriculado.</td></tr>';
-      return;
+    const { id_turma: idTurma, alunos } = req.body;
+    if (!idTurma) return res.status(400).json({ error: 'id_turma is required' });
+    if (!Array.isArray(alunos) || alunos.length === 0) {
+      return res.status(400).json({ error: 'alunos array is required' });
     }
 
-    tbody.innerHTML = '';
-    rows.forEach(r => {
-      const ra = r.ra_aluno ?? (r.alunos && r.alunos.ra) ?? '—';
-      const nome = (r.alunos && r.alunos.nome) ?? '—';
-      const p1 = r.componente_1 ?? '—';
-      const p2 = r.componente_2 ?? '—';
-      const p3 = r.componente_3 ?? '—';
-      const notaFinal = r.nota_final ?? '—';
-      const notaAjust = r.nota_final_ajustada ?? '—';
+    // normalize and unique by RA
+    const map = new Map();
+    alunos.forEach(a => {
+      const ra = (a.ra || '').toString().trim();
+      const nome = (a.nome || '').toString().trim();
+      if (ra && nome) map.set(ra, { ra, nome });
+    });
+    const unique = Array.from(map.values());
+    if (unique.length === 0) return res.json({ imported: 0, matriculados: 0 });
 
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${ra}</td>
-        <td>${nome}</td>
-        <td>${p1}</td>
-        <td>${p2}</td>
-        <td>${p3}</td>
-        <td class="${notaFinal !== '—' && notaFinal >= 6 ? 'green' : (notaFinal !== '—' ? 'red' : '')}">${notaFinal}</td>
-        <td>${notaAjust}</td>
-      `;
-      tbody.appendChild(tr);
+    // 1) Upsert alunos in chunks
+    const CHUNK = 200;
+    for (const chunk of chunkArray(unique, CHUNK)) {
+      const payload = chunk.map(r => ({ ra: r.ra, nome: r.nome }));
+      const { error: upsertErr } = await supabase.from('alunos').upsert(payload, { onConflict: 'ra' });
+      if (upsertErr) throw upsertErr;
+    }
+
+    // 2) Find existing matriculas for this turma
+    const ras = unique.map(u => u.ra);
+    const { data: existingMats, error: existingErr } = await supabase
+      .from('matricula')
+      .select('ra_aluno')
+      .in('ra_aluno', ras)
+      .eq('id_turma', Number(idTurma));
+
+    if (existingErr) throw existingErr;
+    const existSet = new Set((existingMats || []).map(m => m.ra_aluno));
+
+    // 3) Insert missing matriculas
+    const toInsert = unique
+      .filter(u => !existSet.has(u.ra))
+      .map(u => ({ ra_aluno: u.ra, id_turma: Number(idTurma) }));
+
+    let insertedCount = 0;
+    for (const chunk of chunkArray(toInsert, CHUNK)) {
+      const { error: insertErr } = await supabase.from('matricula').insert(chunk);
+      if (insertErr) throw insertErr;
+      insertedCount += chunk.length;
+    }
+
+    return res.json({
+      imported: unique.length,
+      matriculados: insertedCount,
+      message: 'Import completed'
     });
   } catch (err) {
-    console.error('Erro ao buscar alunos:', err);
-    tbody.innerHTML = '<tr><td colspan="7">Erro ao carregar alunos.</td></tr>';
+    console.error('Import error:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
   }
 });
+
+// simple health
+app.get('/ping', (_req, res) => res.send('ok'));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`students backend running on port ${PORT}`));
