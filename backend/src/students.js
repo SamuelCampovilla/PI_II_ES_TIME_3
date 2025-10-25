@@ -1,4 +1,4 @@
-// ...existing code...
+
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const supabaseUrl = 'https://ncordpjdmjxjxadnfeyg.supabase.co';
@@ -65,4 +65,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     tbody.innerHTML = '<tr><td colspan="7">Erro ao carregar alunos.</td></tr>';
   }
 });
-// ...existing code...
