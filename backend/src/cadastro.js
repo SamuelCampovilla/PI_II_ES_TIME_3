@@ -1,66 +1,82 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-const supabaseUrl = 'https://ncordpjdmjxjxadnfeyg.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jb3JkcGpkbWp4anhhZG5mZXlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MzcwMjAsImV4cCI6MjA3NDMxMzAyMH0.krfcElHajJjdXBHplAPACaHnrSz3RMlVydw_Pa9rrsY';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const API_URL = window.location.origin;
 
 document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     const idDocente = params.get('id');
     console.log("ID Docente:", idDocente);
-    const welcomeEl = document.getElementById('welcome');
-    const profNameEl = document.getElementById('prof_name');
-    const { data: docente, error: docenteError } = await supabase
-        .from('docente')
-        .select('nome')
-        .eq('id_docente', idDocente)
-        .single();
-    if (docenteError) {
-        console.error('Erro ao buscar nome do docente:', docenteError);
-    } else if (welcomeEl && docente) {
-        welcomeEl.textContent = `Bem-vindo, ${docente.nome}!`;
-        profNameEl.textContent = `Prof. ${docente.nome}`;
-    }
-
-    if (!idDocente) return;
-
-    // Buscar instituições vinculadas
-    const { data, error } = await supabase
-        .from('docente_instituicao')
-        .select(`
-            instituicao (
-                id_instituicao,
-                nome_instituicao
-            )
-        `)
-        .eq('id_docente', idDocente);
-
-    if (error) {
-        console.error('Erro ao buscar instituições:', error);
+    
+    if (!idDocente) {
+        console.error('ID Docente não fornecido');
         return;
     }
 
+    const welcomeEl = document.getElementById('welcome');
+    const profNameEl = document.getElementById('prof_name');
+
+    // Fetch docente name
+    try {
+        const docenteResponse = await fetch(`${API_URL}/api/docente/${idDocente}`, {
+            credentials: 'include'
+        });
+        
+        if (docenteResponse.ok) {
+            const docente = await docenteResponse.json();
+            if (welcomeEl) {
+                welcomeEl.textContent = `Bem-vindo, ${docente.nome}!`;
+            }
+            if (profNameEl) {
+                profNameEl.textContent = `Prof. ${docente.nome}`;
+            }
+        } else {
+            console.error('Erro ao buscar nome do docente');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar nome do docente:', error);
+    }
+
+    // Fetch institutions
+    let institutions = [];
+    try {
+        const instResponse = await fetch(`${API_URL}/api/docente/${idDocente}/instituicoes`, {
+            credentials: 'include'
+        });
+        
+        if (instResponse.ok) {
+            institutions = await instResponse.json();
+        } else {
+            console.error('Erro ao buscar instituições');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar instituições:', error);
+    }
+
+    // Render institutions
     const institutionList = document.querySelector('.card_container');
     if (institutionList) {
         institutionList.innerHTML = '';
 
-        data.forEach(async row => {
-            const institution = row.instituicao;
+        for (const institution of institutions) {
+            // Fetch courses count for each institution
+            let cursosCount = 0;
+            try {
+                const cursosResponse = await fetch(`${API_URL}/api/instituicoes/${institution.id_instituicao}/cursos`, {
+                    credentials: 'include'
+                });
+                
+                if (cursosResponse.ok) {
+                    const cursosData = await cursosResponse.json();
+                    cursosCount = cursosData.count || 0;
+                }
+            } catch (error) {
+                console.error('Erro ao buscar cursos:', error);
+            }
 
-            // Buscar cursos da instituição
-            const { data: cursos } = await supabase
-                .from('cursos')
-                .select('id_curso')
-                .eq('id_instituicao', institution.id_instituicao);
-
-            const cursosCount = cursos ? cursos.length : 0;
-
-            // Criar card
+            // Create card
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
                 <div class="institution_info">
-                    <img src="../src/assets/images/icon_institution.png" alt="institution icon">
+                    <img src="/frontend/src/assets/images/icon_institution.png" alt="institution icon">
                     <h2 class="institution_name">${institution.nome_instituicao}</h2>
                     <button class="btnExcluir" data-id="${institution.id_instituicao}" type="button">
                         <img src="/frontend/src/assets/images/trash.png" alt="Excluir">
@@ -68,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
                 <div class="info">
                     <div>
-                        <img src="../src/assets/images/book.png" alt="book image">
+                        <img src="/frontend/src/assets/images/book.png" alt="book image">
                         <p class="courses">Cursos</p>
                     </div>
                     <p>${cursosCount}</p>
@@ -78,32 +94,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             institutionList.appendChild(card);
 
-            // Botão excluir
+            // Delete button
             const btnExcluir = card.querySelector('.btnExcluir');
             btnExcluir.addEventListener('click', async () => {
                 const idInstituicao = btnExcluir.getAttribute('data-id');
-                const { error } = await supabase
-                    .from('docente_instituicao')
-                    .delete()
-                    .match({ id_docente: idDocente, id_instituicao: idInstituicao });
+                
+                if (!confirm('Tem certeza que deseja remover esta instituição?')) {
+                    return;
+                }
 
-                if (error) {
-                    alert('Erro ao excluir instituição: ' + error.message);
-                } else {
-                    card.remove();
+                try {
+                    const response = await fetch(`${API_URL}/api/docente/${idDocente}/instituicoes/${idInstituicao}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                        card.remove();
+                    } else {
+                        const data = await response.json();
+                        alert('Erro ao excluir instituição: ' + (data.error || 'Erro desconhecido'));
+                    }
+                } catch (error) {
+                    console.error('Erro ao excluir instituição:', error);
+                    alert('Erro ao excluir instituição');
                 }
             });
 
-            // Botão gerenciar
+            // Manage button
             const btnGerenciar = card.querySelector('.btnGerenciar');
             btnGerenciar.addEventListener('click', () => {
                 const id = btnGerenciar.getAttribute('data-id');
-                window.location.href = `../../frontend/pages/menagementPage.html?id=${id}`;
+                window.location.href = `/frontend/pages/menagementPage.html?id=${id}`;
             });
-        });
+        }
     }
 
-    // Botão adicionar
+    // Add institution button
     const btnAdd = document.getElementById('btnAdicionar');
     if (btnAdd) {
         btnAdd.addEventListener('click', async (event) => {
@@ -113,66 +140,49 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert('Por favor, insira o nome da instituição.');
                 return;
             }
-            await adicionarVinculoDocenteInstituicao(idDocente, nomeInstituicao);
-            location.reload();
+
+            try {
+                const response = await fetch(`${API_URL}/api/docente/${idDocente}/instituicoes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ nome_instituicao: nomeInstituicao })
+                });
+
+                if (response.ok) {
+                    alert('Instituição adicionada com sucesso!');
+                    location.reload();
+                } else {
+                    const data = await response.json();
+                    alert('Erro ao adicionar instituição: ' + (data.error || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar instituição:', error);
+                alert('Erro ao adicionar instituição');
+            }
         });
     }
 
-    // Botão sair
+    // Logout button
     const btnSair = document.getElementById('btnSair');
     if (btnSair) {
-        btnSair.addEventListener('click', async () => {
-            await supabase.auth.signOut();
-            window.location.href = '../../frontend/src/index.html';
+        btnSair.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/signout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                });
+
+                // Always redirect, even if there's an error
+                window.location.href = '/frontend/src/index.html';
+            } catch (error) {
+                console.error('Erro ao fazer logout:', error);
+                window.location.href = '/frontend/src/index.html';
+            }
         });
     }
 });
-
-// Função para adicionar vínculo docente-instituição
-async function adicionarVinculoDocenteInstituicao(idDocente, nomeInstituicao) {
-    try {
-        // Verifica se a instituição já existe
-        let { data: instituicao, error: errorSelect } = await supabase
-            .from('instituicao')
-            .select('*')
-            .eq('nome_instituicao', nomeInstituicao)
-            .maybeSingle();
-
-        let idInstituicao;
-
-        if (!instituicao) {
-            // Se não existir, cria a instituição
-            const { data: novaInstituicao, error: errorInsert } = await supabase
-                .from('instituicao')
-                .insert([{ nome_instituicao: nomeInstituicao }])
-                .select()
-                .single();
-
-            if (errorInsert) {
-                console.error('Erro ao criar instituição:', errorInsert);
-                alert('Erro ao criar instituição');
-                return;
-            }
-
-            idInstituicao = novaInstituicao.id_instituicao;
-        } else {
-            idInstituicao = instituicao.id_instituicao;
-        }
-
-        // Cria o vínculo evitando duplicados
-        const { error: errorVinculo } = await supabase
-            .from('docente_instituicao')
-            .insert([{ id_docente: idDocente, id_instituicao: idInstituicao }], { ignoreDuplicates: true });
-
-        if (errorVinculo) {
-            console.error('Erro ao vincular docente à instituição:', errorVinculo);
-            alert('Erro ao vincular docente à instituição');
-            return;
-        }
-
-        alert('Vínculo criado com sucesso!');
-    } catch (err) {
-        console.error('Erro inesperado:', err);
-        alert('Erro inesperado ao criar vínculo');
-    }
-}
