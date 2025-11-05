@@ -8,7 +8,7 @@ const password = 'UerGWimRCmPCiXyKgdbodDRyfrXaedsf';
 const database = 'railway'; 
 
 
-async function connectToDatabase() {
+export async function connectToDatabase() {
 
     try{
         const connection = await mysql.createConnection({
@@ -22,6 +22,7 @@ async function connectToDatabase() {
     }   
     catch (error){
         console.error('Erro ao conectar ao banco de dados:', error);
+        throw error;
     }
 }   
 connectToDatabase();
