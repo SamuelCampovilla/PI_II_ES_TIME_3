@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded',() =>{
+document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('signup-form');
 
     form.addEventListener('submit', async (event) => {
@@ -7,32 +7,31 @@ document.addEventListener('DOMContentLoaded',() =>{
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const telefone = document.getElementById('telephone').value;
-        
-        const infoCadastro = {name, email, password, telefone};
+
+        const infoCadastro = { name, email, password, telefone };
         let resposta;
 
-        try{
-            resposta = await fetch('http://localhost:3000/cadastro', {
+        try {
+            resposta = await fetch('/cadastro', {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json',
                 },
                 body: JSON.stringify(infoCadastro),
-                
+
             });
 
-            const result = await resposta.json();    
-            if (resposta.ok){
-                alert ('Cadastro realizado com sucesso!');
+            const result = await resposta.json();
+            if (resposta.ok) {
+                alert('Cadastro realizado com sucesso!');
                 window.location.href = '/';
-            }else{
-                alert (`Erro ao cadastrar usuário: ${result.message || 'Erro desconhecido do servidor.'}`);
+            } else {
+                alert(`Erro ao cadastrar usuário: ${result.message || 'Erro desconhecido do servidor.'}`);
             }
-        }catch (error){
+        } catch (error) {
             console.error('Erro ao cadastrar usuário:', error);
+            alert('Erro de conexão com o servidor. Verifique se o backend está rodando.');
         }
 
-
-    
     });
 });

@@ -27,3 +27,5 @@ export async function connectToDatabase() {
     }
 }   
 connectToDatabase();
+
+export const dbConfig = { host, port, user, password, database };
