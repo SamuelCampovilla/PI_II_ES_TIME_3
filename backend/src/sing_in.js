@@ -1,4 +1,4 @@
-const API_URL = window.location.origin;
+const API_URL = 'http://localhost:3000';
 
 async function handleSignUp(email, password, name, phone) {
   try {
