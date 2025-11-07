@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await resposta.json();
             if (resposta.ok) {
                 alert(result.message);
-                window.location.href = '/';  // Redireciona para a página inicial após sucesso
+                window.location.href = '/'; 
             } else {
                 alert(result.message || 'Erro ao processar a solicitação');
             }
