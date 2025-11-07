@@ -1,8 +1,15 @@
 
 // codigo para fazer a conexão com o banco de dados - Caio Polo
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import mysql from 'mysql2/promise';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// Load .env explicitly from repository root
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const host = process.env.DB_HOST || 'caboose.proxy.rlwy.net';
 const port = process.env.DB_PORT ? Number(process.env.DB_PORT) : 31256;
