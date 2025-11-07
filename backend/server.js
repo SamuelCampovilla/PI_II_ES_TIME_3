@@ -1,3 +1,5 @@
+//código do servidor - Caio Polo - Samuel Campovilla - Vinicius castro - Caua Bianchi
+
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -20,7 +22,12 @@ app.get('/frontend/pages/signup.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/pages/signup.html'));
 });
 
-// Rota para cadastro de usuário
+
+app.get('/frontend/pages/instituicao.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/pages/instituicao.html'));
+});
+
+// Rota para cadastro de usuário - Caio 
 app.post('/cadastro', async (req, res) => {
     const { name, email, password, telefone } = req.body;
     let connection;
@@ -32,7 +39,7 @@ app.post('/cadastro', async (req, res) => {
     try {
         connection = await mysql.createConnection(dbConfig);
 
-        const query = 'INSERT INTO docente (nome, email, senha, telefone) VALUES (?,?,?,?)';
+        const query = 'INSERT INTO docentes (nome, email, senha, telefone) VALUES (?,?,?,?)';
         const [result] = await connection.execute(query, [name, email, password, telefone]);
 
         return res.status(201).json({
@@ -52,6 +59,37 @@ app.post('/cadastro', async (req, res) => {
         }
     }
 });
+
+
+
+app.post('/login', async(req, res) =>{
+    const {email, password} = req.body;
+    let connection;
+    if(!email || !password){
+        return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
+    }
+    try{
+        connection = await mysql.createConnection(dbConfig);
+        const query = 'SELECT email, senha FROM docentes WHERE email = ? and senha = ?';
+        const [result] = await connection.execute(query, [email, password]);
+
+        if (result && result.length === 1){
+            return res.status(200).json({ message: 'Login correto!' });
+        } else {
+            return res.status(401).json({ message: 'Email ou senha inválidos!' });
+        }
+    }catch(error){
+        console.error('Erro ao entrar.');
+        return res.status(500).json({ message: 'Erro interno do servidor' });
+
+    }finally{
+        if(connection){
+            await connection.end();
+        }
+    }
+});
+
+
 
 app.listen(port, () => {
     console.log(`Servidor aberto em http://localhost:${port}`);

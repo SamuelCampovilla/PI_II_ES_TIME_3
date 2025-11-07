@@ -1,6 +1,6 @@
 /*Estilos para as páginas de autenticação (login e sigin) - Samuel Campovilla*/
-@import url(/frontend/src/styles/base/typography.css);
-@import url(/frontend/src/styles/components/buttons.css);
+@import url(/styles/base/typography.css);
+@import url(/styles/components/buttons.css);
 
 body {
     min-height: 100vh;
