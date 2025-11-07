@@ -18,6 +18,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/src/index.html'));
 });
 
+app.get('/frontend/pages/forgotpassword.html', (req, res) =>{
+    res.sendFile(path.join(__dirname, '../frontend/pages/forgotpassword.html'));
+})
+
 app.get('/frontend/pages/signup.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/pages/signup.html'));
 });
