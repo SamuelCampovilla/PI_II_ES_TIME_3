@@ -38,6 +38,10 @@ app.get('/frontend/pages/forgotpassword.html', (req, res) =>{
     res.sendFile(path.join(__dirname, '../frontend/pages/forgotpassword.html'));
 })
 
+app.get('/frontend/pages/redefine_pass.html', (req, res) =>{
+    res.sendFile(path.join(__dirname, '../frontend/pages/redefine_pass.html'));
+})
+
 app.get('/frontend/pages/signup.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/pages/signup.html'));
 });
@@ -45,10 +49,6 @@ app.get('/frontend/pages/signup.html', (req, res) => {
 
 app.get('/frontend/pages/instituicao.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/pages/instituicao.html'));
-});
-
-app.get('/frontend/pages/forgotpassword.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/pages/forgotpassword.html'));
 });
 
 
