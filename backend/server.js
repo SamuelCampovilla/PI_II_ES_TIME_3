@@ -73,6 +73,8 @@ app.post('/cadastro', async (req, res) => {
     }
 });
 
+// Rota para recuperação de senha - Vinicius Castro
+
 app.post('/forgotpassword', async (req, res) => {
     const { email } = req.body || {};
     let connection;
