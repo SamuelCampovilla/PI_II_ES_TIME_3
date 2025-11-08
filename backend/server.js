@@ -27,6 +27,10 @@ app.get('/frontend/pages/instituicao.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/pages/instituicao.html'));
 });
 
+app.get('/frontend/pages/forgotpassword.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/pages/forgotpassword.html'));
+});
+
 // Rota para cadastro de usuário - Caio 
 app.post('/cadastro', async (req, res) => {
     const { name, email, password, telefone } = req.body;
