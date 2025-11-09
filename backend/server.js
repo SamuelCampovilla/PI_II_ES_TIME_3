@@ -52,8 +52,6 @@ app.get('/frontend/pages/instituicao.html', (req, res) => {
 });
 
 
-
-
 //---------------------------------------------------------------------------------------------------//
 // Rota para cadastro de usuário - Caio Polo
 app.post('/cadastro', async (req, res) => {
