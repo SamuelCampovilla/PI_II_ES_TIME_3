@@ -26,7 +26,7 @@ const transporter = nodemailer.createTransport({
 
 
 app.use(express.json());
-// also accept urlencoded form bodies (fallback when JS is disabled or form submits normally)
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../frontend/src')));
 
@@ -187,19 +187,22 @@ app.post('/forgot', async(req, res) =>{
 
 app.post('/redefinepassword', async(req, res) =>{
     console.log('Body recebido:', req.body);
+    console.log('Query params:', req.query);
+
+    const emailAtualizar = req.query.email;
     const { novaSenha } = req.body;
+    
+    
     let connection;
     
-    if(!novaSenha){
-        return res.status(400).json({ message: 'nova senha campo obrigatórios' });
+    if(!novaSenha || !emailAtualizar){
+        return res.status(400).json({ message: 'Nova senha é obrigatorio' });
     }
 
     try{
         connection = await mysql.createConnection(dbConfig);
         const query = 'UPDATE docentes SET senha = ? WHERE email = ?';
-        const [result] = await connection.execute(query, [novaSenha, req.query.email]);
-        console.log('Resultado da atualização:', result);
-
+        const [result] = await connection.execute(query, [novaSenha, emailAtualizar]);
         if(result.affectedRows === 1){
             return res.status(200).json({ message: 'Senha redefinida com sucesso!' });
         }else{
