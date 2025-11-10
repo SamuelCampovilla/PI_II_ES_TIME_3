@@ -2,7 +2,7 @@
 
 import express from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../index.js';
 import nodemailer from 'nodemailer';
@@ -54,6 +54,10 @@ app.get('/frontend/pages/instituicao.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/pages/instituicao.html'));
 });
 
+
+app.get('/frontend/pages/instituicao.html', (req, res)=>{
+    res.sendFile(path.join(__dirname, '../frontend/pages/instituicao.html'));
+});
 
 //---------------------------------------------------------------------------------------------------//
 // Rota para cadastro de usuário - Caio Polo
@@ -213,6 +217,92 @@ app.post('/redefinepassword', async(req, res) =>{
         return res.status(500).json({ message: 'Erro interno do servidor' });
     }finally{
         if(connection){
+            await connection.end();
+        }
+    }
+});
+
+
+//---------------------------------------------------------------------------------------------------//
+
+
+
+//pegar id do docente -- caio Polo
+
+app.get('/docente/id', async(req, res) =>{
+    const email = req.query.email;
+    let connection
+
+    try{
+        connection = await mysql.createConnection(dbConfig);
+        const query = 'SELECT id_docente FROM docentes WHERE email = ?';
+        const [resultado] = await connection.execute(query, [email]);   
+        
+        if(resultado.length === 1){
+            return res.status(200).json({id: resultado[0].id_docente});
+        }else{
+            return res.status(404).json({ message: 'Docente não encontrado no banco.' });
+        }
+    }catch(error){
+        console.error('Erro ao buscar docente', error);
+        return res.status(500).json({ message: 'Erro interno do servidor.' });
+    }finally{
+        if(connection){
+            await connection.end();
+        }
+    }
+
+
+});
+
+
+
+//---------------------------------------------------------------------------------------------------//
+
+// codigo para adiconar instituicao -- caio Polo
+app.post('/instituicao', async (req, res) => {
+    const docenteId = req.query.id;
+    const { nomeInstituicao } = req.body;
+
+    if (!nomeInstituicao) {
+        return res.status(400).json({ message: 'Nome da instituição é obrigatório.' });
+    }
+
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+
+        const encontrarInstituicaoQuery = 'SELECT id_instituicao FROM instituicoes WHERE nome_instituicao = ?';
+        const [found] = await connection.execute(encontrarInstituicaoQuery, [nomeInstituicao]);
+
+        let idInstituicao;
+        if (found && found.length === 1) {
+            idInstituicao = found[0].id_instituicao;
+        } else {
+            const insertInstituicaoQuery = 'INSERT INTO instituicoes (nome_instituicao) VALUES (?)';
+            const [InsertResultado] = await connection.execute(insertInstituicaoQuery, [nomeInstituicao]);
+            idInstituicao = InsertResultado.insertId;
+        }
+
+        const checarVinculoQuery = 'SELECT 1 FROM docente_instituicao WHERE id_docente = ? AND id_instituicao = ?';
+        const [vinculo] = await connection.execute(checarVinculoQuery, [docenteId, idInstituicao]);
+        if (vinculo && vinculo.length > 0) {
+            return res.status(409).json({ message: 'Docente já está vinculado a esta instituição.' });
+        }
+
+   
+        const insertRelQuery = 'INSERT INTO docente_instituicao (id_docente, id_instituicao) VALUES (?, ?)';
+        await connection.execute(insertRelQuery, [docenteId, idInstituicao]);
+
+        return res.status(201).json({
+            message: 'Instituição e vínculo criados com sucesso.',
+            id: idInstituicao
+        });
+    } catch (error) {
+        console.error('Erro ao criar instituição/vínculo:', error);
+        return res.status(500).json({ message: 'Erro interno no servidor.' });
+    } finally {
+        if (connection) {
             await connection.end();
         }
     }
