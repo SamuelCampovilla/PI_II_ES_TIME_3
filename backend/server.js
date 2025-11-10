@@ -26,6 +26,8 @@ const transporter = nodemailer.createTransport({
 
 
 app.use(express.json());
+// also accept urlencoded form bodies (fallback when JS is disabled or form submits normally)
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../frontend/src')));
 
 //---------------------------------------------------------------------------------------------------//
@@ -39,6 +41,7 @@ app.get('/frontend/pages/forgotpassword.html', (req, res) =>{
 })
 
 app.get('/frontend/pages/redefine_pass.html', (req, res) =>{
+    console.log('Query params recebidos:', req.query);
     res.sendFile(path.join(__dirname, '../frontend/pages/redefine_pass.html'));
 })
 
@@ -139,7 +142,7 @@ app.post('/forgot', async(req, res) =>{
                 html: `<h3>Olá!</h3>
                         <p>Você solicitou a recuperação de senha do NotaDez.</p>
                         <p>Clique neste link para redefinir sua senha: 
-                        <a href="http://localhost:3000/frontend/pages/redefine_pass.html">Redefinir Senha</a></p>
+                        <a href="http://localhost:3000/frontend/pages/redefine_pass.html?email=${email}">Redefinir Senha</a></p>
                         `    
             };
 
@@ -180,6 +183,37 @@ app.post('/forgot', async(req, res) =>{
 
 });
 
+// redefinir senha - Vinicius Castro
+
+app.post('/redefinepassword', async(req, res) =>{
+    console.log('Body recebido:', req.body);
+    const { novaSenha } = req.body;
+    let connection;
+    
+    if(!novaSenha){
+        return res.status(400).json({ message: 'nova senha campo obrigatórios' });
+    }
+
+    try{
+        connection = await mysql.createConnection(dbConfig);
+        const query = 'UPDATE docentes SET senha = ? WHERE email = ?';
+        const [result] = await connection.execute(query, [novaSenha, req.query.email]);
+        console.log('Resultado da atualização:', result);
+
+        if(result.affectedRows === 1){
+            return res.status(200).json({ message: 'Senha redefinida com sucesso!' });
+        }else{
+            return res.status(404).json({ message: 'Email não encontrado. Não foi possível redefinir a senha.' });
+        }
+    }catch(error){
+        console.error('Erro ao redefinir a senha:', error);
+        return res.status(500).json({ message: 'Erro interno do servidor' });
+    }finally{
+        if(connection){
+            await connection.end();
+        }
+    }
+});
 
 //---------------------------------------------------------------------------------------------------//
 app.listen(port, () => {
