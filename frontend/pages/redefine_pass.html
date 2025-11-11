@@ -2,28 +2,36 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <link href="../src/styles/pages/forgotpassword.css" rel="stylesheet"/>
-    <title>NotaDez - Esqueci a Senha</title>
+    <link href="/styles/pages/forgotpassword.css" rel="stylesheet"/>
+    <title>NotaDez - Redefinir Senha</title>
 </head>
-    <body>
-        <section class="wrapper">
-            <a href="/frontend/src/index.html" class="back-link" aria-label="Back to login">
+<body>
+    <section class="wrapper">
+        <a href="/index.html" class="back-link" aria-label="Back to login">
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            </a>
-            <div class="form-container">
-                <img src="/frontend/src/assets/images/PI - Logo.PNG" id="logo">
-                <h1>Redefinir Senha</h1>
-                <form action="redefinepassword">
-                    <label for="email">Nova senha:  <span>*</span></label>
-                    <input  type="password" placeholder="" required />
-                    <label for="email">Confirmar senha:  <span>*</span></label>
-                    <input  type="password" placeholder="" required />
-                    <input id="signup_btn" class="btn btn--primary"  type="submit" value="Enviar" />
-                </form>
+        </a>
+        <div class="form-container">
+            <img src="/assets/images/PI - Logo.PNG" id="logo">
+            <h1>Redefinir Senha</h1>
+            <div id="emailDisplay" style="font-size:0.9rem; color:#555; margin-bottom:8px; text-align:left; display:none;"></div>
+           
+            <div id="debugHelper" style="display:none; margin-bottom:8px; text-align:left;">
+                <button id="debugFillBtn" type="button" style="background:transparent;border:none;color:#06c;text-decoration:underline;cursor:pointer;padding:0;">(test) Preencher e habilitar formulário localmente</button>
             </div>
-        </section>
-        <script type="module" src="../../backend/src/esqueceusenha.js"></script>
-    </body>
+
+            <form id="formularioRedefinir" action="/redefinepassword" method="POST">
+
+                <input type="hidden" id="emailHidden" name="email" />
+                <label for="novaSenha">Nova senha:  <span>*</span></label>
+                <input id="novaSenha" name="novaSenha" type="password" placeholder="" required />
+                <label for="confirmPassword">Confirmar senha:  <span>*</span></label>
+                <input id="confirmPassword" type="password" placeholder="" required />
+                <input id="signup_btn" class="btn btn--primary"  type="submit" value="Enviar" />
+            </form>
+        </div>
+    </section>
+    <script type="module" src="/js/redefinepass.js"></script>
+</body>
 </html>

@@ -93,11 +93,11 @@ document.addEventListener('DOMContentLoaded', async() =>{
         htmlContent += `
         <div class="course" data-course-id="${course.id_curso}"> 
             <div class="course-header">
-                    <span><img src="/frontend/src/assets/images/book.png" alt=""> ${course.nome_curso}</span>
+                    <span><img src="/assets/images/book.png" alt=""> ${course.nome_curso}</span>
                     <div class="btn-group">
                         <button class="btn btn-primary">+ Nova Disciplina</button>
-                        <button class="btn-icon" title="Editar Curso"><img src="/frontend/src/assets/images/pencil.png" alt=""></button>
-                        <button class="btn-icon" title="Excluir Curso"><img src="/frontend/src/assets/images/trash.png" alt=""></button>
+                        <button class="btn-icon" title="Editar Curso"><img src="/assets/images/pencil.png" alt=""></button>
+                        <button class="btn-icon" title="Excluir Curso"><img src="/assets/images/trash.png" alt=""></button>
                     </div>
                 </div>
                 <div class="disciplines"></div>

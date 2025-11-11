@@ -1,6 +1,6 @@
 /* Modal de exclusão de curso - Samuel Campovilla*/
-@import url(/frontend/src/styles/base/typography.css);
-@import url(/frontend/src/styles/base/variables.css);
+@import url(/styles/base/typography.css);
+@import url(/styles/base/variables.css);
   #exclusion_modal{
   position: fixed;
   inset: 0;
