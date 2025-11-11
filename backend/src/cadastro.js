@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const idDocente = params.get('id');
     console.log("ID Docente:", idDocente);
     const welcomeEl = document.getElementById('welcome');
+    const profNameEl = document.getElementById('prof_name');
     const { data: docente, error: docenteError } = await supabase
         .from('docente')
         .select('nome')
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Erro ao buscar nome do docente:', docenteError);
     } else if (welcomeEl && docente) {
         welcomeEl.textContent = `Bem-vindo, ${docente.nome}!`;
+        profNameEl.textContent = `Prof. ${docente.nome}`;
     }
 
     if (!idDocente) return;

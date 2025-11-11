@@ -1,9 +1,27 @@
-import { createClient } from '@supabase/supabase-js'
+import mysql from 'mysql2/promise';
 
 
-const supabaseUrl = 'https://ncordpjdmjxjadnfeyg.supabase.co' 
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jb3JkcGpkbWp4anhhZG5mZXlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MzcwMjAsImV4cCI6MjA3NDMxMzAyMH0.krfcElHajJjdXBHplAPACaHnrSz3RMlVydw_Pa9rrsY'
+const host = 'caboose.proxy.rlwy.net';
+const port = 31256;
+const user = 'root';  
+const password = 'UerGWimRCmPCiXyKgdbodDRyfrXaedsf';   
+const database = 'railway'; 
 
-const supabase = createClient(supabaseUrl, supabaseKey)
 
-console.log('Conexão com supabase bem sucedida.');
+async function connectToDatabase() {
+
+    try{
+        const connection = await mysql.createConnection({
+            host,
+            port,
+            user,
+            password,
+            database
+        });
+        console.log('conexão bem sucedida');
+    }   
+    catch (error){
+        console.error('Erro ao conectar ao banco de dados:', error);
+    }
+}   
+connectToDatabase();
