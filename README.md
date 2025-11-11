@@ -55,6 +55,12 @@ Com o NotaDez, o professor pode:
 ## ⚙️ Instalação e Execução Local
 
 Siga as etapas abaixo para rodar o projeto localmente:
+1. Ter o node.js instalado. 
+2. Ter o Live Server instalado.
+3. Ter conexão com internet.
+4. Ter um navegador compativel com js.
+5. 
+
 
 --- 
 
