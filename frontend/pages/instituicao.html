@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/frontend/src/styles/base/reset.css">
-    <link rel="stylesheet" href="/frontend/src/styles/components/exclusion_modal.css">
-    <link rel="stylesheet" href="/frontend/src/styles/pages/instituicao.css">
+    <link rel="stylesheet" href="/styles/base/reset.css">
+    <link rel="stylesheet" href="/styles/components/exclusion_modal.css">
+    <link rel="stylesheet" href="/styles/pages/instituicao.css">
 <!-- Dashboard de adicionar instituições a pagina --- Caio Polo -->
     <title>NotaDez - Dashboard</title>
     </head>
@@ -13,7 +13,7 @@
         <header>
             <div class="header">
                 <div class="logo">
-                    <img src="/frontend/src/assets/images/PI - Logo.PNG" alt="Logo NotaDez" class="logo" width="70" height="70">
+                    <img src="/assets/images/PI - Logo.PNG" alt="Logo NotaDez" class="logo" width="70" height="70">
                     <div>
                         <h1 class="name"><strong>NotaDez</strong></h1>
                         <p class="initial_text" >Dashboard Docente</p>
@@ -40,10 +40,10 @@
             </div>
             <div id="blurred-bg">
             <div id="pop-up"> 
-                <button id="close-pop-up" aria-label="Fechar pop-up"><img src="/frontend/src/assets/images/cancel.png" alt=""></button>
+                <button id="close-pop-up" aria-label="Fechar pop-up"><img src="/assets/images/cancel.png" alt=""></button>
                 <div>
                     <h2>Adicionar instituição</h2>
-                    <input type="text" id="institution-name" placeholder="Nome da Instituição">
+                    <input type="text" id="nomeInstituicao" placeholder="Nome da Instituição">
                     <button id = "btnAdicionar">Adicionar</button>
                 </div>
             </div>
@@ -52,26 +52,26 @@
                 <div class="card_container">
                     <div class="card">
                         <div class="institution_info">
-                            <img src="../src/assets/images/icon_institution.png" alt="institution icon">
-                            <h2 class="institution_name">Universidade Federal de São Paulo</h1>
+                            <img src="/assets/images/icon_institution.png" alt="institution icon">
+                            <h2 class="institution_name">Universidade Federal de São Paulo</h2>
                                 <button type="button" aria-label="Editar item">
-                                    <img src="/frontend/src/assets/images/pencil.png" alt="">
+                                    <img src="/assets/images/pencil.png" alt="">
                                 </button>
 
                                 <button class = "btnExcluir" type="button"  onclick="exclusion_modal();" aria-label="Excluir item">
-                                    <img src="/frontend/src/assets/images/trash.png" alt="">
+                                                                    <img src="/assets/images/trash.png" alt="">
                                 </button>
                         </div>
                         <div class="info"> 
                             <div>
-                                <img src="../src/assets/images/book.png" alt="book image">
+                                <img src="/assets/images/book.png" alt="book image">
                                 <p class="courses">Cursos</p>
                             </div>
                             <p>3</p>
                         </div>
                         <div class="info"> 
                             <div>
-                                <img src="/frontend/src/assets/images/people_icon.png" alt="book image">
+                                <img src="/assets/images/people_icon.png" alt="book image">
                                 <p class="courses">Cursos</p>
                             </div>
                             <p>75</p>
@@ -86,7 +86,7 @@
     <div class="modal" id="exclusion_modal">
       <div class="modal_content">
         <div class="modal_top">
-          <img src="/frontend/src/assets/images/danger.svg" alt="Warning" class="modal_icon">
+                        <img src="/assets/images/danger.svg" alt="Warning" class="modal_icon">
           <h2>Excluir Turma</h2>
         </div>
         <div class="modal_header">
@@ -107,8 +107,8 @@
     </div>
 
 
-    <script src="/frontend/src/js/exclusion_modal.js"></script>
-    <script type="module" src="../../backend/src/cadastro.js"></script>
-    <script src="/frontend/src/js/institution.js"></script>
+            <script src="/js/exclusion_modal.js"></script>
+            <script type="module" src="../../backend/src/cadastro.js"></script>
+            <script src="/js/institution.js"></script>
     </body>
 </html>

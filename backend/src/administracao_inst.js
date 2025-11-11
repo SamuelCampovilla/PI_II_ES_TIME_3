@@ -63,11 +63,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             div.className = 'course';
             div.innerHTML = `
                 <div class="course-header">
-                    <span class="nome_curso"><img src="/frontend/src/assets/images/book.png" alt=""> ${curso.nome_curso}</span>
+                    <span class="nome_curso"><img src="/assets/images/book.png" alt=""> ${curso.nome_curso}</span>
                     <div class="btn-group">
                         <button class="btn btn-primary">+ Nova Disciplina</button>
-                        <button class="btnEditarCurso btn-icon" title="Editar Curso"><img src="/frontend/src/assets/images/pencil.png" alt=""></button>
-                        <button class="btnExcluirCurso btn-icon" title="Excluir Curso"><img src="/frontend/src/assets/images/trash.png" alt=""></button>
+                        <button class="btnEditarCurso btn-icon" title="Editar Curso"><img src="/assets/images/pencil.png" alt=""></button>
+                        <button class="btnExcluirCurso btn-icon" title="Excluir Curso"><img src="/assets/images/trash.png" alt=""></button>
                     </div>
                 </div>
                 <div class="disciplines"></div>
@@ -109,8 +109,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <div class="discipline-header">
                                     <span>${disciplina.nome_disciplina}</span>
                                     <div class="btn-group">
-                                        <button class="btn-icon" title="Editar Disciplina"><img src="/frontend/src/assets/images/pencil.png" alt=""></button>
-                                        <button class="btn-icon" title="Excluir Disciplina"><img src="/frontend/src/assets/images/trash.png" alt=""></button>
+                                        <button class="btn-icon" title="Editar Disciplina"><img src="/assets/images/pencil.png" alt=""></button>
+                                        <button class="btn-icon" title="Excluir Disciplina"><img src="/assets/images/trash.png" alt=""></button>
                                     </div>
                                 </div>
                                 <div class="discipline-subheader">

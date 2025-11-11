@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Modelo de Cursos</title>
-    <link rel="stylesheet" href="/frontend/src/styles/pages/menagement.css" />
-    <link rel="stylesheet" href="/frontend/src/styles/components/exclusion_modal.css" />
-    <script src="/frontend/src/js/exclusion_modal.js" defer></script>
+  <link rel="stylesheet" href="/styles/pages/menagement.css" />
+  <link rel="stylesheet" href="/styles/components/exclusion_modal.css" />
+  <script src="/js/exclusion_modal.js" defer></script>
   </head>
   <body>
     <header class="header">
@@ -23,7 +23,7 @@
     <!-- Pop - up para adicionar curso --- Caio Polo-->
     <div id="blurred-bg">
     <div id="pop-up"> 
-      <button id="close-pop-up" aria-label="Fechar pop-up"><img src="/frontend/src/assets/images/cancel.png" alt=""></button>
+  <button id="close-pop-up" aria-label="Fechar pop-up"><img src="/assets/images/cancel.png" alt=""></button>
         <div>
           <h2>Adicionar Curso</h2>
             <input type="text" id="course-name-pop-up" placeholder="Nome do Curso">
@@ -36,7 +36,7 @@
     <div class="modal" id="exclusion_modal">
       <div class="modal_content">
         <div class="modal_top">
-          <img src="/frontend/src/assets/images/danger.svg" alt="Warning" class="modal_icon">
+          <img src="/assets/images/danger.svg" alt="Warning" class="modal_icon">
           <h2>Excluir Turma</h2>
         </div>
         <div class="modal_header">
@@ -55,6 +55,6 @@
         </div>
       </div>
     </div>
-    <script type="module" src="/backend/src/courses.js"></script>
+    <script src="/js/menagementpage.js" defer></script>
   </body>
 </html>

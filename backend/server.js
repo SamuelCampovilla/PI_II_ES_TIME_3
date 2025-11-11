@@ -1,181 +1,314 @@
+//código do servidor - Caio Polo - Samuel Campovilla - Vinicius castro - Caua Bianchi
+
 import express from 'express';
-import session from 'express-session';
-import dotenv from 'dotenv';
-import cors from 'cors';
 import path from 'path';
-import * as authModule from './routes/auth.js';
-import * as instituicoesModule from './routes/instituicoes.js';
-import requireAuth from './middleware/requireAuth.js';
-import * as dbModule from './db/pool.js';
-import bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { fileURLToPath, pathToFileURL } from 'url';
+import mysql from 'mysql2/promise';
+import { dbConfig } from '../index.js';
+import nodemailer from 'nodemailer';
 
-dotenv.config();
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
+const port = 3000;
 
-// global error handlers to capture stack traces
-process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION:', err && err.stack ? err.stack : err);
-  process.exit(1);
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth:{
+        user: 'projetonotadezgrupo3@gmail.com',
+         pass: 'egleaakcifizvpgu'
+    },
+    tls:{
+        rejectUnauthorized: false
+    }
 });
-process.on('unhandledRejection', (reason) => {
-  console.error('UNHANDLED REJECTION:', reason && reason.stack ? reason.stack : reason);
-});
 
-// resolve pool safely (aceita várias formas de export)
-let pool;
-try {
-  pool = dbModule.pool || dbModule.default || dbModule;
-  if (!pool) {
-    console.warn('DB pool resolved to falsy value:', pool);
-  }
-} catch (err) {
-  console.error('Erro ao resolver dbModule:', err && err.stack ? err.stack : err);
-  pool = undefined;
-}
 
-// middlewares
-app.set('trust proxy', 1);
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://127.0.0.1:5501';
-app.use(cors({
-  origin: FRONTEND_ORIGIN,
-  credentials: true,
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+
 app.use(express.json());
+
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, '../frontend/src')));
 
-// static assets
-app.use('/frontend', express.static(path.join(process.cwd(), 'frontend')));
-app.use('/backend', express.static(path.join(process.cwd(), 'backend')));
-app.use(express.static(path.join(process.cwd(), 'frontend')));
+//---------------------------------------------------------------------------------------------------//
 
-// session
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'dev-secret-trocar-depois',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000
-  }
-}));
-
-// helper que suporta pool.execute (mysql2) ou pool.query (pg)
-async function executeQuery(sql, params = []) {
-  if (!pool) throw new Error('DB pool não configurado (pool is undefined)');
-  if (typeof pool.execute === 'function') {
-    const [rows] = await pool.execute(sql, params);
-    return rows;
-  } else if (typeof pool.query === 'function') {
-    const count = (sql.match(/\?/g) || []).length;
-    if (count > 0) {
-      let i = 0;
-      const converted = sql.replace(/\?/g, () => `$${++i}`);
-      const res = await pool.query(converted, params);
-      return res.rows;
-    }
-    const res = await pool.query(sql, params);
-    return res.rows || res;
-  }
-  throw new Error('DB pool não suporta execute/query');
-}
-
-// health/debug endpoints
-app.get('/ping', (_req, res) => res.status(200).send('ok'));
-app.get('/debug/db', async (_req, res) => {
-  try {
-    const rows = await executeQuery('SELECT NOW() as now');
-    res.json({ ok: true, now: rows[0]?.now || rows });
-  } catch (err) {
-    console.error('/debug/db error:', err && err.stack ? err.stack : err);
-    res.status(500).json({ ok: false, error: String(err.message || err) });
-  }
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/src/index.html'));
 });
 
-// Rota de cadastro adicionada diretamente no server.js
-app.post('/auth/signup', async (req, res) => {
-  const { nome, email, senha, telefone } = req.body;
-  if (!nome || !email || !senha) {
-    return res.status(400).json({ success: false, message: 'nome, email e senha são obrigatórios' });
-  }
+app.get('/frontend/pages/forgotpassword.html', (req, res) =>{
+    res.sendFile(path.join(__dirname, '../frontend/pages/forgotpassword.html'));
+})
 
-  try {
-    // checa existência
-    const existing = await executeQuery('SELECT id_docente FROM docente WHERE email = ?', [email]);
-    if (existing && existing.length > 0) {
-      return res.status(409).json({ success: false, message: 'Email já cadastrado' });
-    }
+app.get('/frontend/pages/redefine_pass.html', (req, res) =>{
+    console.log('Query params recebidos:', req.query);
+    res.sendFile(path.join(__dirname, '../frontend/pages/redefine_pass.html'));
+})
 
-    // Inserção - executeQuery converte placeholders ? -> $n para PG
-   const hashed = await bcrypt.hash(senha, 10);
-
-    // inserir apenas as colunas que existem (id_docente é automático)
-    await executeQuery(
-      'INSERT INTO docente (nome, email, senha, telefone) VALUES (?, ?, ?, ?)',
-      [nome, email, hashed, telefone || null]
-    );
-
-    // buscar registro recém-inserido para retornar id e nome
-    const rows = await executeQuery('SELECT id_docente, nome FROM docente WHERE email = ? LIMIT 1', [email]);
-    const user = Array.isArray(rows) && rows[0] ? rows[0] : { nome };
-
-    return res.status(201).json({ success: true, user });
-  } catch (err) {
-    console.error('auth.signup error:', err && err.stack ? err.stack : err);
-    if (err && err.code === '23505') {
-      return res.status(409).json({ success: false, message: 'Registro já existe' });
-    }
-    return res.status(500).json({ success: false, message: 'Erro interno' });
-  }
+app.get('/frontend/pages/signup.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/pages/signup.html'));
 });
 
-// mount router helper (tolerante a formatos)
-function mountImport(pathMount, moduleImport) {
-  try {
-    if (!moduleImport) return;
-    // module could be { default: router } or Router directly or a factory function
-    const m = moduleImport.default || moduleImport;
-    if (!m) return;
-    if (typeof m === 'function' && m.length === 0) {
-      const maybeRouter = m();
-      app.use(pathMount, maybeRouter);
-      return;
-    }
-    if (typeof m === 'function') {
-      app.use(pathMount, m);
-      return;
-    }
-    app.use(pathMount, m);
-  } catch (err) {
-    console.error(`Erro ao montar router em ${pathMount}:`, err && err.stack ? err.stack : err);
-  }
-}
 
-mountImport('/auth', authModule);
-mountImport('/api', instituicoesModule);
-
-// example protected endpoint using executeQuery helper
-app.get('/api/user', requireAuth, async (req, res) => {
-  try {
-    if (!req.session || !req.session.userId) return res.status(401).json({ error: 'Não autenticado' });
-    const rows = await executeQuery(
-      'SELECT id_docente, nome, email, telefone FROM docente WHERE id_docente = ?',
-      [req.session.userId]
-    );
-    if (!rows || rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
-    res.json(rows[0]);
-  } catch (err) {
-    console.error('Erro ao buscar usuário:', err && err.stack ? err.stack : err);
-    res.status(500).json({ error: 'Erro ao buscar usuário' });
-  }
+app.get('/frontend/pages/instituicao.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/pages/instituicao.html'));
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+
+app.get('/frontend/pages/instituicao.html', (req, res)=>{
+    res.sendFile(path.join(__dirname, '../frontend/pages/instituicao.html'));
+});
+
+//---------------------------------------------------------------------------------------------------//
+// Rota para cadastro de usuário - Caio Polo
+app.post('/cadastro', async (req, res) => {
+    const { name, email, password, telefone } = req.body;
+    let connection;
+
+    if (!name || !email || !password || !telefone) {
+        return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
+    }
+
+    try {
+        connection = await mysql.createConnection(dbConfig);
+
+        const query = 'INSERT INTO docentes (nome, email, senha, telefone) VALUES (?,?,?,?)';
+        const [result] = await connection.execute(query, [name, email, password, telefone]);
+
+        return res.status(201).json({
+            message: 'Usuário cadastrado com sucesso',
+            id: result.insertId
+        });
+
+    } catch (error) {
+        console.error('Erro ao cadastrar usuário:', error);
+        if (error && error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: 'Email já cadastrado' });
+        }
+        return res.status(500).json({ message: 'Erro interno do servidor' });
+    } finally {
+        if (connection) {
+            await connection.end();
+        }
+    }
+});
+//---------------------------------------------------------------------------------------------------//
+
+//rota para login - caio Polo
+app.post('/login', async(req, res) =>{
+    const {email, password} = req.body;
+    let connection;
+    if(!email || !password){
+        return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
+    }
+    try{
+        connection = await mysql.createConnection(dbConfig);
+        const query = 'SELECT email, senha FROM docentes WHERE email = ? and senha = ?';
+        const [result] = await connection.execute(query, [email, password]);
+
+        if (result && result.length === 1){
+            return res.status(200).json({ message: 'Login correto!' });
+        } else {
+            return res.status(401).json({ message: 'Email ou senha inválidos!' });
+        }
+    }catch(error){
+        console.error('Erro ao entrar.');
+        return res.status(500).json({ message: 'Erro interno do servidor' });
+
+    }finally{
+        if(connection){
+            await connection.end();
+        }
+    }
+});
+
+//---------------------------------------------------------------------------------------------------//
+
+// enviar email de recuperaçao de senha Vinicius Castro e Caio Polo
+
+app.post('/forgot', async(req, res) =>{
+    const {email} = req.body;
+    let connection;
+
+    if(!email){
+        return res.status(400).json({ message: 'O campo de email é obrigatório' });
+    }
+    try{
+        connection = await mysql.createConnection(dbConfig);
+        const query = 'SELECT email FROM docentes WHERE email = ?';
+        const [result] = await connection.execute(query, [email]);
+
+        if(result && result.length === 1){
+            const mail = {
+                from: 'projetonotadezgrupo3@gmail.com',
+                to: email,
+                subject: 'Recuperação de senha NotaDez.',
+                html: `<h3>Olá!</h3>
+                        <p>Você solicitou a recuperação de senha do NotaDez.</p>
+                        <p>Clique neste link para redefinir sua senha: 
+                        <a href="http://localhost:3000/frontend/pages/redefine_pass.html?email=${email}">Redefinir Senha</a></p>
+                        `    
+            };
+
+            try{
+                await new Promise((resolve, reject) => {
+                    transporter.sendMail(mail, (error, info) => {
+                        if (error) {
+                            console.error('Erro ao enviar email:', error);
+                            reject(error);
+                        } else {
+                            console.log('Email enviado:', info.response);
+                            resolve(info);
+                        }
+                    });
+                });
+                
+                return res.status(200).json({ 
+                    message: 'E-mail de recuperação enviado! Verifique sua caixa de entrada.' 
+                });
+            }catch(errorMail){
+                console.error('ERRO AO ENVIAR EMAIL:', errorMail);
+                return res.status(500).json({ 
+                    message: 'Erro ao enviar o email de recuperação. Por favor, tente novamente.' 
+                });
+            }
+        }else{
+            return res.status(401).json({ message: 'Email inválido! tente novamente com outro e-mail' });
+
+        }
+        
+    }catch(error){
+        return res.status(500).json({ message: 'Erro interno do servidor' });
+    }finally{
+        if(connection){
+            await connection.end();
+        }
+    }
+
+});
+
+// redefinir senha - Vinicius Castro
+
+app.post('/redefinepassword', async(req, res) =>{
+    console.log('Body recebido:', req.body);
+    console.log('Query params:', req.query);
+
+    const emailAtualizar = req.query.email;
+    const { novaSenha } = req.body;
+    
+    
+    let connection;
+    
+    if(!novaSenha || !emailAtualizar){
+        return res.status(400).json({ message: 'Nova senha é obrigatorio' });
+    }
+
+    try{
+        connection = await mysql.createConnection(dbConfig);
+        const query = 'UPDATE docentes SET senha = ? WHERE email = ?';
+        const [result] = await connection.execute(query, [novaSenha, emailAtualizar]);
+        if(result.affectedRows === 1){
+            return res.status(200).json({ message: 'Senha redefinida com sucesso!' });
+        }else{
+            return res.status(404).json({ message: 'Email não encontrado. Não foi possível redefinir a senha.' });
+        }
+    }catch(error){
+        console.error('Erro ao redefinir a senha:', error);
+        return res.status(500).json({ message: 'Erro interno do servidor' });
+    }finally{
+        if(connection){
+            await connection.end();
+        }
+    }
+});
+
+
+//---------------------------------------------------------------------------------------------------//
+
+
+
+//pegar id do docente -- caio Polo
+
+app.get('/docente/id', async(req, res) =>{
+    const email = req.query.email;
+    let connection
+
+    try{
+        connection = await mysql.createConnection(dbConfig);
+        const query = 'SELECT id_docente FROM docentes WHERE email = ?';
+        const [resultado] = await connection.execute(query, [email]);   
+        
+        if(resultado.length === 1){
+            return res.status(200).json({id: resultado[0].id_docente});
+        }else{
+            return res.status(404).json({ message: 'Docente não encontrado no banco.' });
+        }
+    }catch(error){
+        console.error('Erro ao buscar docente', error);
+        return res.status(500).json({ message: 'Erro interno do servidor.' });
+    }finally{
+        if(connection){
+            await connection.end();
+        }
+    }
+
+
+});
+
+
+
+//---------------------------------------------------------------------------------------------------//
+
+// codigo para adiconar instituicao -- caio Polo
+app.post('/instituicao', async (req, res) => {
+    const docenteId = req.query.id;
+    const { nomeInstituicao } = req.body;
+
+    if (!nomeInstituicao) {
+        return res.status(400).json({ message: 'Nome da instituição é obrigatório.' });
+    }
+
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+
+        const encontrarInstituicaoQuery = 'SELECT id_instituicao FROM instituicoes WHERE nome_instituicao = ?';
+        const [found] = await connection.execute(encontrarInstituicaoQuery, [nomeInstituicao]);
+
+        let idInstituicao;
+        if (found && found.length === 1) {
+            idInstituicao = found[0].id_instituicao;
+        } else {
+            const insertInstituicaoQuery = 'INSERT INTO instituicoes (nome_instituicao) VALUES (?)';
+            const [InsertResultado] = await connection.execute(insertInstituicaoQuery, [nomeInstituicao]);
+            idInstituicao = InsertResultado.insertId;
+        }
+
+        const checarVinculoQuery = 'SELECT 1 FROM docente_instituicao WHERE id_docente = ? AND id_instituicao = ?';
+        const [vinculo] = await connection.execute(checarVinculoQuery, [docenteId, idInstituicao]);
+        if (vinculo && vinculo.length > 0) {
+            return res.status(409).json({ message: 'Docente já está vinculado a esta instituição.' });
+        }
+
+   
+        const insertRelQuery = 'INSERT INTO docente_instituicao (id_docente, id_instituicao) VALUES (?, ?)';
+        await connection.execute(insertRelQuery, [docenteId, idInstituicao]);
+
+        return res.status(201).json({
+            message: 'Instituição e vínculo criados com sucesso.',
+            id: idInstituicao
+        });
+    } catch (error) {
+        console.error('Erro ao criar instituição/vínculo:', error);
+        return res.status(500).json({ message: 'Erro interno no servidor.' });
+    } finally {
+        if (connection) {
+            await connection.end();
+        }
+    }
+});
+
+//---------------------------------------------------------------------------------------------------//
+app.listen(port, () => {
+    console.log(`Servidor aberto em http://localhost:${port}`);
 });
