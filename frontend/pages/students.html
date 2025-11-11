@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quadro de Notas</title>
+  <link rel="stylesheet" href="/styles/pages/students.css">
+</head>
+<body>
+  <div class="layout">
+
+    <!-- Conteúdo Principal -->
+    <main class="main">
+
+      <!-- Cabeçalho -->
+      <header class="header">
+        <div>
+          <h1>Algoritmos e Estrutura de Dados</h1>
+          <p>Turma A • Quadro de Notas</p>
+        </div>
+        <hr>
+      </header>
+
+      <!-- Barra de Ações -->
+      <div class="actions">
+        <button class="primary">+ Adicionar Aluno</button>
+        <button>Importar Alunos</button>
+        <button>Componentes</button>
+        <button>Fórmula</button>
+        <span class="status">Modo de Edição: </span>
+        <select class="select-option">
+          <option>Habilitado</option>
+          <option>Desabilitado</option>
+        </select>
+      </div>
+
+      <!-- Switch -->
+      <div class="switch">
+        <input type="checkbox" id="ajuste">
+        <label for="ajuste">Acrescentar coluna de notas finais ajustadas</label>
+      </div>
+
+      <!-- Tabela -->
+      <section class="table-container">
+        <h2>Notas dos Alunos</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Matrícula</th>
+              <th>Nome do Aluno</th>
+              <th>P1</th>
+              <th>P2</th>
+              <th>P3</th>
+              <th>Nota Final</th>
+              <th>Nota Final Ajustada</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2021001</td>
+              <td>João Silva Santos</td>
+              <td>7.5</td>
+              <td>8.0</td>
+              <td>6.5</td>
+              <td class="green">7.3</td>
+              <td>7.5</td>
+            </tr>
+            <tr>
+              <td>2021002</td>
+              <td>Maria Oliveira Costa</td>
+              <td>9.0</td>
+              <td>8.5</td>
+              <td>9.5</td>
+              <td class="green">9.0</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>2021003</td>
+              <td>Pedro Almeida Lima</td>
+              <td>5.0</td>
+              <td>6.0</td>
+              <td>7.0</td>
+              <td class="red">6.0</td>
+              <td>6.0</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <!-- Auditoria -->
+    <aside class="audit">
+      <h3>Auditoria de Alterações</h3>
+      <div class="audit-item">
+        <span class="date">23/09/2024 14:30:25</span>
+        <p><strong>João Silva Santos</strong></p>
+        <p>Nota P1 modificada 7 → 7.5</p>
+      </div>
+      <div class="audit-item">
+        <span class="date">23/09/2024 14:25:10</span>
+        <p><strong>Maria Oliveira Costa</strong></p>
+        <p>Nota P3 adicionada 9.5</p>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>
