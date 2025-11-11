@@ -308,7 +308,35 @@ app.post('/instituicao', async (req, res) => {
     }
 });
 
+
 //---------------------------------------------------------------------------------------------------//
+
+    app.get('/pegarInstituicoes', async(req, res) =>{
+        const docenteId = req.query.docenteId;
+        let connection;
+        try{
+            connection = await mysql.createConnection(dbConfig);
+            const query = `SELECT 
+                    i.id_instituicao, 
+                    i.nome_instituicao 
+                FROM 
+                    docente_instituicao AS di
+                JOIN 
+                    instituicoes AS i ON di.id_instituicao = i.id_instituicao
+                WHERE 
+                    di.id_docente = ?;
+            `;
+            const [instituicoes] = await connection.execute(query, [docenteId]);
+            return res.status(200).json({ instituicoes });
+        }catch(error){
+            console.error('Erro ao buscar instituições:', error);
+            return res.status(500).json({ message: 'Erro interno do servidor.' });
+        }
+    });
+
+
+
+
 app.listen(port, () => {
     console.log(`Servidor aberto em http://localhost:${port}`);
 });
