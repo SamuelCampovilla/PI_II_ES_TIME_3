@@ -130,9 +130,16 @@ document.addEventListener('DOMContentLoaded', async() => {
                                 </div>
                                 <p>${cursosCount}</p>
                             </div>
-                            <button class="btnGerenciar" data-id="${institution.id_instituicao}">Gerenciar</button>
+                            <button class="btnGerenciar" id="btnGerenciar" data-id="${institution.id_instituicao}">Gerenciar</button>
                         `;
                     institutionListContainer.appendChild(card);
+                });
+
+                document.querySelectorAll('.btnGerenciar').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const institutionId = this.getAttribute('data-id');
+                        window.location.href = `/frontend/pages/menagementPage.html?institutionId=${institutionId}&email=${docenteEmail}`;
+                    });
                 });
 
             } else {
