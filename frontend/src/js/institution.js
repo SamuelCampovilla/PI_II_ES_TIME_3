@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', async() => {
     const fundoBlur = document.getElementById('blurred-bg'); 
     const popupConteudo = document.getElementById('pop-up'); 
     const addButton = document.getElementById('btnAdicionar');
+    const voltar = document.getElementById('btnSair');
+    const nomeEl = document.getElementById('prof_name');
+    const welcomeEl = document.getElementById('welcome')
     
 
     const nomeInstituicaoInput = document.getElementById('nomeInstituicao');
@@ -59,6 +62,9 @@ document.addEventListener('DOMContentLoaded', async() => {
             fecharPopup();
         }
     });
+    voltar.addEventListener('click', ()=>{
+        window.location.href = '/';
+    })
 
     addButton.addEventListener('click',async () =>{
         try{
@@ -94,7 +100,18 @@ document.addEventListener('DOMContentLoaded', async() => {
         }
     });
 
+    try{
+        const resposta = await fetch(`/instituicaoNomeDocente?docenteId=${encodeURIComponent(docenteId)}`);
+        const data = await resposta.json();
+        const nome = data.nomeDocente;
 
+        welcomeEl.textContent = `Bem vindo! ${nome}.`;
+        nomeEl.textContent = `Prof. ${nome}`;
+
+    }catch(error){
+        console.error('erro ao encontrar professor');
+        alert('Erro de conexão com o servidor. Verifique o backend.');
+    }
     const institutionListContainer = document.querySelector('.card_container');
     
     if (institutionListContainer && docenteId) {

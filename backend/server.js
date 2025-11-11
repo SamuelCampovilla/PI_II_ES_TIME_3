@@ -254,7 +254,27 @@ app.get('/docente/id', async(req, res) =>{
 
 
 });
+//---------------------------------------------------------------------------------------------------//
 
+//pegar nome do docente
+
+app.get('/instituicaoNomeDocente', async(req, res)=>{{
+    const docenteId = req.query.docenteId;
+    let connection;
+    try{
+        let connection = await mysql.createConnection(dbConfig);
+        const query = 'SELECT nome FROM docentes WHERE id_docente = ?';
+        const [result] = await connection.execute(query, [docenteId]);
+        if(result.length === 1){
+            return res.status(200).json({ nomeDocente: result[0].nome });
+        }
+    }catch(error){
+        console.error('Nao foi possivel encontrar docente.');
+        return res.status(500).json({message: 'Erro interno do servidor.'})
+    }finally{
+        await connection.end();
+    }
+}});
 
 
 //---------------------------------------------------------------------------------------------------//
