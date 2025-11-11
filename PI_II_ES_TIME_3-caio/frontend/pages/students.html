@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
   <title>Quadro de Notas</title>
   <link rel="stylesheet" href="/styles/pages/students.css">
 </head>
@@ -22,39 +21,10 @@
         <hr>
       </header>
 
-     <div class="actions">
-        <button id="btnAddAluno" class="primary">+ Adicionar Aluno</button>
-        <div id="blurred-bg">
-            <div id="pop-up"> 
-                <button id="close-pop-up" aria-label="Fechar pop-up"><img src="/frontend/src/assets/images/cancel.png" alt=""></button>
-                <div>
-                    <h2>Adicionar Aluno</h2>
-                    <input type="text" id="ra_aluno" placeholder="Ra do Aluno">
-                    <input type="text" id="nome_aluno" placeholder="Nome do Aluno">
-                    <button id = "btnAdicionar">Adicionar</button>
-                </div>
-            </div>
-        </div>
-
-        <button id="btnImportar">Importar Alunos</button>
-        <!-- Import modal (adicionado) -->
-        <div id="import-blurred-bg" class="hidden" aria-hidden="true">
-          <div id="import-pop-up" role="dialog" aria-modal="true">
-            <button id="import-close" aria-label="Fechar importação"><img src="/frontend/src/assets/images/cancel.png" alt=""></button>
-            <div>
-              <h2>Importar CSV de Alunos</h2>
-              <p>O CSV deve conter colunas com RA e Nome (ex.: ra, nome). Cabeçalhos não sensíveis a maiúsculas.</p>
-              <input type="file" id="csvFileInput" accept=".csv,text/csv">
-              <div style="margin-top:10px;">
-                <button id="btnStartImport">Enviar e Importar</button>
-                <button id="btnCancelImport">Cancelar</button>
-              </div>
-              <div id="import-status" style="margin-top:8px;color:#333"></div>
-            </div>
-          </div>
-        </div>
-        <!-- fim import modal -->
-
+      <!-- Barra de Ações -->
+      <div class="actions">
+        <button class="primary">+ Adicionar Aluno</button>
+        <button>Importar Alunos</button>
         <button>Componentes</button>
         <button>Fórmula</button>
         <span class="status">Modo de Edição: </span>
@@ -63,6 +33,7 @@
           <option>Desabilitado</option>
         </select>
       </div>
+
       <!-- Switch -->
       <div class="switch">
         <input type="checkbox" id="ajuste">
@@ -132,7 +103,5 @@
       </div>
     </aside>
   </div>
-  <script type="module" src="../../backend/src/students.js"></script>
-  <script type="module" src="/frontend/src/js/studentsmodal.js"></script>
 </body>
 </html>
