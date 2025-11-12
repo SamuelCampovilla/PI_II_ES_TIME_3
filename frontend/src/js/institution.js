@@ -66,7 +66,8 @@ document.addEventListener('DOMContentLoaded', async() => {
         window.location.href = '/';
     })
 
-    addButton.addEventListener('click',async () =>{
+
+    async function adicionarInstituicao(){
         try{
             
             
@@ -98,6 +99,10 @@ document.addEventListener('DOMContentLoaded', async() => {
             console.error('Erro ao inserir instituição', error);
             alert('Erro de conexão com o servidor. Verifique o backend.');
         }
+
+    }
+    addButton.addEventListener('click',async () =>{
+        await adicionarInstituicao();
     });
 
     try{
@@ -121,6 +126,10 @@ document.addEventListener('DOMContentLoaded', async() => {
             const resposta = await fetch(`/pegarInstituicoes?docenteId=${encodeURIComponent(docenteId)}`);
 
             const data = await resposta.json();
+            if(resposta.ok && data.instituicoes && data.instituicoes.length === 0){
+                abrirPopup();
+                return;
+            }
             
 
             if (resposta.ok && data.instituicoes) { 
@@ -151,6 +160,12 @@ document.addEventListener('DOMContentLoaded', async() => {
                         `;
                     institutionListContainer.appendChild(card);
                 });
+                document.querySelectorAll('.btnGerenciar').forEach(button => {
+                    button.addEventListener('click', function() {
+                    const institutionId = this.getAttribute('data-id');
+                    window.location.href = `/frontend/pages/menagementPage.html?institutionId=${institutionId}&email=${docenteEmail}`;
+                 });
+    });
 
             } else {
                 alert(`Erro ao carregar instituições: ${data.message || 'Verifique o servidor.'}`);
@@ -161,4 +176,8 @@ document.addEventListener('DOMContentLoaded', async() => {
             alert('Erro de conexão com o servidor. Verifique o backend.');
         }
     }
+
+
+
+
 });

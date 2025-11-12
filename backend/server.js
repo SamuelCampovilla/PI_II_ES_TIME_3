@@ -328,8 +328,11 @@ app.post('/instituicao', async (req, res) => {
     }
 });
 
+//---------------------------------------------------------------------------------------------------//
+
 
 //---------------------------------------------------------------------------------------------------//
+//pegar instituicoes vinculadas ao docente - caio Polo
 
     app.get('/pegarInstituicoes', async(req, res) =>{
         const docenteId = req.query.docenteId;
