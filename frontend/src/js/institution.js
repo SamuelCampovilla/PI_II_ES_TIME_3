@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                                 </div>
                                 <p>${cursosCount}</p>
                             </div>
-                            <button class="btnGerenciar" id="btnGerenciar" data-id="${institution.id_instituicao}">Gerenciar</button>
+                            <button class="btnGerenciar" data-id="${institution.id_instituicao}">Gerenciar</button>
                         `;
                     institutionListContainer.appendChild(card);
                 });
@@ -167,13 +167,6 @@ document.addEventListener('DOMContentLoaded', async() => {
                  });
     });
 
-                document.querySelectorAll('.btnGerenciar').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const institutionId = this.getAttribute('data-id');
-                        window.location.href = `/frontend/pages/menagementPage.html?institutionId=${institutionId}&email=${docenteEmail}`;
-                    });
-                });
-
             } else {
                 alert(`Erro ao carregar instituições: ${data.message || 'Verifique o servidor.'}`);
             }
@@ -183,8 +176,5 @@ document.addEventListener('DOMContentLoaded', async() => {
             alert('Erro de conexão com o servidor. Verifique o backend.');
         }
     }
-
-
-
 
 });
