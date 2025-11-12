@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+
             const response = await fetch(`/redefinepassword?email=${encodeURIComponent(email)}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

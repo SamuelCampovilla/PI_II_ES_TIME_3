@@ -7,8 +7,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const telefone = document.getElementById('telephone').value;
-
+        const confirmarSenha = document.getElementById('confirm_password').value
         const infoCadastro = { name, email, password, telefone };
+        const verifyIfEmail = "@";
+        const checkbox = document.getElementById('conditions');
+
+        
+        if(password != confirmarSenha){
+            return alert("As senhas devem ser iguais!")
+        }
+        if(telefone.length < 14){
+            return alert("Insira um telefone válido")
+        }
+
+        if(!email.includes(verifyIfEmail)){
+            return alert("Insira um e-mail válido");
+        }
+
+        if(!checkbox.checked){
+            return alert("Leia os termos antes de continuar.")
+        }
+
         let resposta;
 
         try {

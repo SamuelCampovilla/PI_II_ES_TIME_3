@@ -13,14 +13,16 @@ const app = express();
 const port = 3000;
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'projetonotadezgrupo3@gmail.com',
-    pass: 'egleaakcifizvpgu'
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
+    host: 'smtp.gmail.com', 
+    port: 587,
+    secure: false, 
+    auth: {
+        user: 'projetonotadezgrupo3@gmail.com',
+        pass: 'makfcsgsbcyvvncb' 
+    },
+    tls: {
+        rejectUnauthorized: false 
+    }
 });
 
 app.use(express.json());
@@ -188,8 +190,8 @@ app.get('/frontend/pages/instituicao.html', (req, res) => {
 });
 
 
-app.get('/frontend/pages/instituicao.html', (req, res)=>{
-    res.sendFile(path.join(__dirname, '../frontend/pages/instituicao.html'));
+app.get('/frontend/pages/menagementPage.html', (req, res)=>{
+    res.sendFile(path.join(__dirname, '../frontend/pages/menagementPage.html'));
 });
 
 app.get('/frontend/pages/menagementPage.html', (req, res) => {
@@ -511,6 +513,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+
 // ---------------------------------------------------------------------
 // Recuperação de senha - Vinicius Castro e Caio Polo
 // ---------------------------------------------------------------------
@@ -544,7 +547,7 @@ app.post('/forgot', async (req, res) => {
               console.error('Erro ao enviar email:', error);
               reject(error);
             } else {
-              console.log('Email enviado:', info.response);
+              console.log('Email enviado caso o email exista:', info.response);
               resolve(info);
             }
           });
@@ -737,27 +740,10 @@ app.post('/instituicao', async (req, res) => {
         }
     });
 
-    app.post('/addCurso', async(req, res) =>{
-        const institutionId = req.query.institutionId;
-        const { courseName } = req.body;
-        let connection;
 
-        if(!courseName){
-            return res.status(400).json({ message: 'Nome do curso é obrigatório.' });
-        }
-        try{
-            connection = await mysql.createConnection(dbConfig);
-            const query = 'INSERT INTO cursos (nome_curso, id_instituicao) VALUES (?, ?)';
-            const [result] = await connection.execute(query, [courseName, institutionId]);
-            return res.status(201).json({
-                message: 'Curso adicionado com sucesso!',
-                id: result.insertId
-            });
-        }catch(error){
-            console.error('Erro ao adicionar curso:', error);
-            return res.status(500).json({ message: 'Erro interno do servidor.' });
-        }
-    });
+
+
+//-------------------------------------------------------------------------------------------------------------
 
     app.get('/cursos', async (req, res) => {
         const institutionId = req.query.institutionId;
@@ -805,6 +791,9 @@ app.post('/instituicao', async (req, res) => {
             }
         }
     });
+//---------------------------------------------------------------------------------------------------------
+
+
 
     app.get('/pegarCursosInicial' , async (req, res) => {
         const institutionId = req.query.institutionId;
@@ -843,6 +832,35 @@ app.get('/disciplinas', async (req, res) => {
         return res.status(200).json({ disciplinas });
     } catch (error) {
         console.error('Erro ao buscar disciplinas:', error);
+        return res.status(500).json({ message: 'Erro interno do servidor.' });
+    } finally {
+        if (connection) {
+            await connection.end();
+        }
+    }
+});
+
+// ...existing code...
+app.post('/adddisciplina', async (req, res) => {
+    const { nome_disciplina, codigo_disciplina, periodo, curso_id, instituicao_id } = req.body;
+    let connection;
+    
+    if (!curso_id || !nome_disciplina || !codigo_disciplina || !periodo) {
+        return res.status(400).json({ 
+            message: 'ID do curso, nome da disciplina, código e período são obrigatórios.' 
+        });
+    }
+    
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        const query = 'INSERT INTO disciplinas (nome_disciplina, codigo_disciplina, periodo, id_curso, id_instituicao) VALUES (?, ?, ?, ?, ?)';
+        const [result] = await connection.execute(query, [nome_disciplina, codigo_disciplina, periodo, curso_id, instituicao_id]);
+        return res.status(201).json({
+            message: 'Disciplina adicionada com sucesso!',
+            id: result.insertId
+        });
+    } catch (error) {
+        console.error('Erro ao adicionar disciplina:', error);
         return res.status(500).json({ message: 'Erro interno do servidor.' });
     } finally {
         if (connection) {
