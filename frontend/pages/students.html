@@ -1,107 +1,158 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quadro de Notas</title>
-  <link rel="stylesheet" href="/styles/pages/students.css">
-</head>
-<body>
-  <div class="layout">
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <title>NotaDez - Alunos da Turma</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="/styles/pages/students.css">
+    <link rel="stylesheet" href="/styles/components/loading.css">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">PUC-Campinas</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navBar">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-    <!-- Conteúdo Principal -->
-    <main class="main">
-
-      <!-- Cabeçalho -->
-      <header class="header">
-        <div>
-          <h1>Algoritmos e Estrutura de Dados</h1>
-          <p>Turma A • Quadro de Notas</p>
+        <div class="collapse navbar-collapse" id="navBar">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Menu</a>
+              <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/frontend/pages/instituicao.html">Instituições</a></li>
+                    <li><a class="dropdown-item" href="/frontend/pages/menagementPage.html">Turmas</a></li>
+                  </ul>
+            </li>
+          </ul>
         </div>
-        <hr>
-      </header>
+      </div>
+    </nav>
 
-      <!-- Barra de Ações -->
-      <div class="actions">
-        <button class="primary">+ Adicionar Aluno</button>
-        <button>Importar Alunos</button>
-        <button>Componentes</button>
-        <button>Fórmula</button>
-        <span class="status">Modo de Edição: </span>
-        <select class="select-option">
-          <option>Habilitado</option>
-          <option>Desabilitado</option>
-        </select>
+    <main class="container my-4">
+      <div class="mb-2">
+        <h2 class="mb-0">Quadro de Notas</h2>
+        <small class="text-muted">Alunos da turma selecionada</small>
       </div>
 
-      <!-- Switch -->
-      <div class="switch">
-        <input type="checkbox" id="ajuste">
-        <label for="ajuste">Acrescentar coluna de notas finais ajustadas</label>
+      <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddAluno">
+          + Adicionar Aluno
+        </button>
+
+        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddComponente">
+          + Criar Componente
+        </button>
+
+        <div class="form-check form-switch ms-2">
+          <input class="form-check-input" type="checkbox" id="switchEdicao">
+          <label class="form-check-label" for="switchEdicao">Modo de edição de notas (C1, C2, C3)</label>
+        </div>
+
+        <div class="form-check form-switch ms-2">
+          <input class="form-check-input" type="checkbox" id="switchEditarComponentes">
+          <label class="form-check-label" for="switchEditarComponentes">Editar componentes (mostrar excluir nas siglas)</label>
+        </div>
+
+        <div id="wrapRemoverSelecionados" class="ms-auto d-none">
+          <button id="btnRemoverSelecionados" class="btn btn-outline-danger btn-sm" type="button">
+            Remover Selecionados
+          </button>
+        </div>
       </div>
 
-      <!-- Tabela -->
-      <section class="table-container">
-        <h2>Notas dos Alunos</h2>
-        <table>
-          <thead>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle" id="tabelaNotas">
+          <thead class="table-light">
             <tr>
-              <th>Matrícula</th>
-              <th>Nome do Aluno</th>
-              <th>P1</th>
-              <th>P2</th>
-              <th>P3</th>
-              <th>Nota Final</th>
-              <th>Nota Final Ajustada</th>
+              <th style="width:36px;">
+                <input id="checkAll" class="form-check-input" type="checkbox">
+              </th>
+              <th>RA</th>
+              <th>Nome</th>
+              <th>C1</th>
+              <th>C2</th>
+              <th>C3</th>
+              <th>Média</th>
+              <th class="text-end" style="width:140px;">Ações</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>2021001</td>
-              <td>João Silva Santos</td>
-              <td>7.5</td>
-              <td>8.0</td>
-              <td>6.5</td>
-              <td class="green">7.3</td>
-              <td>7.5</td>
-            </tr>
-            <tr>
-              <td>2021002</td>
-              <td>Maria Oliveira Costa</td>
-              <td>9.0</td>
-              <td>8.5</td>
-              <td>9.5</td>
-              <td class="green">9.0</td>
-              <td>—</td>
-            </tr>
-            <tr>
-              <td>2021003</td>
-              <td>Pedro Almeida Lima</td>
-              <td>5.0</td>
-              <td>6.0</td>
-              <td>7.0</td>
-              <td class="red">6.0</td>
-              <td>6.0</td>
-            </tr>
+          <tbody id="tbodyStudents">
+            <!-- Linhas de alunos serão inseridas aqui via JavaScript -->
           </tbody>
         </table>
-      </section>
+      </div>
+
+      <small class="text-muted">
+        A tabela sempre abre em modo de visualização. Para salvar notas, crie componentes com siglas C1, C2 e C3 para a disciplina desta turma.
+      </small>
     </main>
 
-    <!-- Auditoria -->
-    <aside class="audit">
-      <h3>Auditoria de Alterações</h3>
-      <div class="audit-item">
-        <span class="date">23/09/2024 14:30:25</span>
-        <p><strong>João Silva Santos</strong></p>
-        <p>Nota P1 modificada 7 → 7.5</p>
+    <!-- Modal Adicionar Aluno -->
+    <div class="modal fade" id="modalAddAluno" tabindex="-1">
+      <div class="modal-dialog">
+        <form class="modal-content" id="formAddAluno">
+          <div class="modal-header">
+            <h5 class="modal-title">Adicionar Aluno</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">RA</label>
+              <input type="text" id="addRa" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nome</label>
+              <input type="text" id="addNome" class="form-control" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+            <button class="btn btn-primary" type="submit">Salvar</button>
+          </div>
+        </form>
       </div>
-      <div class="audit-item">
-        <span class="date">23/09/2024 14:25:10</span>
-        <p><strong>Maria Oliveira Costa</strong></p>
-        <p>Nota P3 adicionada 9.5</p>
+    </div>
+
+    <!-- Modal Criar Componente -->
+    <div class="modal fade" id="modalAddComponente" tabindex="-1">
+      <div class="modal-dialog">
+        <form class="modal-content" id="formAddComponente">
+          <div class="modal-header">
+            <h5 class="modal-title">Criar Componente de Nota</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Nome do componente</label>
+              <input type="text" id="compNome" class="form-control" placeholder="Ex: Prova 1" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Sigla</label>
+              <input type="text" id="compSigla" class="form-control" placeholder="Ex: C1, P1, TF" required>
+              <small class="text-muted">Para este quadro, use C1, C2 e C3 se quiser que apareçam nas colunas.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Descrição (opcional)</label>
+              <textarea id="compDescricao" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+            <button class="btn btn-primary" type="submit">Criar</button>
+          </div>
+        </form>
       </div>
-    </aside>
-  </div>
-</body>
+    </div>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/loading.js"></script>
+    <!-- JS da página -->
+    <script src="/js/students.js"></script>
+  </body>
 </html>

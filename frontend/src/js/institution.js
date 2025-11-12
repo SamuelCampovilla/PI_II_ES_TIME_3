@@ -177,7 +177,4 @@ document.addEventListener('DOMContentLoaded', async() => {
         }
     }
 
-
-
-
 });
