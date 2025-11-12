@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const popupConteudo = document.getElementById('pop-up'); 
     const addButton = document.getElementById('btnAdicionar');
     const listaCursosContainer = document.getElementById('lista_cursos');
+    const addDisciplina = document.getElementById('btnAddDisciplina');
     
     const urlParams = new URLSearchParams(window.location.search);
     const institutionId = urlParams.get('institutionId');
@@ -51,7 +52,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 listaCursosContainer.innerHTML = '<p>Nenhum curso encontrado para esta instituição.</p>';
                 return;
             }
-            listaCursosContainer.innerHTML = '';
+
+   // ...existing code...
+             listaCursosContainer.innerHTML = '';
             cursos.forEach(curso => {
                 const cursoId = curso.id_curso ?? curso.id ?? curso.idCurso;
                 const nomeCurso = curso.nome_curso ?? curso.nome ?? 'Curso sem nome';
@@ -60,23 +63,75 @@ document.addEventListener('DOMContentLoaded', async () => {
                 card.className = 'course';
                 card.innerHTML = `
                     <div class="course-header">
-                        <div class="icon">📚</div>
+                        <div class="icon"><img src="/assets/images/book.png" alt="Curso"></div>
                         <h2>${escapeHtml(nomeCurso)}</h2>
                         <div class="btn-group">
-                            <button class="manage-course btn-primary" data-course-id="${escapeHtml(cursoId)}">Gerenciar</button>
+                            <button class="btn-primary edit" data-course-id="${escapeHtml(cursoId)}" title="Editar"><img src="/assets/images/pencil.png" alt="Editar"></button>
+                            <button class="btn-primary delete" data-course-id="${escapeHtml(cursoId)}" title="Excluir"><img src="/assets/images/trash.png" alt="Excluir"></button>
+                             <button id="btnAddDisciplina" class="btn-primary add" data-course-id="${escapeHtml(cursoId)}">+ Adicionar Disciplina</button>
                         </div>
+                    </div>
+                    <div class="disciplinas-container">
+                        <p style="color: #999; font-size: 0.9rem;">Carregando disciplinas...</p>
                     </div>
                 `;
                 listaCursosContainer.appendChild(card);
+                
+                // Carregar disciplinas deste curso
+                loadDisciplinesForCourse(cursoId, card);
             });
-        } catch (err) {
-            console.error(err);
-            listaCursosContainer.innerHTML = '<p>Erro ao carregar cursos.</p>';
+        } catch (error) {
+            console.error('Erro ao carregar cursos:', error);
+            if (listaCursosContainer) listaCursosContainer.innerHTML = '<p>Erro ao carregar cursos.</p>';
         }
     }
 
+    // Função para carregar disciplinas de um curso
+    async function loadDisciplinesForCourse(cursoId, courseElement) {
+        try {
+            const res = await fetch(`/disciplinas?cursoId=${encodeURIComponent(cursoId)}`);
+            if (!res.ok) throw new Error('Erro ao buscar disciplinas');
+            
+            const data = await res.json();
+            const disciplinas = data.disciplinas ?? [];
+            
+            const container = courseElement.querySelector('.disciplinas-container');
+            container.innerHTML = '';
+            
+            if (disciplinas.length === 0) {
+                container.innerHTML = '<p style="color: #999; font-size: 0.9rem;">Nenhuma disciplina encontrada</p>';
+                return;
+            }
+            
+            disciplinas.forEach(disc => {
+                const discCard = document.createElement('div');
+                discCard.className = 'disciplina-card';
+                discCard.innerHTML = `
+                    <div class="disciplina-header">
+                        <div class="disciplina-info">
+                            <h3>${escapeHtml(disc.nome_disciplina ?? 'Sem nome')}</h3>
+                            <p>Código: ${escapeHtml(disc.codigo_disciplina ?? '-')} | Período: ${escapeHtml(disc.periodo ?? '-')}</p>
+                        </div>
+                        <div class="disciplina-acoes">
+                            <button class="icon-btn edit" title="Editar"><img src="/assets/images/pencil.png" alt="Editar"></button>
+                            <button class="icon-btn delete" title="Excluir"><img src="/assets/images/trash.png" alt="Excluir"></button>
+                            <button class="btn-primary add" data-course-id="${escapeHtml(cursoId)}">+ Adicionar Turma</button> 
+                        </div>
+                    </div> 
+                    
+                    <div class="turmas-container">
+                        <!-- Turmas serão carregadas aqui -->
+                    </div>
+                `;
+                container.appendChild(discCard);
+            });
+            
+        } catch (err) {
+            console.error(err);
+        }
+    }
     // delegação de eventos para botões "Gerenciar"
-    if (listaCursosContainer) {
+    if(listaCursosContainer) {
         listaCursosContainer.addEventListener('click', (e) => {
             const btn = e.target.closest('.manage-course');
             if (!btn) return;
