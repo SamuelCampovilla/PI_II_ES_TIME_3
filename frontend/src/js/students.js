@@ -1,26 +1,22 @@
-// frontend/src/js/students.js
-
-// id da turma vindo da query string (?id_turma=...). Se ausente, mantém 1 como fallback.
 const urlParams = new URLSearchParams(window.location.search);
 const ID_TURMA = urlParams.get('id_turma') ? Number(urlParams.get('id_turma')) : 1;
 
-// estado em memória
-let componentesAtuais = [];        // componentes da disciplina (até 3)
-let modoEditarComponentes = false; // controlado pelo switch de edição de componentes
+let componentesAtuais = [];
+let modoEditarComponentes = false;
 
 // elementos da tabela
 const tbody = document.getElementById('tbodyStudents');
 const checkAll = document.getElementById('checkAll');
-const switchEdicao = document.getElementById('switchEdicao'); // edição de notas
-const switchEditarComponentes = document.getElementById('switchEditarComponentes'); // edição de componentes
+const switchEdicao = document.getElementById('switchEdicao');
+const switchEditarComponentes = document.getElementById('switchEditarComponentes');
 const wrapRemoverSelecionados = document.getElementById('wrapRemoverSelecionados');
 const btnRemoverSelecionados = document.getElementById('btnRemoverSelecionados');
 const thead = document.querySelector('#tabelaNotas thead');
 
-// overlay global para bloquear a UI durante operações de salvamento
+// operações de salvamento
 let _blockingOverlay = null;
 function showBlockingOverlay(message = 'Salvando...') {
-  if (_blockingOverlay) return; // já visível
+  if (_blockingOverlay) return;
   const ov = document.createElement('div');
   ov.id = 'blockingOverlay';
   ov.style.position = 'fixed';
@@ -80,7 +76,7 @@ const compDescricao = document.getElementById('compDescricao');
 // helpers
 // ------------------------------------------------------
 function calcMedia(c1, c2, c3) {
-  // Para o cálculo, NULL deve ser tratado como 0 (conforme requisito).
+  // Para o cálculo, NULL deve ser tratado como 0.
   // Porém, se ainda não existem 3 componentes, retornamos null para indicar pendência.
   if (componentesAtuais.length < 3) return null;
 
@@ -104,12 +100,10 @@ function atualizarVisibilidadeRemoverSelecionados() {
   wrapRemoverSelecionados.classList.toggle('d-none', !anyChecked);
 }
 
-// formata valor da nota para exibir
 function formatNotaCell(valor) {
   return valor == null ? 'NULL' : valor;
 }
 
-// converte texto da célula em número ou null
 function parseNotaTexto(texto) {
   const t = texto.trim().replace(',', '.');
   if (t === '' || t.toUpperCase() === 'NULL') return null;
@@ -141,11 +135,9 @@ function renderComponentHeaders() {
     }
   }
 
-  // ajustar visibilidade das colunas de componente (mostra/oculta C1/C2/C3)
   ajustarColunasComponentes();
 }
 
-// mostra/oculta as colunas de componente (C1..C3) com base em componentesAtuais
 function ajustarColunasComponentes() {
   const ths = document.querySelectorAll('#tabelaNotas thead th');
   const rows = tbody.querySelectorAll('tr');
@@ -155,7 +147,6 @@ function ajustarColunasComponentes() {
     const th = ths[3 + i];
     if (th) th.style.display = visible ? '' : 'none';
 
-    // ajustar cada linha
     rows.forEach(tr => {
       const tds = tr.querySelectorAll('td');
       const td = tds[3 + i];
@@ -231,7 +222,6 @@ async function salvarLinha(ra, nome, c1, c2, c3) {
   });
 
   if (!res.ok) {
-    // tenta extrair mensagem do servidor (JSON ou texto)
     let errorText = '';
     try {
       const data = await res.json();
@@ -241,7 +231,6 @@ async function salvarLinha(ra, nome, c1, c2, c3) {
       try { errorText = await res.text(); } catch (_) { errorText = String(res.status); }
     }
     console.error('Erro ao salvar linha:', res.status, errorText);
-    // lança para o chamador tratar (ex: mostrar mensagem no UI)
     throw new Error(errorText || 'Erro ao salvar aluno/notas.');
   }
 
@@ -310,10 +299,66 @@ function aplicarModoEdicaoComponentes() {
   renderComponentHeaders();
 }
 
-// ------------------------------------------------------
-// event listeners principais
-// ------------------------------------------------------
-window.addEventListener('DOMContentLoaded', carregarAlunos);
+// ------------------
+// event listeners
+// ------------------
+// tenta montar os links do menu com o id do docente (usa /api/me se existir sessão, senão cai no fallback por email)
+async function setupMenuDocenteLinks() {
+  try {
+    // 1) tenta obter via sessão (rota opcional /api/me)
+    let idDoc = null;
+    let email = null;
+    try {
+      const meRes = await fetch('/api/me');
+      if (meRes.ok) {
+        const me = await meRes.json();
+        idDoc = me.id_docente;
+        email = me.email;
+      }
+    } catch (e) {
+      // ignore, vamos tentar fallback
+    }
+
+    // 2) fallback por email: procura na query string, localStorage ou cookie
+    if (!idDoc) {
+      const urlParams = new URLSearchParams(window.location.search);
+      email = email || urlParams.get('email') || localStorage.getItem('user_email') || (document.cookie.match(/(?:^|; )email=([^;]*)/) || [])[1];
+      if (email) {
+        try {
+          const r = await fetch(`/docente/id?email=${encodeURIComponent(email)}`);
+          if (r.ok) {
+            const j = await r.json();
+            idDoc = j.id;
+          }
+        } catch (e) {
+          console.error('Erro ao obter id do docente via fallback:', e);
+        }
+      }
+    }
+
+    if (!idDoc) return; // sem id, não atualiza links
+
+    // atualiza links do dropdown (se existirem) adicionando id_docente
+    const menuLinks = document.querySelectorAll('.dropdown-menu a');
+    menuLinks.forEach(a => {
+      if (!a || !a.getAttribute) return;
+      const href = a.getAttribute('href') || '';
+      if (href.includes('instituicao.html')) {
+        a.setAttribute('href', `/frontend/pages/instituicao.html?id_docente=${encodeURIComponent(idDoc)}`);
+      }
+      if (href.includes('menagementPage.html')) {
+        a.setAttribute('href', `/frontend/pages/menagementPage.html?id_docente=${encodeURIComponent(idDoc)}`);
+      }
+    });
+  } catch (err) {
+    console.error('Erro em setupMenuDocenteLinks:', err);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  await setupMenuDocenteLinks();
+  carregarAlunos();
+});
 
 // alternar edição de notas
 switchEdicao.addEventListener('change', aplicarModoEdicaoNotas);
@@ -371,7 +416,7 @@ tbody.addEventListener('blur', async (e) => {
   savingNode.textContent = 'Salvando...';
   td.appendChild(savingNode);
 
-  // bloquear UI enquanto salva para evitar múltiplas ações
+  // bloquear enquanto salva para evitar múltiplas ações
   showBlockingOverlay('Salvando nota...');
 
   try {
@@ -395,7 +440,6 @@ tbody.addEventListener('blur', async (e) => {
         aplicarCorMedia(tdMedia, media);
       }
     }
-    // em caso de sucesso, mostra 'Salvo' breve
     const okNode = document.createElement('span');
     okNode.className = 'text-success small ms-2';
     okNode.textContent = 'Salvo';
@@ -403,16 +447,14 @@ tbody.addEventListener('blur', async (e) => {
     setTimeout(() => { if (okNode && okNode.parentNode) okNode.parentNode.removeChild(okNode); }, 1500);
   } catch (err) {
     console.error('Erro ao salvar nota (blur):', err);
-    // mostra mensagem de erro inline
     const errorNode = document.createElement('div');
     errorNode.className = 'text-danger small mt-1';
     errorNode.textContent = err.message || 'Erro ao salvar nota.';
     tdMedia.appendChild(errorNode);
     setTimeout(() => { if (errorNode && errorNode.parentNode) errorNode.parentNode.removeChild(errorNode); }, 5000);
   } finally {
-    // remover indicador de salvando
     if (savingNode && savingNode.parentNode) savingNode.parentNode.removeChild(savingNode);
-    // desbloquear UI
+    // desbloquear
     hideBlockingOverlay();
   }
 }, true);
@@ -469,7 +511,6 @@ formAddAluno.addEventListener('submit', async (e) => {
   }
 
   // na criação do aluno, ainda não lançamos notas
-  // mostrar overlay de processamento
   showBlockingOverlay('Adicionando aluno...');
   try {
     await salvarLinha(ra, nome, null, null, null);
@@ -508,9 +549,9 @@ formAddComponente.addEventListener('submit', async (e) => {
   modal.hide();
 });
 
-// ------------------------------------------------------
+// ---------------------------
 // remoção de componentes 
-// ------------------------------------------------------
+// ---------------------------
 async function removerComponente(id) {
   // mostrar overlay de processamento
   showBlockingOverlay('Removendo componente...');

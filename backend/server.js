@@ -191,6 +191,10 @@ app.get('/frontend/pages/students.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/pages/students.html'));
 });
 
+app.get('/frontend/pages/menagementPage.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/pages/menagementPage.html'));
+});
+
 // ---------------------------------------------------------------------
 // Cadastro de usuário - Caio Polo
 // ---------------------------------------------------------------------
