@@ -318,6 +318,14 @@ app.delete('/notas/:ra', async (req, res) => {
     await connection.execute('DELETE FROM calculo_final WHERE id_turma = ? AND id_aluno = ?', [idTurma, ra]);
     await connection.execute('DELETE FROM matricula WHERE id_matricula = ?', [idMatricula]);
 
+    const [restantes] = await connection.execute(
+      'SELECT 1 FROM matricula WHERE id_aluno = ? LIMIT 1',
+      [ra]
+    );
+    if (!restantes.length) {
+      await connection.execute('DELETE FROM alunos WHERE ra = ?', [ra]);
+    }
+
     res.status(204).send();
   } catch (error) {
     console.error('Erro ao remover aluno:', error);

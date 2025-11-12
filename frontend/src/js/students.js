@@ -14,6 +14,7 @@ const wrapRemoverSelecionados = document.getElementById('wrapRemoverSelecionados
 const btnRemoverSelecionados = document.getElementById('btnRemoverSelecionados');
 const thead = document.querySelector('#tabelaNotas thead');
 const btnImportarCsv = document.getElementById('btnImportarCsv');
+const btnExportarCsv = document.getElementById('btnExportarCsv');
 const inputCsvAlunos = document.getElementById('inputCsvAlunos');
 
 // modal adicionar aluno
@@ -288,6 +289,51 @@ async function importarAlunosDoCsv(file) {
     console.error('Erro durante importação CSV:', err);
     alert('Erro ao importar alunos. Verifique o arquivo e tente novamente.');
   }
+}
+
+function exportarAlunosParaCsv() {
+  if (!alunosAtuais.length) {
+    alert('Não há alunos nesta turma para exportar.');
+    return;
+  }
+
+  const todosComNotas = alunosAtuais.length > 0 && componentesAtuais.length >= 3 && alunosAtuais.every(aluno => {
+    const notas = [aluno.c1, aluno.c2, aluno.c3];
+    if (notas.some(n => n == null || n === '' || n === '-')) return false;
+    const media = calcMedia(aluno.c1, aluno.c2, aluno.c3);
+    return media !== null;
+  });
+
+  if (!todosComNotas) {
+    alert('Para exportar é necessário que todos os alunos tenham as notas dos componentes e o cálculo final concluído.');
+    return;
+  }
+
+  const linhas = ['ra,nome'];
+  alunosAtuais.forEach(aluno => {
+    const ra = (aluno.ra ?? '').toString().trim();
+    const nome = (aluno.nome ?? '').toString().trim();
+    linhas.push(`${ra},"${nome.replace(/"/g, '""')}"`);
+  });
+
+  const csvString = linhas.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const agora = new Date();
+  const pad = (num, size = 2) => String(num).padStart(size, '0');
+  const dataStr = `${agora.getFullYear()}-${pad(agora.getMonth() + 1)}-${pad(agora.getDate())}_${pad(agora.getHours())}${pad(agora.getMinutes())}${pad(agora.getSeconds())}${pad(agora.getMilliseconds(), 3)}`;
+  const turmaStr = `Turma${ID_TURMA}`;
+  const siglaStr = componentesAtuais[0]?.sigla ? componentesAtuais[0].sigla : 'SemSigla';
+  const nomeArquivo = `${dataStr}-${turmaStr}-${siglaStr}.csv`;
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = nomeArquivo;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 // remove aluno (matrícula + notas + cálculo_final)
@@ -595,6 +641,10 @@ if (btnImportarCsv && inputCsvAlunos) {
     // permite importar o mesmo arquivo novamente se necessário
     e.target.value = '';
   });
+}
+
+if (btnExportarCsv) {
+  btnExportarCsv.addEventListener('click', exportarAlunosParaCsv);
 }
 
 // ---------------------------
