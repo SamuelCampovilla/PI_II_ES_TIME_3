@@ -53,21 +53,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
+   // ...existing code...
             listaCursosContainer.innerHTML = '';
             cursos.forEach(curso => {
                 const cursoId = curso.id_curso ?? curso.id ?? curso.idCurso;
                 const nomeCurso = curso.nome_curso ?? curso.nome ?? 'Curso sem nome';
 
                 const card = document.createElement('div');
-                card.className = 'course-card';
+                card.className = 'course';
                 card.innerHTML = `
-                    <h3>${escapeHtml(nomeCurso)}</h3>
-                    <div class="course-actions">
-                        <button class="manage-course" data-course-id="${escapeHtml(cursoId)}">Gerenciar</button>
+                    <div class="course-header">
+                        <div class="icon">📚</div>
+                        <h2>${escapeHtml(nomeCurso)}</h2>
+                        <div class="btn-group">
+                            <button class="manage-course btn-primary" data-course-id="${escapeHtml(cursoId)}">Gerenciar</button>
+                        </div>
                     </div>
                 `;
                 listaCursosContainer.appendChild(card);
             });
+// ...existing code...
         } catch (err) {
             console.error(err);
             listaCursosContainer.innerHTML = '<p>Erro ao carregar cursos.</p>';
