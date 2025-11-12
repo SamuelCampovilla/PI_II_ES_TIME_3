@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const result = await resposta.json();
       if (resposta.ok) {
-        window.location.href = `/frontend/pages/instituicao.html?email=${encodeURIComponent(email)}`;
+        window.location.href = `/frontend/pages/instituicao.html?email=${encodeURIComponent(email)} `;
       } else {
         alert(`Erro ao entrar: ${result.message || 'Credenciais inválidas.'}`);
       }
