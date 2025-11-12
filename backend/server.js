@@ -55,8 +55,8 @@ app.get('/frontend/pages/instituicao.html', (req, res) => {
 });
 
 
-app.get('/frontend/pages/instituicao.html', (req, res)=>{
-    res.sendFile(path.join(__dirname, '../frontend/pages/instituicao.html'));
+app.get('/frontend/pages/menagementPage.html', (req, res)=>{
+    res.sendFile(path.join(__dirname, '../frontend/pages/menagementPage.html'));
 });
 
 //---------------------------------------------------------------------------------------------------//

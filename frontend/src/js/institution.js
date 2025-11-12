@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                 document.querySelectorAll('.btnGerenciar').forEach(button => {
                     button.addEventListener('click', function() {
                     const institutionId = this.getAttribute('data-id');
-                    window.location.href = `/frontend/pages/menagementPage.html?institutionId=${institutionId}&email=${docenteEmail}`;
+                    window.location.href = `/frontend/pages/menagementPage.html?institutionId=${institutionId}`;
                  });
     });
 
