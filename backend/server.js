@@ -478,6 +478,35 @@ app.get('/disciplinas', async (req, res) => {
     }
 });
 
+// ...existing code...
+app.post('/adddisciplina', async (req, res) => {
+    const { nome_disciplina, codigo_disciplina, periodo, curso_id, instituicao_id } = req.body;
+    let connection;
+    
+    if (!curso_id || !nome_disciplina || !codigo_disciplina || !periodo) {
+        return res.status(400).json({ 
+            message: 'ID do curso, nome da disciplina, código e período são obrigatórios.' 
+        });
+    }
+    
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        const query = 'INSERT INTO disciplinas (nome_disciplina, codigo_disciplina, periodo, id_curso, id_instituicao) VALUES (?, ?, ?, ?, ?)';
+        const [result] = await connection.execute(query, [nome_disciplina, codigo_disciplina, periodo, curso_id, instituicao_id]);
+        return res.status(201).json({
+            message: 'Disciplina adicionada com sucesso!',
+            id: result.insertId
+        });
+    } catch (error) {
+        console.error('Erro ao adicionar disciplina:', error);
+        return res.status(500).json({ message: 'Erro interno do servidor.' });
+    } finally {
+        if (connection) {
+            await connection.end();
+        }
+    }
+});
+
 app.listen(port, () => {
     console.log(`Servidor aberto em http://localhost:${port}`);
 });

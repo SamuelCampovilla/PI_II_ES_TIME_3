@@ -1,40 +1,62 @@
-// ...existing code...
 document.addEventListener('DOMContentLoaded', async () => {
-
-    const botaoAbrir = document.getElementById('add-course');
-    const botaoFechar = document.getElementById('close-pop-up');
-    const fundoBlur = document.getElementById('blurred-bg'); 
-    const popupConteudo = document.getElementById('pop-up'); 
-    const addButton = document.getElementById('btnAdicionar');
+ const botaoAbrir = document.getElementById('add-course');
+    // const fundoBlurDisciplina = document.getElementById('blurred-bg-disciplina'); // REMOVIDO
+    const fundoBlur = document.getElementById('blurred-bg');
+    const popupConteudo = document.getElementById('pop-up');
+    const popupDisciplina = document.getElementById('pop-up-disciplina');
+    const addButton = document.getElementById('btnAdicionar'); // adiciona curso
+    const addDisciplina = document.getElementById('btnAdicionarDisciplina'); // botão do modal de disciplina
     const listaCursosContainer = document.getElementById('lista_cursos');
-    const addDisciplina = document.getElementById('btnAddDisciplina');
-    
+
     const urlParams = new URLSearchParams(window.location.search);
     const institutionId = urlParams.get('institutionId');
     const docenteEmail = urlParams.get('email');
 
-    // busca e exibe nome da instituição
     if (institutionId) {
         try {
             const response = await fetch(`/institution/${institutionId}`);
             if (response.ok) {
                 const institution = await response.json();
                 const institutionNameElement = document.getElementById('nome_instituicao');
-                if (institutionNameElement) {
-                    institutionNameElement.textContent = institution.nome_instituicao;
-                }
+                if (institutionNameElement) institutionNameElement.textContent = institution.nome_instituicao;
             } else {
                 console.error('Erro ao buscar dados da instituição');
             }
         } catch (error) {
             console.error('Erro na requisição:', error);
         }
-
-        // carregar cursos da instituição ao abrir a página
         loadCoursesForInstitution(institutionId);
     } else {
         if (listaCursosContainer) listaCursosContainer.innerHTML = '<p>ID da instituição não fornecido na URL.</p>';
     }
+
+    // Delegação: captura cliques em botões gerados dinamicamente dentro da lista de cursos
+    listaCursosContainer.addEventListener('click', (e) => {
+        // botão "Adicionar Disciplina"
+        const addDiscBtn = e.target.closest('.btn-add-disciplina');
+        if (addDiscBtn) {
+            // guarda o courseId no botão do modal para uso no envio
+            addDisciplina.dataset.courseId = addDiscBtn.dataset.courseId;
+            abrirPopupDisciplina();
+            return;
+        }
+
+        // exemplo: editar curso
+        const editBtn = e.target.closest('.btn-edit-course');
+        if (editBtn) {
+            const courseId = editBtn.dataset.courseId;
+            // implementar editar se necessário
+            return;
+        }
+
+        // exemplo: excluir curso
+        const delBtn = e.target.closest('.btn-delete-course');
+        if (delBtn) {
+            const courseId = delBtn.dataset.courseId;
+            // implementar exclusão se necessário
+            return;
+        }
+    });
 
     // função para buscar e renderizar cursos
     async function loadCoursesForInstitution(institutionId) {
@@ -43,9 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             const res = await fetch(`/cursos?institutionId=${encodeURIComponent(institutionId)}`);
-            if (!res.ok) {
-                throw new Error('Erro ao buscar cursos');
-            }
+            if (!res.ok) throw new Error('Erro ao buscar cursos');
             const data = await res.json();
             const cursos = data.cursos ?? [];
 
@@ -54,8 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-   // ...existing code...
-             listaCursosContainer.innerHTML = '';
+            listaCursosContainer.innerHTML = '';
             cursos.forEach(curso => {
                 const cursoId = curso.id_curso ?? curso.id ?? curso.idCurso;
                 const nomeCurso = curso.nome_curso ?? curso.nome ?? 'Curso sem nome';
@@ -67,9 +86,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="icon"><img src="/assets/images/book.png" alt="Curso"></div>
                         <h2>${escapeHtml(nomeCurso)}</h2>
                         <div class="btn-group">
-                            <button class="btn-primary edit" data-course-id="${escapeHtml(cursoId)}" title="Editar"><img src="/assets/images/pencil.png" alt="Editar"></button>
-                            <button class="btn-primary delete" data-course-id="${escapeHtml(cursoId)}" title="Excluir"><img src="/assets/images/trash.png" alt="Excluir"></button>
-                             <button id="btnAddDisciplina" class="btn-primary add" data-course-id="${escapeHtml(cursoId)}">+ Adicionar Disciplina</button>
+                            <button class="btn-primary btn-edit-course" data-course-id="${escapeHtml(cursoId)}" title="Editar">
+                                <img src="/assets/images/pencil.png" alt="Editar" />
+                            </button>
+                            <button class="btn-primary btn-delete-course" data-course-id="${escapeHtml(cursoId)}" title="Excluir">
+                                <img src="/assets/images/trash.png" alt="Excluir" />
+                            </button>
+                            <button class="btn-primary btn-add-disciplina" data-course-id="${escapeHtml(cursoId)}">+ Adicionar Disciplina</button>
                         </div>
                     </div>
                     <div class="disciplinas-container">
@@ -77,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 `;
                 listaCursosContainer.appendChild(card);
-                
+
                 // Carregar disciplinas deste curso
                 loadDisciplinesForCourse(cursoId, card);
             });
@@ -90,20 +113,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Função para carregar disciplinas de um curso
     async function loadDisciplinesForCourse(cursoId, courseElement) {
         try {
-            const res = await fetch(`/disciplinas?cursoId=${encodeURIComponent(cursoId)}`);
+            // ajustar para 'courseId' ou 'cursoId' conforme servidor; aqui usamos courseId
+            const res = await fetch(`/disciplinas?courseId=${encodeURIComponent(cursoId)}`);
             if (!res.ok) throw new Error('Erro ao buscar disciplinas');
-            
+
             const data = await res.json();
             const disciplinas = data.disciplinas ?? [];
-            
+
             const container = courseElement.querySelector('.disciplinas-container');
             container.innerHTML = '';
-            
+
             if (disciplinas.length === 0) {
                 container.innerHTML = '<p style="color: #999; font-size: 0.9rem;">Nenhuma disciplina encontrada</p>';
                 return;
             }
-            
+
             disciplinas.forEach(disc => {
                 const discCard = document.createElement('div');
                 discCard.className = 'disciplina-card';
@@ -114,31 +138,126 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <p>Código: ${escapeHtml(disc.codigo_disciplina ?? '-')} | Período: ${escapeHtml(disc.periodo ?? '-')}</p>
                         </div>
                         <div class="disciplina-acoes">
-                            <button class="icon-btn edit" title="Editar"><img src="/assets/images/pencil.png" alt="Editar"></button>
-                            <button class="icon-btn delete" title="Excluir"><img src="/assets/images/trash.png" alt="Excluir"></button>
-                            <button class="btn-primary add" data-course-id="${escapeHtml(cursoId)}">+ Adicionar Turma</button> 
+                            <button class="icon-btn" title="Editar"><img src="/assets/images/pencil.png" alt="Editar" /></button>
+                            <button class="icon-btn" title="Excluir"><img src="/assets/images/trash.png" alt="Excluir" /></button>
+                            <button class="btn-primary btn-add-turma" data-course-id="${escapeHtml(cursoId)}">+ Adicionar Turma</button>
                         </div>
-                    </div> 
-                    
-                    <div class="turmas-container">
-                        <!-- Turmas serão carregadas aqui -->
                     </div>
+                    <div class="turmas-container"></div>
                 `;
                 container.appendChild(discCard);
             });
-            
+
         } catch (err) {
-            console.error(err);
+            console.error('Erro ao carregar disciplinas:', err);
+            const container = courseElement.querySelector('.disciplinas-container');
+            if (container) container.innerHTML = '<p style="color: #999; font-size: 0.9rem;">Erro ao carregar disciplinas</p>';
         }
     }
-    // delegação de eventos para botões "Gerenciar"
-    if(listaCursosContainer) {
-        listaCursosContainer.addEventListener('click', (e) => {
-            const btn = e.target.closest('.manage-course');
-            if (!btn) return;
-            const courseId = btn.dataset.courseId;
-            window.location.href = `/courseManagement.html?institutionId=${encodeURIComponent(institutionId)}&courseId=${encodeURIComponent(courseId)}`;
+
+    // adicionar curso (modal)
+    if (addButton) {
+        addButton.addEventListener('click', async () => {
+            const courseNameInput = document.getElementById('course-name-pop-up');
+            const courseName = courseNameInput.value.trim();
+            if (!courseName) return alert('Por favor, insira o nome do curso.');
+
+            try {
+                const response = await fetch('/addcursos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome_curso: courseName, instituicao_id: institutionId }),
+                });
+                if (response.ok) {
+                    alert('Curso adicionado com sucesso!');
+                    courseNameInput.value = '';
+                    fecharPopup();
+                    loadCoursesForInstitution(institutionId);
+                } else {
+                    alert('Erro ao adicionar curso.');
+                }
+            } catch (error) {
+                console.error('Erro na requisição:', error);
+                alert('Erro ao adicionar curso.');
+            }
         });
+    }
+
+    // adicionar disciplina (modal) - utiliza dataset.courseId preenchido ao abrir o modal
+     if (addDisciplina) {
+        addDisciplina.addEventListener('click', async () => {
+            const courseId = addDisciplina.dataset.courseId;
+            const disciplinaName = document.getElementById('nomeDisciplina').value.trim();
+            const disciplinaCode = document.getElementById('codDisciplina').value.trim();
+            const disciplinaPeriodo = document.getElementById('PerDisciplina')?.value.trim() ?? '';
+
+            if (!disciplinaName || !disciplinaCode) return alert('Nome e código são obrigatórios.');
+
+            try {
+                const response = await fetch('/adddisciplina', {  // lowercase
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome_disciplina: disciplinaName,
+                        codigo_disciplina: disciplinaCode,
+                        periodo: disciplinaPeriodo,
+                        curso_id: courseId,
+                        instituicao_id: institutionId,  // adicione isto
+                    }),
+                });
+                if (response.ok) {
+                    alert('Disciplina adicionada com sucesso!');
+                    document.getElementById('nomeDisciplina').value = '';
+                    document.getElementById('codDisciplina').value = '';
+                    if (document.getElementById('PerDisciplina')) document.getElementById('PerDisciplina').value = '';
+                    loadCoursesForInstitution(institutionId);
+                } else {
+                    const err = await response.json();
+                    alert('Erro: ' + err.message);
+                }
+            } catch (error) {
+                console.error('Erro na requisição:', error);
+                alert('Erro ao adicionar disciplina.');
+            }
+        });
+    }
+
+    document.querySelectorAll('.close-pop-up').forEach(btn => {
+        btn.addEventListener('click', () => {
+            fecharPopup();
+            fecharPopupDisciplina();
+        });
+    });
+
+    // fechar clicando no backdrop (agora usa o mesmo backdrop para ambos)
+    fundoBlur.addEventListener('click', (event) => {
+        if (event.target === fundoBlur) {
+            fecharPopup();
+            fecharPopupDisciplina();
+        }
+    });
+
+
+    function abrirPopup() {
+        fundoBlur.classList.add('mostrar');
+        popupConteudo.classList.add('mostrar');
+        popupDisciplina.classList.remove('mostrar');
+    }
+
+    function fecharPopup() {
+        fundoBlur.classList.remove('mostrar');
+        popupConteudo.classList.remove('mostrar');
+    }
+
+    function abrirPopupDisciplina() {
+        fundoBlur.classList.add('mostrar');
+        popupDisciplina.classList.add('mostrar');
+        popupConteudo.classList.remove('mostrar');
+    }
+
+    function fecharPopupDisciplina() {
+        fundoBlur.classList.remove('mostrar');
+        popupDisciplina.classList.remove('mostrar');
     }
 
     // helper para escapar HTML básico
@@ -151,57 +270,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             .replace(/'/g, '&#39;');
     }
 
-    if(addButton) {
-        addButton.addEventListener('click', async () => {
-            const courseNameInput = document.getElementById('course-name-pop-up');
-            const courseName = courseNameInput.value.trim();
-            if (courseName) {
-                try {
-                    const response = await fetch('/addcursos', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            nome_curso: courseName,
-                            instituicao_id: institutionId,
-                        }),
-                    });
-                    if (response.ok) {
-                        alert('Curso adicionado com sucesso!');
-                        courseNameInput.value = '';
-                        fecharPopup();
-                        // recarrega a lista de cursos
-                        loadCoursesForInstitution(institutionId);
-                    } else {
-                        alert('Erro ao adicionar curso.');
-                    }
-                } catch (error) {
-                    console.error('Erro na requisição:', error);
-                    alert('Erro ao adicionar curso.');
-                }
-            } else {
-                alert('Por favor, insira o nome do curso.');
-            }
-        });
-    }
-
-    function abrirPopup() {
-        fundoBlur.classList.add('mostrar');
-        popupConteudo.classList.add('mostrar');
-    }
-
-    function fecharPopup() {
-        fundoBlur.classList.remove('mostrar');
-        popupConteudo.classList.remove('mostrar');
-    }
-
-    botaoAbrir.addEventListener('click', abrirPopup);
-    botaoFechar.addEventListener('click', fecharPopup);
-    fundoBlur.addEventListener('click', (event) => {
-        if (event.target === fundoBlur) {
-            fecharPopup();
-        }
-    });
+    // inicializar listeners de botões fixos
+    botaoAbrir?.addEventListener('click', abrirPopup);
 });
-// ...existing code...
