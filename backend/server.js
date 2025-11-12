@@ -26,6 +26,7 @@ const transporter = nodemailer.createTransport({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../frontend/src')));
+app.use(express.static(path.join(__dirname, 'src')));
 
 // ---------------------------------------------------------------------
 // HELPERS -- Samuel Campovilla e Caua Bianchi
@@ -186,18 +187,42 @@ app.get('/frontend/pages/instituicao.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/pages/instituicao.html'));
 });
 
-// página de alunos / quadro de notas
-app.get('/frontend/pages/students.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/pages/students.html'));
+
+app.get('/frontend/pages/instituicao.html', (req, res)=>{
+    res.sendFile(path.join(__dirname, '../frontend/pages/instituicao.html'));
 });
 
 app.get('/frontend/pages/menagementPage.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/pages/menagementPage.html'));
+    res.sendFile(path.join(__dirname, '../frontend/pages/menagementPage.html'));
 });
 
-// ---------------------------------------------------------------------
-// Cadastro de usuário - Caio Polo
-// ---------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------//
+
+// Rota para buscar uma instituição por ID
+app.get('/institution/:id', async (req, res) => {
+    const { id } = req.params;
+    let connection;
+
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        const query = 'SELECT * FROM instituicoes WHERE id_instituicao = ?';
+        const [rows] = await connection.execute(query, [id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Instituição não encontrada' });
+        }
+
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Erro ao buscar instituição:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+    } finally {
+        if (connection) {
+            await connection.end();
+        }
+    }
+});
+// Rota para cadastro de usuário - Caio Polo
 app.post('/cadastro', async (req, res) => {
   const { name, email, password, telefone } = req.body;
   let connection;
@@ -486,9 +511,102 @@ app.post('/instituicao', async (req, res) => {
         }
     });
 
+    app.post('/addCurso', async(req, res) =>{
+        const institutionId = req.query.institutionId;
+        const { courseName } = req.body;
+        let connection;
 
+        if(!courseName){
+            return res.status(400).json({ message: 'Nome do curso é obrigatório.' });
+        }
+        try{
+            connection = await mysql.createConnection(dbConfig);
+            const query = 'INSERT INTO cursos (nome_curso, id_instituicao) VALUES (?, ?)';
+            const [result] = await connection.execute(query, [courseName, institutionId]);
+            return res.status(201).json({
+                message: 'Curso adicionado com sucesso!',
+                id: result.insertId
+            });
+        }catch(error){
+            console.error('Erro ao adicionar curso:', error);
+            return res.status(500).json({ message: 'Erro interno do servidor.' });
+        }
+    });
+
+    app.get('/cursos', async (req, res) => {
+        const institutionId = req.query.institutionId;
+        let connection;
+    
+        if (!institutionId) {
+            return res.status(400).json({ message: 'O ID da instituição é obrigatório.' });
+        }
+    
+        try {
+            connection = await mysql.createConnection(dbConfig);
+            const query = 'SELECT * FROM cursos WHERE id_instituicao = ?';
+            const [cursos] = await connection.execute(query, [institutionId]);
+            return res.status(200).json({ cursos });
+        } catch (error) {
+            console.error('Erro ao buscar cursos:', error);
+            return res.status(500).json({ message: 'Erro interno do servidor.' });
+        } finally {
+            if (connection) {
+                await connection.end();
+            }
+        }
+    });
+
+    app.post('/addcursos', async (req, res) => {
+        const { nome_curso, instituicao_id } = req.body;
+        let connection;
+        if (!nome_curso || !instituicao_id) {
+            return res.status(400).json({ message: 'Nome do curso e ID da instituição são obrigatórios.' });
+        }
+        try {
+            connection = await mysql.createConnection(dbConfig);
+            const query = 'INSERT INTO cursos (nome_curso, id_instituicao) VALUES (?, ?)';
+            const [result] = await connection.execute(query, [nome_curso, instituicao_id]);
+            return res.status(201).json({
+                message: 'Curso adicionado com sucesso!',
+                id: result.insertId
+            });
+        } catch (error) {
+            console.error('Erro ao adicionar curso:', error);
+            return res.status(500).json({ message: 'Erro interno do servidor.' });
+        } finally {
+            if (connection) {
+                await connection.end();
+            }
+        }
+    });
+
+    app.get('/pegarCursosInicial' , async (req, res) => {
+        const institutionId = req.query.institutionId;
+        let connection;
+        if (!institutionId) {
+            return res.status(400).json({ message: 'O ID da instituição é obrigatório.' });
+        }
+        try {
+            connection = await mysql.createConnection(dbConfig);
+            const query = 'SELECT * FROM cursos WHERE id_instituicao = ?';
+            const [cursos] = await connection.execute(query, [institutionId]);
+            return res.status(200).json({ cursos });
+        }
+        catch (error) {
+            console.error('Erro ao buscar cursos:', error);
+            return res.status(500).json({ message: 'Erro interno do servidor.' });
+        }
+        finally {
+            if (connection) {
+                await connection.end();
+            }
+        }
+    });
 
 
 app.listen(port, () => {
   console.log(`Servidor aberto em http://localhost:${port}`);
 });
+
+//---------------------------------------------------------------------------------------------------//
+
