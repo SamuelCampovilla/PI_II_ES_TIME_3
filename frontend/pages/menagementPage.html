@@ -27,7 +27,6 @@
         <input type="text" id="course-name-pop-up" placeholder="Nome do Curso">
         <button id="btnAdicionar">Adicionar</button>
       </div>
-
       <!-- pop-up de disciplina agora dentro do mesmo backdrop -->
       <div id="pop-up-disciplina" class="popup">
         <button class="close-pop-up" aria-label="Fechar pop-up"><img src="/assets/images/cancel.png" alt=""></button>
@@ -38,10 +37,18 @@
         <button id="btnAdicionarDisciplina">Adicionar</button>
       </div>
     </div>
+ <!-- Pop-up para adicionar turmas -- Caio Polo -->
+    <div id="pop-up-turma" class="popup">
+      <button class="close-pop-up" aria-label="Fechar pop-up"><img src="/assets/images/cancel.png" alt=""></button>
+      <h2>Adicionar Turma</h2>
+      <input type="text" id="codTurma" placeholder="Código da Turma (Ex: T1)">
+      <input type="text" id="nomeTurma" placeholder="Nome da Turma (Ex: Noturno A)">
+      <button id="btnAdicionarTurma">Adicionar</button>
+    </div>  
 
 
     <div class="modal" id="exclusion_modal">
-      <!-- ...existing modal content... -->
+     
     </div>
 
     <script src="/js/menagementpage.js" defer></script>

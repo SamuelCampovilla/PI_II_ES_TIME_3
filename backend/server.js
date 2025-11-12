@@ -655,8 +655,6 @@ app.get('/instituicaoNomeDocente', async(req, res)=>{{
     }catch(error){
         console.error('Nao foi possivel encontrar docente.');
         return res.status(500).json({message: 'Erro interno do servidor.'})
-    }finally{
-        await connection.end();
     }
 }});
 

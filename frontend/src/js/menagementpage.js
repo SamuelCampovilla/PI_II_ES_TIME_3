@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addDisciplina = document.getElementById('btnAdicionarDisciplina'); // botão do modal de disciplina
     const listaCursosContainer = document.getElementById('lista_cursos');
 
+    const popupTurma = document.getElementById('pop-up-turma');
+    const addTurmaBtn = document.getElementById('btnAdicionarTurma');   
+
     const urlParams = new URLSearchParams(window.location.search);
     const institutionId = urlParams.get('institutionId');
     const docenteEmail = urlParams.get('email');
@@ -41,11 +44,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // exemplo: editar curso
+        
         const editBtn = e.target.closest('.btn-edit-course');
         if (editBtn) {
             const courseId = editBtn.dataset.courseId;
-            // implementar editar se necessário
+        
             return;
         }
 
@@ -147,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `;
                 container.appendChild(discCard);
             });
-
+            
         } catch (err) {
             console.error('Erro ao carregar disciplinas:', err);
             const container = courseElement.querySelector('.disciplinas-container');
@@ -194,7 +197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!disciplinaName || !disciplinaCode) return alert('Nome e código são obrigatórios.');
 
             try {
-                const response = await fetch('/adddisciplina', {  // lowercase
+                const response = await fetch('/adddisciplina', {  
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -202,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         codigo_disciplina: disciplinaCode,
                         periodo: disciplinaPeriodo,
                         curso_id: courseId,
-                        instituicao_id: institutionId,  // adicione isto
+                        instituicao_id: institutionId,  
                     }),
                 });
                 if (response.ok) {
@@ -270,6 +273,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             .replace(/'/g, '&#39;');
     }
 
+
+
+    function abrirPopupTurma() {
+        fundoBlur.classList.add('mostrar');
+        popupTurma.classList.add('mostrar');
+        popupConteudo.classList.remove('mostrar');
+        popupDisciplina.classList.remove('mostrar');
+    }
+
+    function fecharPopupTurma() {
+        fundoBlur.classList.remove('mostrar');
+        popupTurma.classList.remove('mostrar');
+    }
+
+    const addTurmaClique = e.target.closest('.btn-add-turma'); 
+        if (addTurmaClique) {
+            addTurmaBtn.dataset.disciplinaId = addTurmaClique.dataset.disciplinaId; 
+            abrirPopupTurma();
+            return;
+        }
+
     // inicializar listeners de botões fixos
     botaoAbrir?.addEventListener('click', abrirPopup);
+
+
+
+
 });
