@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-   // ...existing code...
              listaCursosContainer.innerHTML = '';
             cursos.forEach(curso => {
                 const cursoId = curso.id_curso ?? curso.id ?? curso.idCurso;

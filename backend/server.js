@@ -196,6 +196,224 @@ app.get('/frontend/pages/menagementPage.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/pages/menagementPage.html'));
 });
 
+app.get('/frontend/pages/students.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/pages/students.html'));
+});
+
+app.get('/me', (req, res) => {
+  res.status(401).json({ message: 'Sessão não autenticada.' });
+});
+
+app.get('/notas', async (req, res) => {
+  const idTurma = Number(req.query.id_turma);
+  if (!idTurma) {
+    return res.status(400).json({ message: 'id_turma é obrigatório.' });
+  }
+
+  let connection;
+  try {
+    connection = await mysql.createConnection(dbConfig);
+    const componentes = await pegarComponentesTurma(connection, idTurma);
+
+    const [matriculas] = await connection.execute(
+      `SELECT m.id_matricula, a.ra, a.nome
+         FROM matricula m
+         JOIN alunos a ON a.ra = m.id_aluno
+        WHERE m.id_turma = ?
+        ORDER BY a.nome`,
+      [idTurma]
+    );
+
+    const compIndex = new Map(componentes.map((comp, index) => [comp.id_componente, index]));
+    const alunos = matriculas.map(row => ({
+      ra: row.ra,
+      nome: row.nome,
+      c1: null,
+      c2: null,
+      c3: null,
+      _id_matricula: row.id_matricula
+    }));
+
+    if (alunos.length && componentes.length) {
+      const idsMatricula = alunos.map(a => a._id_matricula);
+      const placeholders = idsMatricula.map(() => '?').join(',');
+      const [notas] = await connection.execute(
+        `SELECT id_matricula, id_componente, valor_nota
+           FROM lancamento_nota
+          WHERE id_matricula IN (${placeholders})`,
+        idsMatricula
+      );
+
+      const alunoPorMatricula = new Map(alunos.map(a => [a._id_matricula, a]));
+      notas.forEach(nota => {
+        const aluno = alunoPorMatricula.get(nota.id_matricula);
+        if (!aluno) return;
+        const compPos = compIndex.get(nota.id_componente);
+        if (compPos === undefined) return;
+        const campo = `c${compPos + 1}`;
+        aluno[campo] = nota.valor_nota;
+      });
+    }
+
+    const resposta = alunos.map(({ _id_matricula, ...rest }) => rest);
+    res.json({ componentes, alunos: resposta });
+  } catch (error) {
+    console.error('Erro ao carregar notas:', error);
+    res.status(500).json({ message: 'Erro ao carregar notas.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
+
+app.post('/notas/salvarLinha', async (req, res) => {
+  const { id_turma, ra, nome, c1 = null, c2 = null, c3 = null } = req.body || {};
+
+  if (!id_turma || !ra || !nome) {
+    return res.status(400).json({ message: 'id_turma, ra e nome são obrigatórios.' });
+  }
+
+  let connection;
+  try {
+    connection = await mysql.createConnection(dbConfig);
+    const idMatricula = await pegarIdMatricula(connection, id_turma, ra, nome);
+    const componentes = await pegarComponentesTurma(connection, id_turma);
+    const valores = [c1, c2, c3];
+
+    for (let i = 0; i < componentes.length && i < 3; i++) {
+      await salvarNota(connection, idMatricula, componentes[i].id_componente, valores[i]);
+    }
+
+    await atualizarCalculoFinal(connection, id_turma, ra);
+    res.json({ message: 'Aluno e notas salvos com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao salvar aluno/notas:', error);
+    res.status(500).json({ message: 'Erro ao salvar aluno/notas.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
+
+app.delete('/notas/:ra', async (req, res) => {
+  const ra = req.params.ra;
+  const idTurma = Number(req.query.id_turma);
+
+  if (!ra || !idTurma) {
+    return res.status(400).json({ message: 'ra e id_turma são obrigatórios.' });
+  }
+
+  let connection;
+  try {
+    connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute(
+      'SELECT id_matricula FROM matricula WHERE id_aluno = ? AND id_turma = ?',
+      [ra, idTurma]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ message: 'Aluno não encontrado na turma.' });
+    }
+
+    const idMatricula = rows[0].id_matricula;
+    await connection.execute('DELETE FROM lancamento_nota WHERE id_matricula = ?', [idMatricula]);
+    await connection.execute('DELETE FROM calculo_final WHERE id_turma = ? AND id_aluno = ?', [idTurma, ra]);
+    await connection.execute('DELETE FROM matricula WHERE id_matricula = ?', [idMatricula]);
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Erro ao remover aluno:', error);
+    res.status(500).json({ message: 'Erro ao remover aluno.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
+
+app.post('/componentes', async (req, res) => {
+  const { id_turma, nome, sigla, descricao } = req.body || {};
+  if (!id_turma || !nome || !sigla) {
+    return res.status(400).json({ message: 'id_turma, nome e sigla são obrigatórios.' });
+  }
+
+  let connection;
+  try {
+    connection = await mysql.createConnection(dbConfig);
+    const [turmaRows] = await connection.execute(
+      'SELECT id_disciplina FROM turmas WHERE id_turma = ?',
+      [id_turma]
+    );
+
+    if (!turmaRows.length) {
+      return res.status(404).json({ message: 'Turma não encontrada.' });
+    }
+
+    const idDisciplina = turmaRows[0].id_disciplina;
+    const [result] = await connection.execute(
+      'INSERT INTO componente_nota (id_disciplina, nome, sigla, descricao) VALUES (?, ?, ?, ?)',
+      [idDisciplina, nome, sigla, descricao || null]
+    );
+
+    res.status(201).json({
+      id_componente: result.insertId,
+      nome,
+      sigla
+    });
+  } catch (error) {
+    console.error('Erro ao criar componente:', error);
+    res.status(500).json({ message: 'Erro ao criar componente.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
+
+app.delete('/componentes/:id', async (req, res) => {
+  const idComponente = Number(req.params.id);
+  if (!idComponente) {
+    return res.status(400).json({ message: 'id do componente é obrigatório.' });
+  }
+
+  let connection;
+  try {
+    connection = await mysql.createConnection(dbConfig);
+    const [info] = await connection.execute(
+      `SELECT t.id_turma
+         FROM componente_nota cn
+         JOIN turmas t ON t.id_disciplina = cn.id_disciplina
+        WHERE cn.id_componente = ?`,
+      [idComponente]
+    );
+
+    const turmaId = info.length ? info[0].id_turma : null;
+
+    await connection.execute('DELETE FROM lancamento_nota WHERE id_componente = ?', [idComponente]);
+    const [result] = await connection.execute(
+      'DELETE FROM componente_nota WHERE id_componente = ?',
+      [idComponente]
+    );
+
+    if (!result.affectedRows) {
+      return res.status(404).json({ message: 'Componente não encontrado.' });
+    }
+
+    if (turmaId) {
+      const [alunosTurma] = await connection.execute(
+        'SELECT DISTINCT id_aluno FROM matricula WHERE id_turma = ?',
+        [turmaId]
+      );
+
+      for (const aluno of alunosTurma) {
+        await atualizarCalculoFinal(connection, turmaId, aluno.id_aluno);
+      }
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Erro ao remover componente:', error);
+    res.status(500).json({ message: 'Erro ao remover componente.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
+
+
 //---------------------------------------------------------------------------------------------------//
 
 // Rota para buscar uma instituição por ID
