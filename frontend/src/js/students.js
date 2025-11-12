@@ -1,17 +1,17 @@
 const urlParams = new URLSearchParams(window.location.search);
 const ID_TURMA = urlParams.get('id_turma') ? Number(urlParams.get('id_turma')) : 1;
 
-let componentesAtuais = [];
-let alunosAtuais = [];
-let modoEditarComponentes = false;
+let listaComponentes = [];
+let listaAlunos = [];
+let modoComponentes = false;
 
 // elementos da tabela
-const tbody = document.getElementById('tbodyStudents');
+const corpoTabela = document.getElementById('tbodyStudents');
 const checkAll = document.getElementById('checkAll');
 const switchEdicao = document.getElementById('switchEdicao');
 const switchEditarComponentes = document.getElementById('switchEditarComponentes');
-const wrapRemoverSelecionados = document.getElementById('wrapRemoverSelecionados');
-const btnRemoverSelecionados = document.getElementById('btnRemoverSelecionados');
+const caixaRemocoes = document.getElementById('caixaRemocoes');
+const btnRemoverMarcados = document.getElementById('btnRemoverMarcados');
 const thead = document.querySelector('#tabelaNotas thead');
 const btnImportarCsv = document.getElementById('btnImportarCsv');
 const btnExportarCsv = document.getElementById('btnExportarCsv');
@@ -31,10 +31,10 @@ const compDescricao = document.getElementById('compDescricao');
 // ------------------------------------------------------
 // helpers
 // ------------------------------------------------------
-function calcMedia(c1, c2, c3) {
+function mediaNotas(c1, c2, c3) {
   // Para o cálculo, NULL deve ser tratado como 0.
   // Porém, se ainda não existem 3 componentes, retornamos null para indicar pendência.
-  if (componentesAtuais.length < 3) return null;
+  if (listaComponentes.length < 3) return null;
 
   const v1 = c1 == null ? 0 : Number(c1);
   const v2 = c2 == null ? 0 : Number(c2);
@@ -45,22 +45,22 @@ function calcMedia(c1, c2, c3) {
   return Number(m.toFixed(1));
 }
 
-function aplicarCorMedia(td, media) {
+function pintaMedia(td, media) {
   td.classList.remove('grade-green', 'grade-red');
   if (media >= 7) td.classList.add('grade-green');
   else td.classList.add('grade-red');
 }
 
-function atualizarVisibilidadeRemoverSelecionados() {
-  const anyChecked = tbody.querySelector('.row-check:checked');
-  wrapRemoverSelecionados.classList.toggle('d-none', !anyChecked);
+function atualizaBotaoRemover() {
+  const anyChecked = corpoTabela.querySelector('.row-check:checked');
+  caixaRemocoes.classList.toggle('d-none', !anyChecked);
 }
 
-function formatNotaCell(valor) {
+function mostrarNota(valor) {
   return valor == null ? 'NULL' : valor;
 }
 
-function parseNotaTexto(texto) {
+function lerNota(texto) {
   const t = texto.trim().replace(',', '.');
   if (t === '' || t.toUpperCase() === 'NULL') return null;
   const n = Number(t);
@@ -68,7 +68,7 @@ function parseNotaTexto(texto) {
   return n;
 }
 
-function dividirLinhaCsv(linha) {
+function quebrarLinhaCsv(linha) {
   const trimmed = linha.trim();
   if (!trimmed) return [];
 
@@ -83,7 +83,7 @@ function dividirLinhaCsv(linha) {
   return [trimmed];
 }
 
-function ehCabecalhoCsv(idColuna, nomeColuna) {
+function pareceCabecalho(idColuna, nomeColuna) {
   const id = (idColuna || '').toLowerCase();
   const nome = (nomeColuna || '').toLowerCase();
   const possiveisIds = ['ra', 'id', 'identificador', 'matricula'];
@@ -91,7 +91,7 @@ function ehCabecalhoCsv(idColuna, nomeColuna) {
   return possiveisIds.includes(id) || possiveisNomes.includes(nome);
 }
 
-async function lerCsvAlunos(file) {
+async function montarListaCsv(file) {
   const texto = await file.text();
   const linhas = texto
     .split(/\r?\n/)
@@ -101,14 +101,14 @@ async function lerCsvAlunos(file) {
   const alunos = [];
 
   linhas.forEach((linha, index) => {
-    const partes = dividirLinhaCsv(linha);
+    const partes = quebrarLinhaCsv(linha);
     if (partes.length < 2) return;
 
     const ra = partes[0]?.trim();
     const nome = partes[1]?.trim();
 
     if (!ra || !nome) return;
-    if (index === 0 && ehCabecalhoCsv(ra, nome)) return;
+    if (index === 0 && pareceCabecalho(ra, nome)) return;
 
     alunos.push({ ra, nome });
   });
@@ -117,15 +117,15 @@ async function lerCsvAlunos(file) {
 }
 
 // atualiza os cabeçalhos dos componentes (C1/C2/C3) com ou sem botão de remover
-function renderComponentHeaders() {
+function desenharCabecalho() {
   const ths = document.querySelectorAll('#tabelaNotas thead th');
 
   for (let i = 0; i < 3; i++) {
     const th = ths[3 + i];
-    const componente = componentesAtuais[i];
+    const componente = listaComponentes[i];
     const label = componente?.sigla || `C${i + 1}`;
 
-    if (modoEditarComponentes && componente) {
+    if (modoComponentes && componente) {
       th.innerHTML = `
         ${label}
         <button type="button"
@@ -139,15 +139,15 @@ function renderComponentHeaders() {
     }
   }
 
-  ajustarColunasComponentes();
+  arrumarColunas();
 }
 
-function ajustarColunasComponentes() {
+function arrumarColunas() {
   const ths = document.querySelectorAll('#tabelaNotas thead th');
-  const rows = tbody.querySelectorAll('tr');
+  const rows = corpoTabela.querySelectorAll('tr');
 
   for (let i = 0; i < 3; i++) {
-    const visible = !!componentesAtuais[i];
+    const visible = !!listaComponentes[i];
     const th = ths[3 + i];
     if (th) th.style.display = visible ? '' : 'none';
 
@@ -162,31 +162,31 @@ function ajustarColunasComponentes() {
 // ------------------------------------------------------
 // carregar dados do backend
 // ------------------------------------------------------
-async function carregarAlunos() {
+async function carregarTela() {
   const res = await fetch(`/notas?id_turma=${ID_TURMA}`);
   const data = await res.json();
 
   const componentes = data.componentes || [];
-  componentesAtuais = componentes;
+  listaComponentes = componentes;
   const alunos = data.alunos || [];
-  alunosAtuais = alunos;
+  listaAlunos = alunos;
 
   // atualiza cabeçalho das 3 colunas de componente
-  renderComponentHeaders();
+  desenharCabecalho();
 
-  tbody.innerHTML = '';
+  corpoTabela.innerHTML = '';
 
   alunos.forEach(a => {
-    const media = calcMedia(a.c1, a.c2, a.c3);
+    const media = mediaNotas(a.c1, a.c2, a.c3);
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><input class="row-check form-check-input" type="checkbox"></td>
       <td data-field="ra">${a.ra}</td>
       <td data-field="nome">${a.nome}</td>
-      <td data-field="c1">${formatNotaCell(a.c1)}</td>
-      <td data-field="c2">${formatNotaCell(a.c2)}</td>
-      <td data-field="c3">${formatNotaCell(a.c3)}</td>
+      <td data-field="c1">${mostrarNota(a.c1)}</td>
+      <td data-field="c2">${mostrarNota(a.c2)}</td>
+      <td data-field="c3">${mostrarNota(a.c3)}</td>
       <td data-field="media"></td>
       <td class="text-end">
         <button class="btn btn-sm btn-outline-danger btn-remover">Remover</button>
@@ -195,7 +195,7 @@ async function carregarAlunos() {
 
     const tdMedia = tr.querySelector('[data-field="media"]');
 
-    if (componentesAtuais.length < 3) {
+    if (listaComponentes.length < 3) {
       // ainda não existem 3 componentes → não calcula média
       tdMedia.innerHTML = '<span class="dot-pending"></span>';
       tdMedia.classList.remove('grade-green', 'grade-red');
@@ -205,20 +205,20 @@ async function carregarAlunos() {
         tdMedia.classList.remove('grade-green', 'grade-red');
       } else {
         tdMedia.textContent = media.toFixed(1);
-        aplicarCorMedia(tdMedia, media);
+        pintaMedia(tdMedia, media);
       }
     }
 
-    tbody.appendChild(tr);
+    corpoTabela.appendChild(tr);
   });
 
-  aplicarModoEdicaoNotas();
-  aplicarModoEdicaoComponentes();
-  atualizarVisibilidadeRemoverSelecionados();
+  alternarNotas();
+  alternarComponentes();
+  atualizaBotaoRemover();
 }
 
 // grava aluno + notas
-async function salvarLinha(ra, nome, c1, c2, c3, { recarregar = true } = {}) {
+async function guardarAluno(ra, nome, c1, c2, c3, { recarregar = true } = {}) {
   const body = { id_turma: ID_TURMA, ra, nome, c1, c2, c3 };
   const res = await fetch('/notas/salvarLinha', {
     method: 'POST',
@@ -240,19 +240,19 @@ async function salvarLinha(ra, nome, c1, c2, c3, { recarregar = true } = {}) {
   }
 
   if (recarregar) {
-    await carregarAlunos();
+    await carregarTela();
   }
   return true;
 }
 
-async function importarAlunosDoCsv(file) {
-  const registros = await lerCsvAlunos(file);
+async function importarCsv(file) {
+  const registros = await montarListaCsv(file);
   if (!registros.length) {
     alert('Não encontramos alunos válidos no CSV informado.');
     return;
   }
 
-  const idsExistentes = new Set(alunosAtuais.map(a => String(a.ra).trim()));
+  const idsExistentes = new Set(listaAlunos.map(a => String(a.ra).trim()));
   const idsNovos = new Set();
   const novosAlunos = [];
   let duplicados = 0;
@@ -280,10 +280,10 @@ async function importarAlunosDoCsv(file) {
 
   try {
     for (const aluno of novosAlunos) {
-      await salvarLinha(aluno.ra, aluno.nome, null, null, null, { recarregar: false });
+      await guardarAluno(aluno.ra, aluno.nome, null, null, null, { recarregar: false });
       inseridos++;
     }
-    await carregarAlunos();
+    await carregarTela();
     alert(`Importação concluída!\nNovos alunos: ${inseridos}\nIgnorados por duplicidade: ${duplicados}`);
   } catch (err) {
     console.error('Erro durante importação CSV:', err);
@@ -291,16 +291,16 @@ async function importarAlunosDoCsv(file) {
   }
 }
 
-function exportarAlunosParaCsv() {
-  if (!alunosAtuais.length) {
+function baixarCsv() {
+  if (!listaAlunos.length) {
     alert('Não há alunos nesta turma para exportar.');
     return;
   }
 
-  const todosComNotas = alunosAtuais.length > 0 && componentesAtuais.length >= 3 && alunosAtuais.every(aluno => {
+  const todosComNotas = listaAlunos.length > 0 && listaComponentes.length >= 3 && listaAlunos.every(aluno => {
     const notas = [aluno.c1, aluno.c2, aluno.c3];
     if (notas.some(n => n == null || n === '' || n === '-')) return false;
-    const media = calcMedia(aluno.c1, aluno.c2, aluno.c3);
+    const media = mediaNotas(aluno.c1, aluno.c2, aluno.c3);
     return media !== null;
   });
 
@@ -310,7 +310,7 @@ function exportarAlunosParaCsv() {
   }
 
   const linhas = ['ra,nome'];
-  alunosAtuais.forEach(aluno => {
+  listaAlunos.forEach(aluno => {
     const ra = (aluno.ra ?? '').toString().trim();
     const nome = (aluno.nome ?? '').toString().trim();
     linhas.push(`${ra},"${nome.replace(/"/g, '""')}"`);
@@ -324,7 +324,7 @@ function exportarAlunosParaCsv() {
   const pad = (num, size = 2) => String(num).padStart(size, '0');
   const dataStr = `${agora.getFullYear()}-${pad(agora.getMonth() + 1)}-${pad(agora.getDate())}_${pad(agora.getHours())}${pad(agora.getMinutes())}${pad(agora.getSeconds())}${pad(agora.getMilliseconds(), 3)}`;
   const turmaStr = `Turma${ID_TURMA}`;
-  const siglaStr = componentesAtuais[0]?.sigla ? componentesAtuais[0].sigla : 'SemSigla';
+  const siglaStr = listaComponentes[0]?.sigla ? listaComponentes[0].sigla : 'SemSigla';
   const nomeArquivo = `${dataStr}-${turmaStr}-${siglaStr}.csv`;
 
   const link = document.createElement('a');
@@ -337,7 +337,7 @@ function exportarAlunosParaCsv() {
 }
 
 // remove aluno (matrícula + notas + cálculo_final)
-async function removerAluno(ra) {
+async function apagarAluno(ra) {
   if (!confirm(`Remover aluno ${ra} desta turma?`)) return;
 
   const res = await fetch(`/notas/${encodeURIComponent(ra)}?id_turma=${ID_TURMA}`, {
@@ -350,11 +350,11 @@ async function removerAluno(ra) {
     return;
   }
 
-  await carregarAlunos();
+  await carregarTela();
 }
 
 // criar componente de nota
-async function criarComponente(nome, sigla, descricao) {
+async function guardarComponente(nome, sigla, descricao) {
   const body = { id_turma: ID_TURMA, nome, sigla, descricao };
   const res = await fetch('/componentes', {
     method: 'POST',
@@ -375,16 +375,16 @@ async function criarComponente(nome, sigla, descricao) {
   }
 
   alert('Componente criado com sucesso!');
-  await carregarAlunos();
+  await carregarTela();
 }
 
 // ------------------------------------------------------
 // modos de edição
 // ------------------------------------------------------
-function aplicarModoEdicaoNotas() {
+function alternarNotas() {
   const editable = switchEdicao.checked;
 
-  tbody
+  corpoTabela
     .querySelectorAll('[data-field="c1"], [data-field="c2"], [data-field="c3"]')
     .forEach(td => {
       td.contentEditable = editable ? 'true' : 'false';
@@ -392,16 +392,16 @@ function aplicarModoEdicaoNotas() {
     });
 }
 
-function aplicarModoEdicaoComponentes() {
-  modoEditarComponentes = switchEditarComponentes.checked;
-  renderComponentHeaders();
+function alternarComponentes() {
+  modoComponentes = switchEditarComponentes.checked;
+  desenharCabecalho();
 }
 
 // ------------------
 // event listeners
 // ------------------
 // tenta montar os links do menu com o id do docente (usa /me se existir sessão, senão cai no fallback por email)
-async function setupMenuDocenteLinks() {
+async function carregarLinksMenu() {
   try {
     // 1) tenta obter via sessão (rota opcional /me)
     let idDoc = null;
@@ -449,35 +449,35 @@ async function setupMenuDocenteLinks() {
       }
     });
   } catch (err) {
-    console.error('Erro em setupMenuDocenteLinks:', err);
+    console.error('Erro em carregarLinksMenu:', err);
   }
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  await setupMenuDocenteLinks();
-  carregarAlunos();
+  await carregarLinksMenu();
+  carregarTela();
 });
 
 // alternar edição de notas
-switchEdicao.addEventListener('change', aplicarModoEdicaoNotas);
+switchEdicao.addEventListener('change', alternarNotas);
 
 // alternar edição de componentes (mostrar/ocultar botões de excluir na sigla)
-switchEditarComponentes.addEventListener('change', aplicarModoEdicaoComponentes);
+switchEditarComponentes.addEventListener('change', alternarComponentes);
 
 checkAll.addEventListener('change', () => {
-  const checks = tbody.querySelectorAll('.row-check');
+  const checks = corpoTabela.querySelectorAll('.row-check');
   checks.forEach(chk => { chk.checked = checkAll.checked; });
-  atualizarVisibilidadeRemoverSelecionados();
+  atualizaBotaoRemover();
 });
 
-tbody.addEventListener('change', (e) => {
+corpoTabela.addEventListener('change', (e) => {
   if (e.target.classList.contains('row-check')) {
-    atualizarVisibilidadeRemoverSelecionados();
+    atualizaBotaoRemover();
   }
 });
 
 // edição inline das notas: commit apenas em blur ou Enter (para evitar múltiplas requisições a cada tecla)
-tbody.addEventListener('keydown', (e) => {
+corpoTabela.addEventListener('keydown', (e) => {
   const td = e.target;
   const field = td.getAttribute && td.getAttribute('data-field');
   if (!['c1', 'c2', 'c3'].includes(field)) return;
@@ -488,13 +488,13 @@ tbody.addEventListener('keydown', (e) => {
   }
 });
 
-tbody.addEventListener('blur', async (e) => {
+corpoTabela.addEventListener('blur', async (e) => {
   const td = e.target;
   const field = td.getAttribute && td.getAttribute('data-field');
   if (!['c1', 'c2', 'c3'].includes(field)) return;
 
   // converte texto da célula em valor (ou null)
-  const valor = parseNotaTexto(td.textContent);
+  const valor = lerNota(td.textContent);
   if (valor === null) {
     td.textContent = 'NULL';
   } else {
@@ -502,9 +502,9 @@ tbody.addEventListener('blur', async (e) => {
   }
 
   const tr = td.closest('tr');
-  const c1Val = parseNotaTexto(tr.querySelector('[data-field="c1"]').textContent);
-  const c2Val = parseNotaTexto(tr.querySelector('[data-field="c2"]').textContent);
-  const c3Val = parseNotaTexto(tr.querySelector('[data-field="c3"]').textContent);
+  const c1Val = lerNota(tr.querySelector('[data-field="c1"]').textContent);
+  const c2Val = lerNota(tr.querySelector('[data-field="c2"]').textContent);
+  const c3Val = lerNota(tr.querySelector('[data-field="c3"]').textContent);
 
   const tdMedia = tr.querySelector('[data-field="media"]');
 
@@ -515,15 +515,15 @@ tbody.addEventListener('blur', async (e) => {
   td.appendChild(savingNode);
 
   try {
-    await salvarLinha(
+    await guardarAluno(
       tr.querySelector('[data-field="ra"]').textContent.trim(),
       tr.querySelector('[data-field="nome"]').textContent.trim(),
       c1Val, c2Val, c3Val
     );
 
-    // recalcula média visual após salvar (o carregarAlunos também será chamado por salvarLinha)
-    const media = calcMedia(c1Val, c2Val, c3Val);
-    if (componentesAtuais.length < 3) {
+    // recalcula média visual após salvar (o carregarTela também será chamado por guardarAluno)
+    const media = mediaNotas(c1Val, c2Val, c3Val);
+    if (listaComponentes.length < 3) {
       tdMedia.innerHTML = '<span class="dot-pending"></span>';
       tdMedia.classList.remove('grade-green', 'grade-red');
     } else {
@@ -532,7 +532,7 @@ tbody.addEventListener('blur', async (e) => {
         tdMedia.classList.remove('grade-green', 'grade-red');
       } else {
         tdMedia.textContent = media.toFixed(1);
-        aplicarCorMedia(tdMedia, media);
+        pintaMedia(tdMedia, media);
       }
     }
     const okNode = document.createElement('span');
@@ -553,17 +553,17 @@ tbody.addEventListener('blur', async (e) => {
 }, true);
 
 // remover único
-tbody.addEventListener('click', (e) => {
+corpoTabela.addEventListener('click', (e) => {
   if (e.target.classList.contains('btn-remover')) {
     const tr = e.target.closest('tr');
     const ra = tr.querySelector('[data-field="ra"]').textContent.trim();
-    removerAluno(ra);
+    apagarAluno(ra);
   }
 });
 
 // remover selecionados
-btnRemoverSelecionados.addEventListener('click', async () => {
-  const selecionados = Array.from(tbody.querySelectorAll('.row-check:checked'));
+btnRemoverMarcados.addEventListener('click', async () => {
+  const selecionados = Array.from(corpoTabela.querySelectorAll('.row-check:checked'));
   if (!selecionados.length) return;
 
   if (!confirm(`Remover ${selecionados.length} aluno(s) desta turma?`)) return;
@@ -588,7 +588,7 @@ btnRemoverSelecionados.addEventListener('click', async () => {
     }
   }
 
-  await carregarAlunos();
+  await carregarTela();
 });
 
 // adicionar aluno
@@ -604,7 +604,7 @@ formAddAluno.addEventListener('submit', async (e) => {
   }
 
   // na criação do aluno, ainda não lançamos notas
-  await salvarLinha(ra, nome, null, null, null);
+  await guardarAluno(ra, nome, null, null, null);
 
   formAddAluno.reset();
   const modal = bootstrap.Modal.getInstance(document.getElementById('modalAddAluno'));
@@ -624,7 +624,7 @@ formAddComponente.addEventListener('submit', async (e) => {
     return;
   }
 
-  await criarComponente(nome, sigla, descricao);
+  await guardarComponente(nome, sigla, descricao);
 
   formAddComponente.reset();
   const modal = bootstrap.Modal.getInstance(document.getElementById('modalAddComponente'));
@@ -636,7 +636,7 @@ if (btnImportarCsv && inputCsvAlunos) {
   inputCsvAlunos.addEventListener('change', async (e) => {
     const [file] = e.target.files;
     if (file) {
-      await importarAlunosDoCsv(file);
+      await importarCsv(file);
     }
     // permite importar o mesmo arquivo novamente se necessário
     e.target.value = '';
@@ -644,13 +644,13 @@ if (btnImportarCsv && inputCsvAlunos) {
 }
 
 if (btnExportarCsv) {
-  btnExportarCsv.addEventListener('click', exportarAlunosParaCsv);
+  btnExportarCsv.addEventListener('click', baixarCsv);
 }
 
 // ---------------------------
 // remoção de componentes 
 // ---------------------------
-async function removerComponente(id) {
+async function apagarComponente(id) {
   const res = await fetch(`/componentes/${id}`, { method: 'DELETE' });
 
   if (res.status !== 204) {
@@ -665,21 +665,21 @@ async function removerComponente(id) {
     return;
   }
 
-  await carregarAlunos();
+  await carregarTela();
 }
 
 thead.addEventListener('click', async (e) => {
-  if (!modoEditarComponentes) return; // só pode remover com switch ligado
+  if (!modoComponentes) return; // só pode remover com switch ligado
 
   const btn = e.target.closest('.btn-remove-comp');
   if (!btn) return;
 
   const compIndex = Number(btn.dataset.compIndex);
-  const componente = componentesAtuais[compIndex];
+  const componente = listaComponentes[compIndex];
   if (!componente) return;
 
   const ok = confirm(`Remover componente ${componente.sigla}? Todas as notas desse componente serão apagadas.`);
   if (!ok) return;
 
-  await removerComponente(componente.id_componente);
+  await apagarComponente(componente.id_componente);
 });
