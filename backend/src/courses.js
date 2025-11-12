@@ -95,9 +95,45 @@ document.addEventListener('DOMContentLoaded', async() =>{
                     </div>`;
             });
             courseList.innerHTML = htmlContent;
+
+            // Após renderizar os cursos, buscar e exibir as disciplinas de cada um
+            fetchAndDisplayDisciplinas();
         }
     } catch (error) {
         console.error('Erro ao buscar cursos:', error);
+    }
+
+    async function fetchAndDisplayDisciplinas() {
+        const courseElements = document.querySelectorAll('.course');
+        for (const courseElement of courseElements) {
+            const courseId = courseElement.dataset.courseId;
+            const disciplinesContainer = courseElement.querySelector('.disciplines');
+
+            if (courseId) {
+                try {
+                    const response = await fetch(`/disciplinas?courseId=${courseId}`);
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Erro ao buscar disciplinas.');
+                    }
+
+                    let disciplinesHtml = '';
+                    if (data.disciplinas && data.disciplinas.length > 0) {
+                        data.disciplinas.forEach(disciplina => {
+                            disciplinesHtml += `<div class="discipline">${disciplina.nome_disciplina}</div>`;
+                        });
+                    } else {
+                        disciplinesHtml = '<div class="no-disciplines">Nenhuma disciplina encontrada.</div>';
+                    }
+                    disciplinesContainer.innerHTML = disciplinesHtml;
+
+                } catch (error) {
+                    console.error(`Erro ao buscar disciplinas para o curso ${courseId}:`, error);
+                    disciplinesContainer.innerHTML = '<div class="error-disciplines">Erro ao carregar disciplinas.</div>';
+                }
+            }
+        }
     }
 
     const btnAdicionar = document.getElementById('btnAdicionar');

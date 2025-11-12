@@ -456,6 +456,27 @@ app.post('/instituicao', async (req, res) => {
         }
     });
 
+app.get('/disciplinas', async (req, res) => {
+    // aceita query param em inglês (courseId) ou em pt (cursoId)
+    const courseId = req.query.courseId ?? req.query.cursoId;
+    let connection;
+    if (!courseId) {
+        return res.status(400).json({ message: 'O ID do curso é obrigatório (use courseId ou cursoId).' });
+    }
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        const query = 'SELECT * FROM disciplinas WHERE id_curso = ?';
+        const [disciplinas] = await connection.execute(query, [courseId]);
+        return res.status(200).json({ disciplinas });
+    } catch (error) {
+        console.error('Erro ao buscar disciplinas:', error);
+        return res.status(500).json({ message: 'Erro interno do servidor.' });
+    } finally {
+        if (connection) {
+            await connection.end();
+        }
+    }
+});
 
 app.listen(port, () => {
     console.log(`Servidor aberto em http://localhost:${port}`);
