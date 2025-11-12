@@ -1,4 +1,3 @@
-// ...existing code...
 document.addEventListener('DOMContentLoaded', async () => {
 
     const botaoAbrir = document.getElementById('add-course');
@@ -52,8 +51,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 listaCursosContainer.innerHTML = '<p>Nenhum curso encontrado para esta instituição.</p>';
                 return;
             }
-
-   // ...existing code...
             listaCursosContainer.innerHTML = '';
             cursos.forEach(curso => {
                 const cursoId = curso.id_curso ?? curso.id ?? curso.idCurso;
@@ -72,7 +69,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `;
                 listaCursosContainer.appendChild(card);
             });
-// ...existing code...
         } catch (err) {
             console.error(err);
             listaCursosContainer.innerHTML = '<p>Erro ao carregar cursos.</p>';
@@ -152,4 +148,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 });
-// ...existing code...
