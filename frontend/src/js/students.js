@@ -2,6 +2,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const ID_TURMA = urlParams.get('id_turma') ? Number(urlParams.get('id_turma')) : 1;
 
 let componentesAtuais = [];
+let alunosAtuais = [];
 let modoEditarComponentes = false;
 
 // elementos da tabela
@@ -12,54 +13,9 @@ const switchEditarComponentes = document.getElementById('switchEditarComponentes
 const wrapRemoverSelecionados = document.getElementById('wrapRemoverSelecionados');
 const btnRemoverSelecionados = document.getElementById('btnRemoverSelecionados');
 const thead = document.querySelector('#tabelaNotas thead');
-
-// operações de salvamento
-let _blockingOverlay = null;
-function showBlockingOverlay(message = 'Salvando...') {
-  if (_blockingOverlay) return;
-  const ov = document.createElement('div');
-  ov.id = 'blockingOverlay';
-  ov.style.position = 'fixed';
-  ov.style.inset = '0';
-  ov.style.background = 'rgba(255,255,255,0.6)';
-  ov.style.zIndex = '9999';
-  ov.style.display = 'flex';
-  ov.style.alignItems = 'center';
-  ov.style.justifyContent = 'center';
-  ov.style.pointerEvents = 'auto';
-
-  const box = document.createElement('div');
-  box.style.padding = '12px 18px';
-  box.style.background = '#fff';
-  box.style.border = '1px solid #ddd';
-  box.style.borderRadius = '6px';
-  box.style.boxShadow = '0 6px 20px rgba(0,0,0,0.08)';
-  box.style.display = 'flex';
-  box.style.gap = '10px';
-  box.style.alignItems = 'center';
-
-  const spinner = document.createElement('div');
-  spinner.className = 'spinner-border text-primary';
-  spinner.setAttribute('role', 'status');
-  spinner.style.width = '1.5rem';
-  spinner.style.height = '1.5rem';
-
-  const txt = document.createElement('div');
-  txt.textContent = message;
-  txt.style.fontWeight = '600';
-
-  box.appendChild(spinner);
-  box.appendChild(txt);
-  ov.appendChild(box);
-  document.body.appendChild(ov);
-  _blockingOverlay = ov;
-}
-
-function hideBlockingOverlay() {
-  if (!_blockingOverlay) return;
-  _blockingOverlay.remove();
-  _blockingOverlay = null;
-}
+const btnImportarCsv = document.getElementById('btnImportarCsv');
+const btnExportarCsv = document.getElementById('btnExportarCsv');
+const inputCsvAlunos = document.getElementById('inputCsvAlunos');
 
 // modal adicionar aluno
 const formAddAluno = document.getElementById('formAddAluno');
@@ -112,6 +68,54 @@ function parseNotaTexto(texto) {
   return n;
 }
 
+function dividirLinhaCsv(linha) {
+  const trimmed = linha.trim();
+  if (!trimmed) return [];
+
+  const separadores = [';', ','];
+  for (const sep of separadores) {
+    const partes = trimmed.split(sep);
+    if (partes.length >= 2) {
+      return partes.map(part => part.trim());
+    }
+  }
+
+  return [trimmed];
+}
+
+function ehCabecalhoCsv(idColuna, nomeColuna) {
+  const id = (idColuna || '').toLowerCase();
+  const nome = (nomeColuna || '').toLowerCase();
+  const possiveisIds = ['ra', 'id', 'identificador', 'matricula'];
+  const possiveisNomes = ['nome', 'nome completo', 'aluno', 'estudante'];
+  return possiveisIds.includes(id) || possiveisNomes.includes(nome);
+}
+
+async function lerCsvAlunos(file) {
+  const texto = await file.text();
+  const linhas = texto
+    .split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(l => l.length);
+
+  const alunos = [];
+
+  linhas.forEach((linha, index) => {
+    const partes = dividirLinhaCsv(linha);
+    if (partes.length < 2) return;
+
+    const ra = partes[0]?.trim();
+    const nome = partes[1]?.trim();
+
+    if (!ra || !nome) return;
+    if (index === 0 && ehCabecalhoCsv(ra, nome)) return;
+
+    alunos.push({ ra, nome });
+  });
+
+  return alunos;
+}
+
 // atualiza os cabeçalhos dos componentes (C1/C2/C3) com ou sem botão de remover
 function renderComponentHeaders() {
   const ths = document.querySelectorAll('#tabelaNotas thead th');
@@ -159,12 +163,13 @@ function ajustarColunasComponentes() {
 // carregar dados do backend
 // ------------------------------------------------------
 async function carregarAlunos() {
-  const res = await fetch(`/api/notas?id_turma=${ID_TURMA}`);
+  const res = await fetch(`/notas?id_turma=${ID_TURMA}`);
   const data = await res.json();
 
   const componentes = data.componentes || [];
   componentesAtuais = componentes;
   const alunos = data.alunos || [];
+  alunosAtuais = alunos;
 
   // atualiza cabeçalho das 3 colunas de componente
   renderComponentHeaders();
@@ -213,9 +218,9 @@ async function carregarAlunos() {
 }
 
 // grava aluno + notas
-async function salvarLinha(ra, nome, c1, c2, c3) {
+async function salvarLinha(ra, nome, c1, c2, c3, { recarregar = true } = {}) {
   const body = { id_turma: ID_TURMA, ra, nome, c1, c2, c3 };
-  const res = await fetch('/api/notas/salvarLinha', {
+  const res = await fetch('/notas/salvarLinha', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -234,15 +239,108 @@ async function salvarLinha(ra, nome, c1, c2, c3) {
     throw new Error(errorText || 'Erro ao salvar aluno/notas.');
   }
 
-  await carregarAlunos();
+  if (recarregar) {
+    await carregarAlunos();
+  }
   return true;
+}
+
+async function importarAlunosDoCsv(file) {
+  const registros = await lerCsvAlunos(file);
+  if (!registros.length) {
+    alert('Não encontramos alunos válidos no CSV informado.');
+    return;
+  }
+
+  const idsExistentes = new Set(alunosAtuais.map(a => String(a.ra).trim()));
+  const idsNovos = new Set();
+  const novosAlunos = [];
+  let duplicados = 0;
+
+  registros.forEach(reg => {
+    const idLimpo = reg.ra.trim();
+    const nomeLimpo = reg.nome.trim();
+    if (!idLimpo || !nomeLimpo) return;
+
+    if (idsExistentes.has(idLimpo) || idsNovos.has(idLimpo)) {
+      duplicados++;
+      return;
+    }
+
+    idsNovos.add(idLimpo);
+    novosAlunos.push({ ra: idLimpo, nome: nomeLimpo });
+  });
+
+  if (!novosAlunos.length) {
+    alert('Todos os alunos do CSV já existem nesta turma.');
+    return;
+  }
+
+  let inseridos = 0;
+
+  try {
+    for (const aluno of novosAlunos) {
+      await salvarLinha(aluno.ra, aluno.nome, null, null, null, { recarregar: false });
+      inseridos++;
+    }
+    await carregarAlunos();
+    alert(`Importação concluída!\nNovos alunos: ${inseridos}\nIgnorados por duplicidade: ${duplicados}`);
+  } catch (err) {
+    console.error('Erro durante importação CSV:', err);
+    alert('Erro ao importar alunos. Verifique o arquivo e tente novamente.');
+  }
+}
+
+function exportarAlunosParaCsv() {
+  if (!alunosAtuais.length) {
+    alert('Não há alunos nesta turma para exportar.');
+    return;
+  }
+
+  const todosComNotas = alunosAtuais.length > 0 && componentesAtuais.length >= 3 && alunosAtuais.every(aluno => {
+    const notas = [aluno.c1, aluno.c2, aluno.c3];
+    if (notas.some(n => n == null || n === '' || n === '-')) return false;
+    const media = calcMedia(aluno.c1, aluno.c2, aluno.c3);
+    return media !== null;
+  });
+
+  if (!todosComNotas) {
+    alert('Para exportar é necessário que todos os alunos tenham as notas dos componentes e o cálculo final concluído.');
+    return;
+  }
+
+  const linhas = ['ra,nome'];
+  alunosAtuais.forEach(aluno => {
+    const ra = (aluno.ra ?? '').toString().trim();
+    const nome = (aluno.nome ?? '').toString().trim();
+    linhas.push(`${ra},"${nome.replace(/"/g, '""')}"`);
+  });
+
+  const csvString = linhas.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const agora = new Date();
+  const pad = (num, size = 2) => String(num).padStart(size, '0');
+  const dataStr = `${agora.getFullYear()}-${pad(agora.getMonth() + 1)}-${pad(agora.getDate())}_${pad(agora.getHours())}${pad(agora.getMinutes())}${pad(agora.getSeconds())}${pad(agora.getMilliseconds(), 3)}`;
+  const turmaStr = `Turma${ID_TURMA}`;
+  const siglaStr = componentesAtuais[0]?.sigla ? componentesAtuais[0].sigla : 'SemSigla';
+  const nomeArquivo = `${dataStr}-${turmaStr}-${siglaStr}.csv`;
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = nomeArquivo;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 // remove aluno (matrícula + notas + cálculo_final)
 async function removerAluno(ra) {
   if (!confirm(`Remover aluno ${ra} desta turma?`)) return;
 
-  const res = await fetch(`/api/notas/${encodeURIComponent(ra)}?id_turma=${ID_TURMA}`, {
+  const res = await fetch(`/notas/${encodeURIComponent(ra)}?id_turma=${ID_TURMA}`, {
     method: 'DELETE'
   });
 
@@ -258,7 +356,7 @@ async function removerAluno(ra) {
 // criar componente de nota
 async function criarComponente(nome, sigla, descricao) {
   const body = { id_turma: ID_TURMA, nome, sigla, descricao };
-  const res = await fetch('/api/componentes', {
+  const res = await fetch('/componentes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -302,14 +400,14 @@ function aplicarModoEdicaoComponentes() {
 // ------------------
 // event listeners
 // ------------------
-// tenta montar os links do menu com o id do docente (usa /api/me se existir sessão, senão cai no fallback por email)
+// tenta montar os links do menu com o id do docente (usa /me se existir sessão, senão cai no fallback por email)
 async function setupMenuDocenteLinks() {
   try {
-    // 1) tenta obter via sessão (rota opcional /api/me)
+    // 1) tenta obter via sessão (rota opcional /me)
     let idDoc = null;
     let email = null;
     try {
-      const meRes = await fetch('/api/me');
+      const meRes = await fetch('/me');
       if (meRes.ok) {
         const me = await meRes.json();
         idDoc = me.id_docente;
@@ -416,9 +514,6 @@ tbody.addEventListener('blur', async (e) => {
   savingNode.textContent = 'Salvando...';
   td.appendChild(savingNode);
 
-  // bloquear enquanto salva para evitar múltiplas ações
-  showBlockingOverlay('Salvando nota...');
-
   try {
     await salvarLinha(
       tr.querySelector('[data-field="ra"]').textContent.trim(),
@@ -454,8 +549,6 @@ tbody.addEventListener('blur', async (e) => {
     setTimeout(() => { if (errorNode && errorNode.parentNode) errorNode.parentNode.removeChild(errorNode); }, 5000);
   } finally {
     if (savingNode && savingNode.parentNode) savingNode.parentNode.removeChild(savingNode);
-    // desbloquear
-    hideBlockingOverlay();
   }
 }, true);
 
@@ -480,7 +573,7 @@ btnRemoverSelecionados.addEventListener('click', async () => {
     const tr = chk.closest('tr');
     const ra = tr.querySelector('[data-field="ra"]').textContent.trim();
     try {
-      const res = await fetch(`/api/notas/${encodeURIComponent(ra)}?id_turma=${ID_TURMA}`, { method: 'DELETE' });
+      const res = await fetch(`/notas/${encodeURIComponent(ra)}?id_turma=${ID_TURMA}`, { method: 'DELETE' });
       if (res.status !== 204) {
         const text = await res.text();
         console.error('Erro ao remover aluno', ra, res.status, text);
@@ -511,12 +604,7 @@ formAddAluno.addEventListener('submit', async (e) => {
   }
 
   // na criação do aluno, ainda não lançamos notas
-  showBlockingOverlay('Adicionando aluno...');
-  try {
-    await salvarLinha(ra, nome, null, null, null);
-  } finally {
-    hideBlockingOverlay();
-  }
+  await salvarLinha(ra, nome, null, null, null);
 
   formAddAluno.reset();
   const modal = bootstrap.Modal.getInstance(document.getElementById('modalAddAluno'));
@@ -536,44 +624,48 @@ formAddComponente.addEventListener('submit', async (e) => {
     return;
   }
 
-  // mostrar overlay de processamento
-  showBlockingOverlay('Criando componente...');
-  try {
-    await criarComponente(nome, sigla, descricao);
-  } finally {
-    hideBlockingOverlay();
-  }
+  await criarComponente(nome, sigla, descricao);
 
   formAddComponente.reset();
   const modal = bootstrap.Modal.getInstance(document.getElementById('modalAddComponente'));
   modal.hide();
 });
 
+if (btnImportarCsv && inputCsvAlunos) {
+  btnImportarCsv.addEventListener('click', () => inputCsvAlunos.click());
+  inputCsvAlunos.addEventListener('change', async (e) => {
+    const [file] = e.target.files;
+    if (file) {
+      await importarAlunosDoCsv(file);
+    }
+    // permite importar o mesmo arquivo novamente se necessário
+    e.target.value = '';
+  });
+}
+
+if (btnExportarCsv) {
+  btnExportarCsv.addEventListener('click', exportarAlunosParaCsv);
+}
+
 // ---------------------------
 // remoção de componentes 
 // ---------------------------
 async function removerComponente(id) {
-  // mostrar overlay de processamento
-  showBlockingOverlay('Removendo componente...');
-  try {
-    const res = await fetch(`/api/componentes/${id}`, { method: 'DELETE' });
+  const res = await fetch(`/componentes/${id}`, { method: 'DELETE' });
 
-    if (res.status !== 204) {
-      let msg = 'Erro ao remover componente.';
-      try {
-        const data = await res.json();
-        if (data.message) msg = data.message;
-      } catch (e) {
-        // pode não ter body
-      }
-      alert(msg);
-      return;
+  if (res.status !== 204) {
+    let msg = 'Erro ao remover componente.';
+    try {
+      const data = await res.json();
+      if (data.message) msg = data.message;
+    } catch (e) {
+      // pode não ter body
     }
-
-    await carregarAlunos();
-  } finally {
-    hideBlockingOverlay();
+    alert(msg);
+    return;
   }
+
+  await carregarAlunos();
 }
 
 thead.addEventListener('click', async (e) => {
