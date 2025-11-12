@@ -57,12 +57,6 @@ function pop_up() {
 //parte principal do código com o html e chamar as funções
 document.addEventListener('DOMContentLoaded', async() =>{
 
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = '/card-styles.css'; 
-    document.head.appendChild(link);
-
-    pop_up();
     //pega o id da instituição na url
     const params = new URLSearchParams(window.location.search);
     const idInstituicao = params.get('id');

@@ -1,14 +1,13 @@
+<!-- ...existing code... -->
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Modelo de Cursos</title>
-  <link rel="stylesheet" href="/styles/pages/menagement.css" />
-  <link rel="stylesheet" href="/styles/components/exclusion_modal.css" />
-  <link rel="stylesheet" href="/styles/components/loading.css" />
-  <script src="/js/loading.js" defer></script>
-  <script src="/js/exclusion_modal.js" defer></script>
+    <link rel="stylesheet" href="/styles/pages/menagement.css" />
+    <link rel="stylesheet" href="/styles/components/exclusion_modal.css" />
+    <script src="/js/exclusion_modal.js" defer></script>
   </head>
   <body>
     <header class="header">
@@ -18,42 +17,33 @@
 
     <button id="add-course">+ Adicionar Novo Curso</button>
 
-    <!-- Container dinâmico para cursos e disciplinas -->
     <div id="lista_cursos"></div>
 
-    
-    <!-- Pop - up para adicionar curso --- Caio Polo-->
-    <div id="blurred-bg">
-    <div id="pop-up"> 
-  <button id="close-pop-up" aria-label="Fechar pop-up"><img src="/assets/images/cancel.png" alt=""></button>
-        <div>
-          <h2>Adicionar Curso</h2>
-            <input type="text" id="course-name-pop-up" placeholder="Nome do Curso">
-              <button id = "btnAdicionar">Adicionar</button>
-        </div>
-    </div>
-    <div class="modal" id="exclusion_modal">
-      <div class="modal_content">
-        <div class="modal_top">
-          <img src="/assets/images/danger.svg" alt="Warning" class="modal_icon">
-          <h2>Excluir Turma</h2>
-        </div>
-        <div class="modal_header">
-          <p><strong>Item a ser excluido</strong></p>
-          <p>Algoritmos e Estrutura de Dados - Turma A</p>
-        </div>
-        <div class="modal_body">
-          <p>Esta ação é irrevogável. Um e-mail de confirmação será enviado para efetivar a exclusão. Todas as notas desta turma serão permanentemente perdidas.</p>
-        </div>
-        <div class="modal_footer">
-          <p><strong>Atenção:</strong> Verifique seu e-mail após confirmar para concluir o processo de exclusão.</p>
-        </div>
-        <div class="modal_buttons">
-          <button class="btn btn-cancel" id="cancel-btn">Cancelar</button>
-          <button class="btn btn-danger" id="confirm-btn">Sim, enviar e-mail</button>
-        </div>
+    <!-- single backdrop containing both popups -->
+       <div id="blurred-bg">
+      <div id="pop-up" class="popup">
+        <button class="close-pop-up" aria-label="Fechar pop-up"><img src="/assets/images/cancel.png" alt=""></button>
+        <h2>Adicionar Curso</h2>
+        <input type="text" id="course-name-pop-up" placeholder="Nome do Curso">
+        <button id="btnAdicionar">Adicionar</button>
+      </div>
+
+      <!-- pop-up de disciplina agora dentro do mesmo backdrop -->
+      <div id="pop-up-disciplina" class="popup">
+        <button class="close-pop-up" aria-label="Fechar pop-up"><img src="/assets/images/cancel.png" alt=""></button>
+        <h2>Adicionar Disciplina</h2>
+        <input type="text" id="nomeDisciplina" placeholder="Nome da Disciplina">
+        <input type="text" id="codDisciplina" placeholder="Codigo da Disciplina">
+        <input type="text" id="PerDisciplina" placeholder="Período da Disciplina">
+        <button id="btnAdicionarDisciplina">Adicionar</button>
       </div>
     </div>
+
+
+    <div class="modal" id="exclusion_modal">
+      <!-- ...existing modal content... -->
+    </div>
+
     <script src="/js/menagementpage.js" defer></script>
   </body>
 </html>
