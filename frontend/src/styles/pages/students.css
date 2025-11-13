@@ -1,3 +1,9 @@
+main.container, 
+.container {
+  margin-top: 40px;
+}
+
+
 .editable {
   outline: 2px dashed rgba(255, 193, 7, 0.6);
   background-color: rgba(255, 193, 7, 0.12);
