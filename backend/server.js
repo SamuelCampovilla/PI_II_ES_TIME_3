@@ -655,8 +655,6 @@ app.get('/instituicaoNomeDocente', async(req, res)=>{{
     }catch(error){
         console.error('Nao foi possivel encontrar docente.');
         return res.status(500).json({message: 'Erro interno do servidor.'})
-    }finally{
-        await connection.end();
     }
 }});
 
@@ -868,6 +866,35 @@ app.post('/adddisciplina', async (req, res) => {
         }
     }
 });
+// Deletar disciplina por código (codigo_disciplina)
+app.delete('/deleteDisciplina', async (req, res) => {
+  const codigo = req.query.codigo;
+  if (!codigo) {
+    return res.status(400).json({ message: 'O código da disciplina é obrigatório (query string ?codigo=).' });
+  }
+  let connection;
+  try {
+    connection = await mysql.createConnection(dbConfig);
+    // checa se existem turmas vinculadas
+    const [turmas] = await connection.execute('SELECT 1 FROM turmas WHERE id_disciplina = ?', [codigo]);
+    if (turmas.length) {
+      return res.status(409).json({ message: 'Não é possível excluir: existem turmas vinculadas a esta disciplina.' });
+    }
+
+    const query = 'DELETE FROM disciplinas WHERE codigo_disciplina = ?';
+    const [result] = await connection.execute(query, [codigo]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Disciplina não encontrada para o código informado.' });
+    }
+    return res.status(200).json({ message: 'Disciplina deletada com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao deletar disciplina por código:', error);
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Servidor aberto em http://localhost:${port}`);
