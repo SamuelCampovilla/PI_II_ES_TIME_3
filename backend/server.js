@@ -425,8 +425,8 @@ app.delete('/componentes/:id', async (req, res) => {
 
 
 //---------------------------------------------------------------------------------------------------//
-
 // Rota para buscar uma instituição por ID
+
 app.get('/institution/:id', async (req, res) => {
     const { id } = req.params;
     let connection;
@@ -434,13 +434,13 @@ app.get('/institution/:id', async (req, res) => {
     try {
         connection = await mysql.createConnection(dbConfig);
         const query = 'SELECT * FROM instituicoes WHERE id_instituicao = ?';
-        const [rows] = await connection.execute(query, [id]);
+        const [resultado] = await connection.execute(query, [id]);
 
-        if (rows.length === 0) {
+        if (resultado.length === 0) {
             return res.status(404).json({ message: 'Instituição não encontrada' });
         }
 
-        res.json(rows[0]);
+        res.json(resultado[0]);
     } catch (error) {
         console.error('Erro ao buscar instituição:', error);
         res.status(500).json({ message: 'Erro interno do servidor' });
@@ -450,6 +450,7 @@ app.get('/institution/:id', async (req, res) => {
         }
     }
 });
+
 // Rota para cadastro de usuário - Caio Polo
 app.post('/cadastro', async (req, res) => {
   const { name, email, password, telefone } = req.body;
@@ -838,7 +839,6 @@ app.get('/disciplinas', async (req, res) => {
     }
 });
 
-// ...existing code...
 app.post('/adddisciplina', async (req, res) => {
     const { nome_disciplina, codigo_disciplina, periodo, curso_id, instituicao_id } = req.body;
     let connection;
@@ -866,6 +866,42 @@ app.post('/adddisciplina', async (req, res) => {
         }
     }
 });
+
+
+//---------------------------------------------------------------------------------------------------------------------
+// adicionar turmas
+
+app.post('/addTurma', async(req, res)=>{
+  const {id_disciplina, codigo_turma, nome_turma} = req.body;
+  let connection;
+
+  if(!id_disciplina){
+    return res.status(400).json({message: 'Erro ao coletar id da disciplina.'});
+  }
+  if(!codigo_turma){
+    return res.status(400).json({message: 'Código de turma é obrigatorio'});
+  }
+  if(!nome_turma){
+    return res.status(400).json({message: 'Nome da turma é obrigatorio'});
+  }
+  try{
+    connection = await mysql.createConnection(dbConfig);
+    const query = 'INSERT INTO turmas (codigo_turma, nome_turma, id_disciplina) VALUES (?,?,?)';
+    const [result] = await connection.execute(query, [codigo_turma, nome_turma, id_disciplina]);
+    return res.status(201).json({message: 'Turma adicionada com sucesso',id: result.insertId});
+  }catch(error){
+      console.error('Erro ao adicionar Turma:', error);
+      return res.status(500).json({ message: 'Erro interno do servidor.' });
+  }finally{
+    if (connection) {
+      await connection.end();
+    }
+  }
+});
+
+
+
+
 
 app.listen(port, () => {
   console.log(`Servidor aberto em http://localhost:${port}`);
