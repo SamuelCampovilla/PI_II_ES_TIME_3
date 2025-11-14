@@ -61,15 +61,26 @@ body {
 }
 
 .back-link {
+  color: #333; 
   text-decoration: none;
-  color: #1e3a8a;
   font-weight: 600;
   font-size: 0.95rem;
   transition: color 0.2s ease;
+  border-radius: 6px;
+}
+.back-link svg {
+  width: 22px; 
+  height: 22px;
 }
 
 .back-link:hover {
-  color: #0f1724;
+  background: #f1f1f1; 
+  outline: none;
+  transition: 0.4s;
+}
+
+.back-link:focus-visible {
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.25);
 }
 
 .header-logo {
