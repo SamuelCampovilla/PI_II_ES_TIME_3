@@ -1,4 +1,7 @@
+import { exclusion_modal } from './exclusion_modal.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
+    const botaoAbrir = document.getElementById('add-course');
 
 //------------------------------------------------------------------------------------------------------------------
 // variaveis
@@ -7,14 +10,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fundoBlur = document.getElementById('blurred-bg');
     const popupConteudo = document.getElementById('pop-up');
     const popupDisciplina = document.getElementById('pop-up-disciplina');
+    const addButton = document.getElementById('btnAdicionar');
+    const addDisciplina = document.getElementById('btnAdicionarDisciplina');
     const popupTurma = document.getElementById('pop-up-turma'); 
     const addButton = document.getElementById('btnAdicionar');
     const addDisciplina = document.getElementById('btnAdicionarDisciplina');
     const addTurma = document.getElementById('btnAdicionarTurma');   
     const listaCursosContainer = document.getElementById('lista_cursos');
+    const popupTurma = document.getElementById('pop-up-turma');
 
     const urlParams = new URLSearchParams(window.location.search);
     const institutionId = urlParams.get('institutionId');
+
+    // Inicializa o modal de exclusão
+    exclusion_modal();
     const docenteEmail = urlParams.get('email');
 //------------------------------------------------------------------------------------------------------------------
 // busca por cursos cadastrados na instituição
@@ -36,6 +45,143 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         if (listaCursosContainer) listaCursosContainer.innerHTML = '<p>ID da instituição não fornecido na URL.</p>';
     }
+
+    // --- DELEGAÇÃO DE EVENTOS PARA AÇÕES ---
+    listaCursosContainer.addEventListener('click', async (e) => {
+        const addDiscBtn = e.target.closest('.btn-add-disciplina');
+        const delDiscBtn = e.target.closest('.btn-delete-disciplina');
+        const delCourseBtn = e.target.closest('.btn-delete-course');
+
+        if (addDiscBtn) {
+            addDisciplina.dataset.courseId = addDiscBtn.dataset.courseId;
+            abrirPopupDisciplina();
+            return;
+        }
+
+        if (delDiscBtn) {
+            const disciplinaCard = delDiscBtn.closest('.disciplina-card');
+            const disciplinaName = disciplinaCard.querySelector('h3').textContent;
+            const disciplinaCodigo = delDiscBtn.dataset.disciplinaCode;
+            
+            handleExclusion('disciplina', disciplinaCodigo, disciplinaName, async () => {
+                // Lógica de verificação: checar se existem turmas
+                const res = await fetch(`/turmas?codigo_disciplina=${encodeURIComponent(disciplinaCodigo)}`);
+                const data = await res.json();
+                const turmas = data.turmas || [];
+                return turmas.length;
+            }, () => {
+                excluirDisciplina(disciplinaCodigo);
+            });
+            return;
+        }
+
+        if (delCourseBtn) {
+            const courseCard = delCourseBtn.closest('.course');
+            const courseName = courseCard.querySelector('h2').textContent;
+            const courseId = delCourseBtn.dataset.courseId;
+
+            handleExclusion('curso', courseId, courseName, async () => {
+                // Lógica de verificação: checar se existem disciplinas
+                const res = await fetch(`/disciplinas?courseId=${encodeURIComponent(courseId)}`);
+                const data = await res.json();
+                const disciplinas = data.disciplinas || [];
+                return disciplinas.length;
+            }, () => {
+                excluirCurso(courseId);
+            });
+            return;
+        }
+    });
+
+    // --- FUNÇÕES DE EXCLUSÃO ---
+
+    async function excluirDisciplina(disciplinaCodigo) {
+        try {
+            const response = await fetch(`/deleteDisciplina?codigo=${encodeURIComponent(disciplinaCodigo)}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                alert('Disciplina excluída com sucesso!');
+                loadCoursesForInstitution(institutionId); // Recarrega os cursos para atualizar a lista
+            } else {
+                const err = await response.json().catch(() => null);
+                alert(err?.message || 'Erro ao excluir disciplina.');
+            }
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            alert('Erro ao excluir disciplina.');
+        } finally {
+            closeExclusionModal();
+        }
+    }
+
+    async function excluirCurso(courseId) {
+        try {
+            const response = await fetch(`/deleteCurso?courseId=${encodeURIComponent(courseId)}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                alert('Curso excluído com sucesso!');
+                loadCoursesForInstitution(institutionId);
+            } else {
+                const err = await response.json().catch(() => null);
+                alert(err?.message || 'Erro ao excluir curso.');
+            }
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            alert('Erro ao excluir curso.');
+        } finally {
+            closeExclusionModal();
+        }
+    }
+
+    // --- LÓGICA DO MODAL DE EXCLUSÃO ---
+
+    let confirmHandler = null; // Armazena o handler de confirmação
+
+    async function handleExclusion(type, id, name, checkDependencies, onConfirm) {
+        const itemNameEl = document.getElementById('exclusion_item_name');
+        const bodyTextEl = document.getElementById('exclusion_body_text');
+        const confirmButton = document.getElementById('confirm-btn');
+        const cancelButton = document.getElementById('cancel-btn');
+
+        itemNameEl.textContent = name;
+        bodyTextEl.textContent = `Verificando dependências para ${type}...`;
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Verificando...';
+
+        window.exclusion_modal(); // Abre o modal
+
+        const dependencyCount = await checkDependencies();
+
+        if (dependencyCount > 0) {
+            const dependencyType = type === 'curso' ? 'disciplinas' : 'turmas';
+            bodyTextEl.textContent = `Não é possível excluir. Existem ${dependencyCount} ${dependencyType} vinculadas a este ${type}. Remova-as primeiro.`;
+            confirmButton.textContent = 'Exclusão impossível';
+            confirmButton.disabled = true;
+        } else {
+            bodyTextEl.textContent = 'Esta ação é irrevogável. Deseja continuar?';
+            confirmButton.disabled = false;
+            confirmButton.textContent = 'Sim, excluir';
+
+            // Remove o listener anterior e adiciona o novo
+            if (confirmHandler) {
+                confirmButton.removeEventListener('click', confirmHandler);
+            }
+            confirmHandler = () => {
+                onConfirm(id);
+            };
+            confirmButton.addEventListener('click', confirmHandler, { once: true });
+        }
+    }
+    
+    function closeExclusionModal() {
+        const modal = document.getElementById('exclusion_modal');
+        if (modal) modal.classList.remove('active');
+    }
+
+
+    // --- FUNÇÕES DE CARREGAMENTO E RENDERIZAÇÃO ---
 
     // ----------------------------------------------------------------------------------------------------
     // funções para modal
@@ -123,6 +269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 `;
                 listaCursosContainer.appendChild(card);
+                loadDisciplinesForCourse(cursoId, card);
 
                 loadDisciplinesForCourse(cursoId, card); 
             });
@@ -164,6 +311,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                         <div class="disciplina-acoes">
                             <button class="icon-btn" title="Editar"><img src="/assets/images/pencil.png" alt="Editar" /></button>
+                            <button class="icon-btn btn-delete-disciplina" data-disciplina-code="${escapeHtml(disc.codigo_disciplina ?? '')}" title="Excluir"><img src="/assets/images/trash.png" alt="Excluir" /></button>
+                            <button class="btn-primary btn-add-turma" data-course-id="${escapeHtml(cursoId)}">+ Adicionar Turma</button>
                             <button class="icon-btn" title="Excluir"><img src="/assets/images/trash.png" alt="Excluir" /></button>
                             
                             <button class="btn-primary btn-add-turma" data-disciplina-id="${escapeHtml(disc.codigo_disciplina)}">+ Adicionar Turma</button>
@@ -181,6 +330,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (container) container.innerHTML = '<p style="color: #999; font-size: 0.9rem;">Erro ao carregar disciplinas</p>';
         }
     }
+
+    // --- FUNÇÕES DE POP-UP ---
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // funçao para carregar turmas dentro de disciplina
@@ -309,6 +460,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+     if (addDisciplina) {
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // parte para adicionar disciplinas
@@ -340,6 +492,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     document.getElementById('codDisciplina').value = '';
                     if (document.getElementById('PerDisciplina')) document.getElementById('PerDisciplina').value = '';
                     loadCoursesForInstitution(institutionId);
+                    fecharPopupDisciplina();
                 } else {
                     const err = await response.json();
                     alert('Erro: ' + err.message);
@@ -413,6 +566,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (event.target === fundoBlur) {
             fecharPopup();
             fecharPopupDisciplina();
+        }
+    });
+
+    function abrirPopup() {
+        fundoBlur.classList.add('mostrar');
+        popupConteudo.classList.add('mostrar');
+        popupDisciplina.classList.remove('mostrar');
+    }
+
+    function fecharPopup() {
+        fundoBlur.classList.remove('mostrar');
+        popupConteudo.classList.remove('mostrar');
+    }
+
+    function abrirPopupDisciplina() {
+        fundoBlur.classList.add('mostrar');
+        popupDisciplina.classList.add('mostrar');
+        popupConteudo.classList.remove('mostrar');
+    }
+
+    function fecharPopupDisciplina() {
+        fundoBlur.classList.remove('mostrar');
+        popupDisciplina.classList.remove('mostrar');
+    }
+
             fecharPopupTurma();
         }
     });
@@ -428,6 +606,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             .replace(/'/g, '&#39;');
     }
 
+    botaoAbrir?.addEventListener('click', abrirPopup);
 //----------------------------------------------------------------------------------------------------------------------------------
 // listener fixo 
 

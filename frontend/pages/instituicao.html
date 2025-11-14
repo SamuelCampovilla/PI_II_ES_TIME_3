@@ -87,22 +87,25 @@
     <div class="modal" id="exclusion_modal">
       <div class="modal_content">
         <div class="modal_top">
-                        <img src="/assets/images/danger.svg" alt="Warning" class="modal_icon">
-          <h2>Excluir Turma</h2>
+          <img src="/assets/images/danger.svg" alt="Warning" class="modal_icon">
+          <h2 id="exclusion_title">Excluir Instituição</h2>
         </div>
         <div class="modal_header">
-          <p><strong>Item a ser excluido</strong></p>
-          <p>Algoritmos e Estrutura de Dados - Turma A</p>
+          <p><strong>Item a ser excluído</strong></p>
+          <p id="exclusion_item_name">Nome da Instituição</p>
         </div>
         <div class="modal_body">
-          <p>Esta ação é irrevogável. Um e-mail de confirmação será enviado para efetivar a exclusão. Todas as notas desta turma serão permanentemente perdidas.</p>
+          <p id="exclusion_body_text">Esta ação é irrevogável. Todas as turmas e notas associadas poderão ser perdidas.</p>
         </div>
-        <div class="modal_footer">
-          <p><strong>Atenção:</strong> Verifique seu e-mail após confirmar para concluir o processo de exclusão.</p>
-        </div>
-        <div class="modal_buttons">
+                <div class="modal_buttons">
+          <!-- loading (invisível até iniciar exclusão) -->
+          <div id="exclusion_loading" style="display:none; align-items:center; gap:8px;">
+            <img src="/assets/images/loading.gif" alt="Carregando" width="20" height="20">
+            <span id="exclusion_loading_text">Excluindo...</span>
+          </div>
+
           <button class="btn btn-cancel" id="cancel-btn">Cancelar</button>
-          <button class="btn btn-danger" id="confirm-btn">Sim, enviar e-mail</button>
+          <button class="btn btn-danger" id="confirm-btn">Sim, excluir</button>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
-const urlParams = new URLSearchParams(window.location.search);
+let urlParams = new URLSearchParams(window.location.search);
 const ID_TURMA = urlParams.get('id_turma') ? Number(urlParams.get('id_turma')) : 1;
+
 
 let componentesAtuais = [];
 let alunosAtuais = [];

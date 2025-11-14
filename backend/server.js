@@ -864,6 +864,84 @@ app.post('/adddisciplina', async (req, res) => {
         }
     }
 });
+// Deletar disciplina por código (codigo_disciplina)
+app.delete('/deleteDisciplina', async (req, res) => {
+  const codigo = req.query.codigo;
+  if (!codigo) {
+    return res.status(400).json({ message: 'O código da disciplina é obrigatório (query string ?codigo=).' });
+  }
+  let connection;
+  try {
+    connection = await mysql.createConnection(dbConfig);
+    // checa se existem turmas vinculadas
+    const [turmas] = await connection.execute('SELECT 1 FROM turmas WHERE id_disciplina = ?', [codigo]);
+    if (turmas.length) {
+      return res.status(409).json({ message: 'Não é possível excluir: existem turmas vinculadas a esta disciplina.' });
+    }
+
+    const query = 'DELETE FROM disciplinas WHERE codigo_disciplina = ?';
+    const [result] = await connection.execute(query, [codigo]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Disciplina não encontrada para o código informado.' });
+    }
+    return res.status(200).json({ message: 'Disciplina deletada com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao deletar disciplina por código:', error);
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
+
+app.get('/turmas', async (req, res) => {
+    const disciplinaCodigo = req.query.codigo_disciplina;
+    if (!disciplinaCodigo) {
+        // Return empty array if no code is provided, as the frontend might call this without a code
+        return res.status(200).json({ turmas: [] });
+    }
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        // This assumes the foreign key in 'turmas' is 'id_disciplina' but it holds the 'codigo_disciplina' value.
+        const query = 'SELECT * FROM turmas WHERE id_disciplina = ?';
+        const [turmas] = await connection.execute(query, [disciplinaCodigo]);
+        return res.status(200).json({ turmas });
+    } catch (error) {
+        console.error('Erro ao buscar turmas:', error);
+        return res.status(500).json({ message: 'Erro interno do servidor.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+app.delete('/deleteCurso', async (req, res) => {
+    const courseId = req.query.courseId;
+    if (!courseId) {
+        return res.status(400).json({ message: 'O ID do curso é obrigatório.' });
+    }
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        
+        const [disciplinas] = await connection.execute('SELECT 1 FROM disciplinas WHERE id_curso = ?', [courseId]);
+        if (disciplinas.length > 0) {
+            return res.status(409).json({ message: 'Não é possível excluir. Existem disciplinas vinculadas a este curso.' });
+        }
+
+        const [result] = await connection.execute('DELETE FROM cursos WHERE id_curso = ?', [courseId]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Curso não encontrado.' });
+        }
+
+        return res.status(200).json({ message: 'Curso excluído com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao deletar curso:', error);
+        return res.status(500).json({ message: 'Erro interno do servidor.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
 
 
 //---------------------------------------------------------------------------------------------------------------------
