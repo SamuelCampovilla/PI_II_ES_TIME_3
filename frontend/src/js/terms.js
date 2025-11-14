@@ -1,34 +1,31 @@
-/* Samuel Campovilla */
+// Samuel Campovilla
 // Aguarda todo o HTML ser carregado antes de rodar o script
 document.addEventListener('DOMContentLoaded', () => {
 
   // Pega o link/botão que abre o modal
   const openBtn = document.getElementById('conditions_popup');
 
-  // Pega o botão que fecha o modal (deve existir no HTML)
+  // Pega o botão que fecha o modal
   const closeBtn = document.getElementById('close_modal');
 
-  // Pega o elemento do modal (container que cobre a tela)
+  // Pega o elemento do modal
   const modal   = document.getElementById('terms_modal');
 
-  // Se faltar qualquer um dos elementos, avisa no console e não continua
   if (!openBtn || !closeBtn || !modal) {
-    console.warn('Ligação do modal: elemento(s) ausente(s).');
     return;
   }
-
-  // Ao clicar no link "Eu li e aceito...", abre o modal ( mostra o container )
+  // Ao clicar no botão, abre o modal
   openBtn.addEventListener('click', (e) => {
-    e.preventDefault();               // impede a navegação do <a href="#">
-    modal.classList.add('active');    // adiciona a classe que deixa o modal visível
+    e.preventDefault(); 
+    modal.classList.add('active');
   });
 
-  // Ao clicar no botão "Fechar", fecha o modal
+  // Ao clicar fecha o modal
   closeBtn.addEventListener('click', () => {
-    modal.classList.remove('active'); // remove a classe e esconde o modal
+    modal.classList.remove('active');
   });
 
-  // Se clicar fora do cartão (na área escura), também fecha o modal
+  // Se clicar fora também fecha o modal
   modal.addEventListener('click', (e) => {
     if (e.target === modal) modal.classList.remove('active');
   });

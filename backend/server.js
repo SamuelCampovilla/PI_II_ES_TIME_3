@@ -36,7 +36,7 @@ app.use(express.static(path.join(__dirname, 'src')));
 // ---------------------------------------------------------------------
 
 // Garante aluno + matrícula e devolve id_matricula
-async function pegarIdMatricula(connection, idTurma, ra, nomeAluno) {
+async function garantirMatricula(connection, idTurma, ra, nomeAluno) {
   await connection.execute(
     'INSERT IGNORE INTO alunos (ra, nome) VALUES (?, ?)',
     [ra, nomeAluno]
@@ -69,7 +69,7 @@ async function pegarIdMatricula(connection, idTurma, ra, nomeAluno) {
 }
 
 // Busca até 3 componentes de nota da disciplina dessa turma
-async function pegarComponentesTurma(connection, idTurma) {
+async function buscarComponentes(connection, idTurma) {
   const [rows] = await connection.execute(
     `SELECT cn.id_componente, cn.sigla
        FROM turmas t
@@ -83,7 +83,7 @@ async function pegarComponentesTurma(connection, idTurma) {
 }
 
 // Salva, atualiza ou apaga uma nota em lancamento_nota
-async function salvarNota(connection, idMatricula, idComponente, valor) {
+async function gravarNota(connection, idMatricula, idComponente, valor) {
   if (!idComponente) return; // se não existe componente na coluna
 
   // se valor é nulo, apagamos eventual lançamento
@@ -214,7 +214,12 @@ app.get('/notas', async (req, res) => {
   let connection;
   try {
     connection = await mysql.createConnection(dbConfig);
-    const componentes = await pegarComponentesTurma(connection, idTurma);
+    const [turmaInfo] = await connection.execute(
+      'SELECT nome_turma FROM turmas WHERE id_turma = ? LIMIT 1',
+      [idTurma]
+    );
+    const nomeTurma = turmaInfo.length ? turmaInfo[0].nome_turma : null;
+    const componentes = await buscarComponentes(connection, idTurma);
 
     const [matriculas] = await connection.execute(
       `SELECT m.id_matricula, a.ra, a.nome
@@ -257,7 +262,7 @@ app.get('/notas', async (req, res) => {
     }
 
     const resposta = alunos.map(({ _id_matricula, ...rest }) => rest);
-    res.json({ componentes, alunos: resposta });
+    res.json({ componentes, alunos: resposta, nome_turma: nomeTurma });
   } catch (error) {
     console.error('Erro ao carregar notas:', error);
     res.status(500).json({ message: 'Erro ao carregar notas.' });
@@ -276,15 +281,15 @@ app.post('/notas/salvarLinha', async (req, res) => {
   let connection;
   try {
     connection = await mysql.createConnection(dbConfig);
-    const idMatricula = await pegarIdMatricula(connection, id_turma, ra, nome);
-    const componentes = await pegarComponentesTurma(connection, id_turma);
+    const idMatricula = await garantirMatricula(connection, id_turma, ra, nome);
+    const componentes = await buscarComponentes(connection, id_turma);
     const valores = [c1, c2, c3];
 
     for (let i = 0; i < componentes.length && i < 3; i++) {
-      await salvarNota(connection, idMatricula, componentes[i].id_componente, valores[i]);
+      await gravarNota(connection, idMatricula, componentes[i].id_componente, valores[i]);
     }
 
-    await atualizarCalculoFinal(connection, id_turma, ra);
+    await atualizaFinal(connection, id_turma, ra);
     res.json({ message: 'Aluno e notas salvos com sucesso.' });
   } catch (error) {
     console.error('Erro ao salvar aluno/notas:', error);
@@ -452,7 +457,7 @@ app.delete('/componentes/:id', async (req, res) => {
       );
 
       for (const aluno of alunosTurma) {
-        await atualizarCalculoFinal(connection, turmaId, aluno.id_aluno);
+        await atualizaFinal(connection, turmaId, aluno.id_aluno);
       }
     }
 
