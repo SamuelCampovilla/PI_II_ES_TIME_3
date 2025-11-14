@@ -1,6 +1,12 @@
 let urlParams = new URLSearchParams(window.location.search);
-const ID_TURMA = urlParams.get('id_turma') ? Number(urlParams.get('id_turma')) : 1;
+let ID_TURMA = urlParams.get('turmaId') ? Number(urlParams.get('turmaId')) : 1;
 
+
+function setTurma(novoId) {
+  TURMA_ID = Number(novoId) || TURMA_ID;
+  console.log('Turma alterada para:', TURMA_ID);
+  carregarAlunos();
+}
 
 let componentesAtuais = [];
 let alunosAtuais = [];

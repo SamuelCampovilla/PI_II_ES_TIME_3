@@ -876,7 +876,7 @@ app.delete('/deleteDisciplina', async (req, res) => {
     // checa se existem turmas vinculadas
     const [turmas] = await connection.execute('SELECT 1 FROM turmas WHERE id_disciplina = ?', [codigo]);
     if (turmas.length) {
-      return res.status(409).json({ message: 'Não é possível excluir: existem turmas vinculadas a esta disciplina.' });
+      return res.status(409).json({ message: 'Não é possível excluir, pois existem alunos associados às turmas desta disciplina.' });
     }
 
     const query = 'DELETE FROM disciplinas WHERE codigo_disciplina = ?';
@@ -936,6 +936,34 @@ app.delete('/deleteCurso', async (req, res) => {
         return res.status(200).json({ message: 'Curso excluído com sucesso!' });
     } catch (error) {
         console.error('Erro ao deletar curso:', error);
+        return res.status(500).json({ message: 'Erro interno do servidor.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+app.delete('/deleteTurma', async (req, res) => {
+    const turmaId = req.query.turmaId;
+    if (!turmaId) {
+        return res.status(400).json({ message: 'O ID da turma é obrigatório.' });
+    }
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        
+        const [alunos] = await connection.execute('SELECT 1 FROM matricula WHERE id_turma = ?', [turmaId]);
+        if (alunos.length > 0) {
+            return res.status(409).json({ message: 'Não é possível excluir. Existem alunos vinculados a esta turma.' });
+        }
+
+        const [result] = await connection.execute('DELETE FROM turmas WHERE id_turma = ?', [turmaId]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Turma não encontrada.' });
+        }
+
+        return res.status(200).json({ message: 'Turma excluída com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao deletar turma:', error);
         return res.status(500).json({ message: 'Erro interno do servidor.' });
     } finally {
         if (connection) await connection.end();

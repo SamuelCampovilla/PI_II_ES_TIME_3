@@ -1,5 +1,20 @@
 // pop-up e adicionar instituição ---- Caio Polo
 
+async function contaCursos(institutionId) {
+    try {
+        const response = await fetch(`/cursos?institutionId=${encodeURIComponent(institutionId)}`);
+        if (response.ok) {
+            const data = await response.json();
+            const cursos = data.cursos || [];
+            return cursos.length;
+        } else {
+            throw new Error('Erro ao buscar cursos');
+        }
+    } catch (error) {
+        console.error('Erro ao contar cursos:', error);
+        return 0;
+    }
+}
 
 async function buscaDocenteId(email) {
     try {
@@ -80,8 +95,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ nomeInstituicao }) ,
-                body: JSON.stringify({ nomeInstituicao }) 
+                body: JSON.stringify({ nomeInstituicao })
             });
             
             const result = await resposta.json();
@@ -133,13 +147,12 @@ document.addEventListener('DOMContentLoaded', async() => {
 
             if (resposta.ok && data.instituicoes) { 
                 
-                data.instituicoes.forEach(institution => {
-                    
-      
-                    const cursosCount = 0;
+                for (const institution of data.instituicoes) {
+                    const cursosCount = await contaCursos(institution.id_instituicao);
                     
                     const card = document.createElement('div');
                     card.className = 'card';
+                    card.setAttribute('data-id', institution.id_instituicao);
                     card.innerHTML = `
                         <div class="institution_info">
                                 <img src="/assets/images/icon_institution.png" alt="institution icon">
@@ -158,7 +171,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                             <button class="btnGerenciar" data-id="${institution.id_instituicao}">Gerenciar</button>
                         `;
                     institutionListContainer.appendChild(card);
-                });
+                }
                 document.querySelectorAll('.btnGerenciar').forEach(button => {
                     button.addEventListener('click', function() {
                     const institutionId = this.getAttribute('data-id');

@@ -47,6 +47,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const addDiscBtn = e.target.closest('.btn-add-disciplina');
         const delDiscBtn = e.target.closest('.btn-delete-disciplina');
         const delCourseBtn = e.target.closest('.btn-delete-course');
+        const deleteTurmaBtn = e.target.closest('.btn-delete-turma');
+        const addTurmaClique = e.target.closest('.btn-add-turma'); 
+        const turmaCardClick = e.target.closest('.turma-card'); 
 
         if (addDiscBtn) {
             addDisciplina.dataset.courseId = addDiscBtn.dataset.courseId;
@@ -85,6 +88,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, () => {
                 excluirCurso(courseId);
             });
+            return;
+        }
+
+        if (deleteTurmaBtn) {
+            const turmaCard = deleteTurmaBtn.closest('.turma-card');
+            const turmaId = deleteTurmaBtn.dataset.turmaId;
+            const turmaNome = turmaCard.querySelector('.turma-nome')?.textContent || 'Turma';
+
+            handleExclusion('turma', turmaId, turmaNome, async () => {
+                // Lógica de verificação: checar se existem alunos/notas
+                const res = await fetch(`/notas?id_turma=${encodeURIComponent(turmaId)}`);
+                const data = await res.json();
+                const alunos = data.alunos || [];
+                return alunos.length;
+            }, () => {
+                excluirTurma(turmaId);
+            });
+            return;
+        }
+
+        if (addTurmaClique) {
+            addTurma.dataset.disciplinaId = addTurmaClique.dataset.disciplinaId; 
+            abrirPopupTurma();
+            return;
+        }
+        if (turmaCardClick) {
+            const turmaId = turmaCardClick.getAttribute('data-turma-id');
+            window.location.href = `/frontend/pages/students.html?turmaId=${turmaId}`;
             return;
         }
     });
@@ -131,6 +162,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    async function excluirTurma(turmaId) {
+        try {
+            const response = await fetch(`/deleteTurma?turmaId=${encodeURIComponent(turmaId)}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                alert('Turma excluída com sucesso!');
+                loadCoursesForInstitution(institutionId); // Recarrega para atualizar lista
+            } else {
+                const err = await response.json().catch(() => null);
+                alert(err?.message || 'Erro ao excluir turma.');
+            }
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            alert('Erro ao excluir turma.');
+        } finally {
+            closeExclusionModal();
+        }
+    }
+
     // --- LÓGICA DO MODAL DE EXCLUSÃO ---
 
     let confirmHandler = null; // Armazena o handler de confirmação
@@ -141,35 +192,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         const confirmButton = document.getElementById('confirm-btn');
         const cancelButton = document.getElementById('cancel-btn');
 
-        itemNameEl.textContent = name;
-        bodyTextEl.textContent = `Verificando dependências para ${type}...`;
-        confirmButton.disabled = true;
-        confirmButton.textContent = 'Verificando...';
+    itemNameEl.textContent = name;
+    bodyTextEl.textContent = `Verificando dependências para ${type}...`;
+    confirmButton.disabled = true;
+    confirmButton.textContent = 'Verificando...';
 
-        window.exclusion_modal(); // Abre o modal
+    window.exclusion_modal();
 
-        const dependencyCount = await checkDependencies();
+    const dependencyCount = await checkDependencies();
 
-        if (dependencyCount > 0) {
-            const dependencyType = type === 'curso' ? 'disciplinas' : 'turmas';
-            bodyTextEl.textContent = `Não é possível excluir. Existem ${dependencyCount} ${dependencyType} vinculadas a este ${type}. Remova-as primeiro.`;
-            confirmButton.textContent = 'Exclusão impossível';
-            confirmButton.disabled = true;
-        } else {
-            bodyTextEl.textContent = 'Esta ação é irrevogável. Deseja continuar?';
-            confirmButton.disabled = false;
-            confirmButton.textContent = 'Sim, excluir';
+ if (dependencyCount > 0) {
+ // --- INÍCIO DA CORREÇÃO ---
+    let dependencyText = 'itens';
+    let pronoun = 'os';
 
-            // Remove o listener anterior e adiciona o novo
-            if (confirmHandler) {
-                confirmButton.removeEventListener('click', confirmHandler);
-            }
-            confirmHandler = () => {
-                onConfirm(id);
-            };
-            confirmButton.addEventListener('click', confirmHandler, { once: true });
-        }
-    }
+    if (type === 'curso') {
+        dependencyText = 'disciplinas';
+        pronoun = 'as';
+ }  else if (type === 'disciplina') {
+        dependencyText = 'turmas';
+        pronoun = 'as';
+ } else if (type === 'turma') {
+        dependencyText = 'alunos'; 
+        pronoun = 'os';
+ }
+
+ bodyTextEl.textContent = `Não é possível excluir. Existem ${dependencyCount} ${dependencyText} vinculadas a esta ${type}. Remova-${pronoun} primeiro.`;
+
+
+ confirmButton.textContent = 'Exclusão impossível';
+ confirmButton.disabled = true;
+ } else {
+ bodyTextEl.textContent = 'Esta ação é irrevogável. Deseja continuar?';
+ confirmButton.disabled = false;
+ confirmButton.textContent = 'Sim, excluir';
+
+ // Remove o listener anterior e adiciona o novo
+ if (confirmHandler) {
+  confirmButton.removeEventListener('click', confirmHandler);
+ }
+ confirmHandler = () => {
+  onConfirm(id);
+ };
+ confirmButton.addEventListener('click', confirmHandler, { once: true });
+ }
+    }
     
     function closeExclusionModal() {
         const modal = document.getElementById('exclusion_modal');
@@ -177,7 +244,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
 
-    // --- FUNÇÕES DE CARREGAMENTO E RENDERIZAÇÃO ---
 
     // ----------------------------------------------------------------------------------------------------
     // funções para modal
@@ -251,9 +317,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="icon"><img src="/assets/images/book.png" alt="Curso"></div>
                         <h2>${escapeHtml(nomeCurso)}</h2>
                         <div class="btn-group">
-                            <button class="btn-primary btn-edit-course" data-course-id="${escapeHtml(cursoId)}" title="Editar">
-                                <img src="/assets/images/pencil.png" alt="Editar" />
-                            </button>
                             <button class="btn-primary btn-delete-course" data-course-id="${escapeHtml(cursoId)}" title="Excluir">
                                 <img src="/assets/images/trash.png" alt="Excluir" />
                             </button>
@@ -305,8 +368,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <p>Código: ${escapeHtml(disc.codigo_disciplina ?? '-')} | Período: ${escapeHtml(disc.periodo ?? '-')}</p>
                         </div>
                         <div class="disciplina-acoes">
-                            <button class="icon-btn" title="Editar"><img src="/assets/images/pencil.png" alt="Editar" /></button>
-                            <button class="icon-btn" title="Excluir"><img src="/assets/images/trash.png" alt="Excluir" /></button>
+                            <button class="icon-btn btn-delete-disciplina" data-disciplina-code="${escapeHtml(disc.codigo_disciplina)}" title="Excluir"><img src="/assets/images/trash.png" alt="Excluir" /></button>
                             
                             <button class="btn-primary btn-add-turma" data-disciplina-id="${escapeHtml(disc.codigo_disciplina)}">+ Adicionar Turma</button>
                         </div>
@@ -373,53 +435,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             turmaContainer.innerHTML = '<p style="color: red; font-size: 0.9rem;">Erro ao carregar turmas.</p>';
         }
     }
-
-
-
-
-//----------------------------------------------------------------------------------------------------------------------------------
-// funçao paa os cliques dos botoes 
-
-
-    listaCursosContainer.addEventListener('click', (e) => {
-        
-
-        const addDiscBtn = e.target.closest('.btn-add-disciplina');
-        if (addDiscBtn) {
-            addDisciplina.dataset.courseId = addDiscBtn.dataset.courseId;
-            abrirPopupDisciplina();
-            return;
-        }
-
-       
-        const addTurmaClique = e.target.closest('.btn-add-turma'); 
-        if (addTurmaClique) {
-            addTurma.dataset.disciplinaId = addTurmaClique.dataset.disciplinaId; 
-            abrirPopupTurma();
-            return;
-        }
-
-
-        const editBtn = e.target.closest('.btn-edit-course');
-        if (editBtn) {
-            const courseId = editBtn.dataset.courseId;
-            return;
-        }
-
-        const delBtn = e.target.closest('.btn-delete-course');
-        if (delBtn) {
-            const courseId = delBtn.dataset.courseId;
-            return;
-        }
-
-        const turmaCardClick = e.target.closest('.turma-card'); 
-        if (turmaCardClick) {
-            const turmaId = turmaCardClick.getAttribute('data-turma-id');
-            window.location.href = `/frontend/pages/students.html?turmaId=${turmaId}`;
-            return;
-        }
-
-    });
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // parte para adicionar cursos
