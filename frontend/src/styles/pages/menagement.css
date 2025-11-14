@@ -238,8 +238,7 @@ margin-bottom: 4px;
  border: 1px solid #e5e7eb;
  padding: 10px 12px;
  display: flex;
- align-items: center;
- justify-content: space-between;
+ justify-content: space-around ;
  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
@@ -275,11 +274,11 @@ margin-bottom: 4px;
  text-decoration: underline;
 }
 
-/* ======================================================= */
-/* MODAL / POP-UP - (SEÇÃO CORRIGIDA) */
-/* ======================================================= */
+.turma-header{
+    display: flex;
+    justify-content: space-around;
 
-/* 1. O fundo (backdrop) */
+}
 #blurred-bg {
  position: fixed;
  top: 0;
@@ -295,44 +294,42 @@ z-index: 999;
  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-/* 2. Regra para MOSTRAR o fundo */
 #blurred-bg.mostrar {
  opacity: 1;
  visibility: visible;
 }
 
-/* 3. Regra COMUM para AMBOS os pop-ups (Curso e Disciplina) */
+
 .popup {
- display: none; /* <- COMEÇAM ESCONDIDOS */
+ display: none; 
  position: fixed;
  top: 50%;
  left: 50%;
  transform: translate(-50%, -50%);
  background-color: white;
  padding: 10px 30px 30px 30px;
- box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
+ box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
  border-radius: 16px;
  z-index: 1000;
- width: 90%; /* Melhor para mobile */
-max-width: 450px; /* Limite em telas grandes */
+ width: 90%; 
+max-width: 450px; 
 flex-direction: column;
  align-items: center;
  gap: 20px;
  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* 4. Regra para MOSTRAR o pop-up específico */
 .popup.mostrar {
- display: flex; /* <- MUDADO DE 'inline' PARA 'flex' */
+ display: flex;
 }
+    
 
-/* 5. Estilos para os botões de fechar (com a CLASSE) */
 .close-pop-up {
  border: none;
  background-color: transparent;
  cursor: pointer;
- align-self: flex-end; /* Alinha o "X" à direita */
- padding: 5px; /* Área de clique maior */
+ align-self: flex-end;
+ padding: 5px; 
 }
 
 .close-pop-up img {
@@ -340,24 +337,23 @@ flex-direction: column;
  height: 16px;
 }
 
-/* 6. Estilos internos genéricos para os pop-ups */
 .popup h2 {
- font-size: 1.5em; /* Ajustado */
+ font-size: 1.5em; 
  font-weight: 700;
  text-align: center;
  width: 100%;
 }
 .popup input {
  border-radius: 6px;
- text-align: left; /* Trocado de 'center' */
- padding: 10px; /* Melhorado */
- font-size: 1em; /* Ajustado */
+ text-align: left;
+ padding: 10px; 
+ font-size: 1em; 
  border: 1px solid #ccc;
  width: 100%;
 }
 
-/* Estilo para o botão de adicionar */
-.popup button[id^="btnAdicionar"] { /* Pega btnAdicionar e btnAdicionarDisciplina */
+
+.popup button[id^="btnAdicionar"] { 
  background-color: #0b1220;
  color: white;
  border: none;
@@ -374,7 +370,7 @@ width: 100%;
  background-color: #1a2b3d;
 }
 
-/* MODAL DE EXCLUSÃO (Seu código original) */
+
 .modal {
  display: none;
  position: fixed;
@@ -390,7 +386,7 @@ width: 100%;
  display: flex;
 }
 
-/* RESPONSIVIDADE (Seu código original, com ajuste no pop-up) */
+
 @media (max-width: 768px) {
  body {
  padding: 16px 20px 32px;
@@ -407,9 +403,4 @@ width: 100%;
  .turmas-container {
  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
  }
-
-/* A regra de .popup já cobre isso,
- mas mantendo a sua mídia original
- (a regra #pop-up foi removida pois .popup já faz o trabalho)
- */
 }

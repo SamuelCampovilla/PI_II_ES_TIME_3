@@ -172,6 +172,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="turmas-container"></div>
                 `;
                 container.appendChild(discCard);
+                loadTurmasForDisciplinas(disc.codigo_disciplina, discCard );
             });
             
         } catch (err) {
@@ -180,6 +181,59 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (container) container.innerHTML = '<p style="color: #999; font-size: 0.9rem;">Erro ao carregar disciplinas</p>';
         }
     }
+
+//----------------------------------------------------------------------------------------------------------------------------------
+// funçao para carregar turmas dentro de disciplina
+
+
+    async function loadTurmasForDisciplinas(disciplinaCodigo, disciplinaElement) {
+        const turmaContainer = disciplinaElement.querySelector('.turmas-container');
+        if(!turmaContainer){
+            return;
+        }
+        try{
+            const resultado = await fetch(`/BuscarTurmas?disciplinaId=${encodeURIComponent(disciplinaCodigo)}`)
+            if(!resultado.ok){
+                throw new Error('Erro ao buscar turmas');
+            }
+            const data = await resultado.json();
+            const turmas = data.turmas ?? []; 
+
+            turmaContainer.innerHTML = ''; 
+            
+            if (turmas.length === 0) {
+                turmaContainer.innerHTML = '<p style="font-size: 0.8rem; color: #aaa;">(Nenhuma turma cadastrada)</p>';
+                return;
+            }
+
+            turmas.forEach(turma => {
+
+                const turmaCard = document.createElement('div');
+                turmaCard.className = 'turma-card';
+                turmaCard.setAttribute('data-turma-id', turma.id_turma); // Adicionar ID ao card
+ 
+                turmaCard.innerHTML = `
+                    <div class="turma-header">
+                        <p class="turma-nome">${escapeHtml(turma.nome_turma ?? turma.codigo_turma)}</p>
+                        <div class="turma-acoes">
+                            <button class="icon-btn btn-delete-turma" data-turma-id="${turma.id_turma}" title="Excluir">
+                                <img src="/assets/images/trash.png" alt="Excluir" />
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                turmaContainer.appendChild(turmaCard);
+        });
+
+        }catch(error){
+            console.error('Erro ao carregar turmas');
+            turmaContainer.innerHTML = '<p style="color: red; font-size: 0.9rem;">Erro ao carregar turmas.</p>';
+        }
+    }
+
+
+
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // funçao paa os cliques dos botoes 
@@ -215,6 +269,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const courseId = delBtn.dataset.courseId;
             return;
         }
+
+        const turmaCardClick = e.target.closest('.turma-card'); 
+        if (turmaCardClick) {
+            const turmaId = turmaCardClick.getAttribute('data-turma-id');
+            window.location.href = `/frontend/pages/students.html?turmaId=${turmaId}`;
+            return;
+        }
+
     });
 
 //----------------------------------------------------------------------------------------------------------------------------------

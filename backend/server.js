@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../index.js';
 import nodemailer from 'nodemailer';
+import { createConnection } from 'net';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -110,14 +111,13 @@ async function salvarNota(connection, idMatricula, idComponente, valor) {
   }
 }
 
-// Atualiza / grava nota final do aluno (tabela calculo_final)
-// Agora busca as notas diretamente do banco (lancamento_nota + matricula)
+
 async function atualizarCalculoFinal(connection, idTurma, ra) {
-  // 1) Verifica se existem 3 componentes para a turma
+
   const componentes = await pegarComponentesTurma(connection, idTurma);
   const componentesCount = componentes.length;
 
-  // Se não há componentes cadastrados para a turma, remover qualquer cálculo antigo
+ 
   if (componentesCount === 0) {
     await connection.execute(
       'DELETE FROM calculo_final WHERE id_turma = ? AND id_aluno = ?',
@@ -126,7 +126,7 @@ async function atualizarCalculoFinal(connection, idTurma, ra) {
     return;
   }
 
-  // 2) Busca as notas lançadas para esse aluno/turma
+
   const [rowsNotas] = await connection.execute(
     `SELECT ln.valor_nota
        FROM matricula m
@@ -145,7 +145,6 @@ async function atualizarCalculoFinal(connection, idTurma, ra) {
   }
 
   if (notas.some(n => Number.isNaN(n))) {
-    // erro: não grava cálculo, remove registro antigo para manter consistência
     await connection.execute(
       'DELETE FROM calculo_final WHERE id_turma = ? AND id_aluno = ?',
       [idTurma, ra]
@@ -818,7 +817,6 @@ app.post('/instituicao', async (req, res) => {
     });
 
 app.get('/disciplinas', async (req, res) => {
-    // aceita query param em inglês (courseId) ou em pt (cursoId)
     const courseId = req.query.courseId ?? req.query.cursoId;
     let connection;
     if (!courseId) {
@@ -899,7 +897,31 @@ app.post('/addTurma', async(req, res)=>{
   }
 });
 
+//------------------------------------------------------------------------------------------------------
+// buscar turmas adicionada em disciplina
 
+
+app.get('/BuscarTurmas', async(req, res)=>{
+  const disciplinaId = req.query.disciplinaId;
+  let connection
+  if(!disciplinaId){
+    return res.status(400).json({message: "Id de disciplinas não encontrado."});
+  }
+  try{
+    connection = await mysql.createConnection(dbConfig);
+    const query = 'SELECT * FROM turmas WHERE id_disciplina = ?'
+    const [turmas] = await connection.execute(query, [disciplinaId]) 
+    return res.status(200).json({ turmas });
+  }catch(error){
+    console.error('Erro ao buscar turmas:', error);
+    return res.status(500).json({message: 'erro interno do servidor.'});
+  }finally{
+    if(connection){
+      await connection.end();
+    }
+  }
+
+});
 
 
 
