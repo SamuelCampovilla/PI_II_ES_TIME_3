@@ -28,12 +28,7 @@ const compNome = document.getElementById('compNome');
 const compSigla = document.getElementById('compSigla');
 const compDescricao = document.getElementById('compDescricao');
 
-// ------------------------------------------------------
-// helpers
-// ------------------------------------------------------
 function mediaNotas(c1, c2, c3) {
-  // Para o cálculo, NULL deve ser tratado como 0.
-  // Porém, se ainda não existem 3 componentes, retornamos null para indicar pendência.
   if (listaComponentes.length < 3) return null;
 
   const v1 = c1 == null ? 0 : Number(c1);
@@ -116,7 +111,6 @@ async function montarListaCsv(file) {
   return alunos;
 }
 
-// atualiza os cabeçalhos dos componentes (C1/C2/C3) com ou sem botão de remover
 function desenharCabecalho() {
   const ths = document.querySelectorAll('#tabelaNotas thead th');
 
@@ -159,9 +153,7 @@ function arrumarColunas() {
   }
 }
 
-// ------------------------------------------------------
-// carregar dados do backend
-// ------------------------------------------------------
+
 async function carregarTela() {
   const res = await fetch(`/notas?id_turma=${ID_TURMA}`);
   const data = await res.json();
@@ -171,9 +163,7 @@ async function carregarTela() {
   const alunos = data.alunos || [];
   listaAlunos = alunos;
 
-  // atualiza cabeçalho das 3 colunas de componente
   desenharCabecalho();
-
   corpoTabela.innerHTML = '';
 
   alunos.forEach(a => {
@@ -196,7 +186,6 @@ async function carregarTela() {
     const tdMedia = tr.querySelector('[data-field="media"]');
 
     if (listaComponentes.length < 3) {
-      // ainda não existem 3 componentes → não calcula média
       tdMedia.innerHTML = '<span class="dot-pending"></span>';
       tdMedia.classList.remove('grade-green', 'grade-red');
     } else {
@@ -217,7 +206,6 @@ async function carregarTela() {
   atualizaBotaoRemover();
 }
 
-// grava aluno + notas
 async function guardarAluno(ra, nome, c1, c2, c3, { recarregar = true } = {}) {
   const body = { id_turma: ID_TURMA, ra, nome, c1, c2, c3 };
   const res = await fetch('/notas/salvarLinha', {
@@ -336,7 +324,7 @@ function baixarCsv() {
   URL.revokeObjectURL(url);
 }
 
-// remove aluno (matrícula + notas + cálculo_final)
+// remove aluno
 async function apagarAluno(ra) {
   if (!confirm(`Remover aluno ${ra} desta turma?`)) return;
 
@@ -368,7 +356,6 @@ async function guardarComponente(nome, sigla, descricao) {
       const data = await res.json();
       if (data.message) msg = data.message;
     } catch (e) {
-      // se não vier JSON, ignora
     }
     alert(msg);
     return;
@@ -378,9 +365,6 @@ async function guardarComponente(nome, sigla, descricao) {
   await carregarTela();
 }
 
-// ------------------------------------------------------
-// modos de edição
-// ------------------------------------------------------
 function alternarNotas() {
   const editable = switchEdicao.checked;
 
@@ -397,13 +381,8 @@ function alternarComponentes() {
   desenharCabecalho();
 }
 
-// ------------------
-// event listeners
-// ------------------
-// tenta montar os links do menu com o id do docente (usa /me se existir sessão, senão cai no fallback por email)
 async function carregarLinksMenu() {
   try {
-    // 1) tenta obter via sessão (rota opcional /me)
     let idDoc = null;
     let email = null;
     try {
@@ -414,10 +393,8 @@ async function carregarLinksMenu() {
         email = me.email;
       }
     } catch (e) {
-      // ignore, vamos tentar fallback
     }
 
-    // 2) fallback por email: procura na query string, localStorage ou cookie
     if (!idDoc) {
       const urlParams = new URLSearchParams(window.location.search);
       email = email || urlParams.get('email') || localStorage.getItem('user_email') || (document.cookie.match(/(?:^|; )email=([^;]*)/) || [])[1];
@@ -434,9 +411,7 @@ async function carregarLinksMenu() {
       }
     }
 
-    if (!idDoc) return; // sem id, não atualiza links
-
-    // atualiza links do dropdown (se existirem) adicionando id_docente
+    if (!idDoc) return;
     const menuLinks = document.querySelectorAll('.dropdown-menu a');
     menuLinks.forEach(a => {
       if (!a || !a.getAttribute) return;
@@ -458,10 +433,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   carregarTela();
 });
 
-// alternar edição de notas
 switchEdicao.addEventListener('change', alternarNotas);
 
-// alternar edição de componentes (mostrar/ocultar botões de excluir na sigla)
 switchEditarComponentes.addEventListener('change', alternarComponentes);
 
 checkAll.addEventListener('change', () => {
@@ -476,7 +449,6 @@ corpoTabela.addEventListener('change', (e) => {
   }
 });
 
-// edição inline das notas: commit apenas em blur ou Enter (para evitar múltiplas requisições a cada tecla)
 corpoTabela.addEventListener('keydown', (e) => {
   const td = e.target;
   const field = td.getAttribute && td.getAttribute('data-field');
@@ -484,7 +456,7 @@ corpoTabela.addEventListener('keydown', (e) => {
 
   if (e.key === 'Enter') {
     e.preventDefault();
-    td.blur(); // dispara o handler de blur que faz o commit
+    td.blur();
   }
 });
 
@@ -493,7 +465,6 @@ corpoTabela.addEventListener('blur', async (e) => {
   const field = td.getAttribute && td.getAttribute('data-field');
   if (!['c1', 'c2', 'c3'].includes(field)) return;
 
-  // converte texto da célula em valor (ou null)
   const valor = lerNota(td.textContent);
   if (valor === null) {
     td.textContent = 'NULL';
@@ -508,7 +479,6 @@ corpoTabela.addEventListener('blur', async (e) => {
 
   const tdMedia = tr.querySelector('[data-field="media"]');
 
-  // mostrar indicador de salvando
   const savingNode = document.createElement('span');
   savingNode.className = 'text-muted small ms-2';
   savingNode.textContent = 'Salvando...';
@@ -521,7 +491,6 @@ corpoTabela.addEventListener('blur', async (e) => {
       c1Val, c2Val, c3Val
     );
 
-    // recalcula média visual após salvar (o carregarTela também será chamado por guardarAluno)
     const media = mediaNotas(c1Val, c2Val, c3Val);
     if (listaComponentes.length < 3) {
       tdMedia.innerHTML = '<span class="dot-pending"></span>';
@@ -552,7 +521,6 @@ corpoTabela.addEventListener('blur', async (e) => {
   }
 }, true);
 
-// remover único
 corpoTabela.addEventListener('click', (e) => {
   if (e.target.classList.contains('btn-remover')) {
     const tr = e.target.closest('tr');
@@ -568,7 +536,6 @@ btnRemoverMarcados.addEventListener('click', async () => {
 
   if (!confirm(`Remover ${selecionados.length} aluno(s) desta turma?`)) return;
 
-  // delete em lote sem confirmar um a um
   for (const chk of selecionados) {
     const tr = chk.closest('tr');
     const ra = tr.querySelector('[data-field="ra"]').textContent.trim();
@@ -577,7 +544,6 @@ btnRemoverMarcados.addEventListener('click', async () => {
       if (res.status !== 204) {
         const text = await res.text();
         console.error('Erro ao remover aluno', ra, res.status, text);
-        // mostrar erro no lugar da linha
         const errNode = document.createElement('div');
         errNode.className = 'text-danger small';
         errNode.textContent = `Erro ao remover ${ra}: ${text || res.status}`;
@@ -603,7 +569,6 @@ formAddAluno.addEventListener('submit', async (e) => {
     return;
   }
 
-  // na criação do aluno, ainda não lançamos notas
   await guardarAluno(ra, nome, null, null, null);
 
   formAddAluno.reset();
@@ -611,7 +576,6 @@ formAddAluno.addEventListener('submit', async (e) => {
   modal.hide();
 });
 
-// submit criar componente
 formAddComponente.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -638,7 +602,6 @@ if (btnImportarCsv && inputCsvAlunos) {
     if (file) {
       await importarCsv(file);
     }
-    // permite importar o mesmo arquivo novamente se necessário
     e.target.value = '';
   });
 }
@@ -647,9 +610,6 @@ if (btnExportarCsv) {
   btnExportarCsv.addEventListener('click', baixarCsv);
 }
 
-// ---------------------------
-// remoção de componentes 
-// ---------------------------
 async function apagarComponente(id) {
   const res = await fetch(`/componentes/${id}`, { method: 'DELETE' });
 
@@ -659,7 +619,7 @@ async function apagarComponente(id) {
       const data = await res.json();
       if (data.message) msg = data.message;
     } catch (e) {
-      // pode não ter body
+
     }
     alert(msg);
     return;
@@ -669,7 +629,7 @@ async function apagarComponente(id) {
 }
 
 thead.addEventListener('click', async (e) => {
-  if (!modoComponentes) return; // só pode remover com switch ligado
+  if (!modoComponentes) return;
 
   const btn = e.target.closest('.btn-remove-comp');
   if (!btn) return;

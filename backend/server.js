@@ -838,7 +838,6 @@ app.get('/disciplinas', async (req, res) => {
     }
 });
 
-// ...existing code...
 app.post('/adddisciplina', async (req, res) => {
     const { nome_disciplina, codigo_disciplina, periodo, curso_id, instituicao_id } = req.body;
     let connection;

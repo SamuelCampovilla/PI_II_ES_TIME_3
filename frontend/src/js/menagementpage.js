@@ -133,7 +133,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `;
                 listaCursosContainer.appendChild(card);
 
-                // Carregar disciplinas deste curso
                 loadDisciplinesForCourse(cursoId, card);
             });
         } catch (error) {
@@ -262,7 +261,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // deletion of disciplines is handled via event delegation on listaCursosContainer
 
     // fechar clicando no backdrop (agora usa o mesmo backdrop para ambos)
     fundoBlur.addEventListener('click', (event) => {

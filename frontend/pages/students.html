@@ -8,98 +8,109 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
     >
+    <link rel="stylesheet" href="/styles/main.css">
     <link rel="stylesheet" href="/styles/pages/students.css">
     <link rel="stylesheet" href="/styles/components/loading.css">
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">PUC-Campinas</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navBar">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navBar">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Menu</a>
-              <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="/frontend/pages/instituicao.html">Instituições</a></li>
-                    <li><a class="dropdown-item" href="/frontend/pages/menagementPage.html">Turmas</a></li>
-                  </ul>
-            </li>
-          </ul>
+    <div class="students-page">
+      <header class="students-header">
+        <div class="header-text">
+          <p class="eyebrow">Dashboard Docente</p>
+          <h1>Gestão de Alunos</h1>
+          <p class="description">Gerencie as notas e componentes da turma selecionada.</p>
+          <div class="header-breadcrumb">
+            <a href="/frontend/pages/instituicao.html">Instituições</a>
+            <span>/</span>
+            <a href="/frontend/pages/menagementPage.html">Turmas</a>
+            <span>/</span>
+            <strong>Alunos</strong>
+          </div>
         </div>
-      </div>
-    </nav>
-
-    <main class="container my-4">
-      <div class="mb-2">
-        <h2 class="mb-0">Quadro de Notas</h2>
-        <small class="text-muted">Alunos da turma selecionada</small>
-      </div>
-
-      <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddAluno">
-          + Adicionar Aluno
-        </button>
-
-        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddComponente">
-          + Criar Componente
-        </button>
-        <div class="btn-group">
-          <button class="btn btn-outline-primary" type="button" id="btnImportarCsv">
-            Importar via CSV
-          </button>
-          <button class="btn btn-outline-primary" type="button" id="btnExportarCsv">
-            Exportar CSV
-          </button>
+        <div class="header-right">
+          <a class="back-link" href="/frontend/pages/menagementPage.html">← Voltar para Turmas</a>
+          <img src="/assets/images/PI - Logo.PNG" alt="Logo NotaDez" class="header-logo" loading="lazy">
         </div>
-        <input type="file" id="inputCsvAlunos" accept=".csv" class="d-none">
+      </header>
 
-        <div class="form-check form-switch ms-2">
-          <input class="form-check-input" type="checkbox" id="switchEdicao">
-          <label class="form-check-label" for="switchEdicao">Modo de edição de notas (C1, C2, C3)</label>
-        </div>
+      <main class="students-main">
+        <section class="students-card panel-card">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Turma selecionada</p>
+              <h2>Quadro de Notas</h2>
+              <small class="text-muted">Alunos da turma selecionada</small>
+            </div>
+            <div id="caixaRemocoes" class="bulk-actions ms-auto d-none">
+              <button id="btnRemoverMarcados" class="btn btn-outline-danger btn-sm" type="button">
+                Remover Selecionados
+              </button>
+            </div>
+          </div>
 
-        <div class="form-check form-switch ms-2">
-          <input class="form-check-input" type="checkbox" id="switchEditarComponentes">
-          <label class="form-check-label" for="switchEditarComponentes">Editar componentes (mostrar excluir nas siglas)</label>
-        </div>
+          <div class="actions-grid">
+            <div class="primary-actions">
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddAluno">
+                + Adicionar Aluno
+              </button>
 
-        <div id="caixaRemocoes" class="ms-auto d-none">
-          <button id="btnRemoverMarcados" class="btn btn-outline-danger btn-sm" type="button">
-            Remover Selecionados
-          </button>
-        </div>
-      </div>
+              <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddComponente">
+                + Criar Componente
+              </button>
+              <div class="btn-group">
+                <button class="btn btn-outline-primary" type="button" id="btnImportarCsv">
+                  Importar via CSV
+                </button>
+                <button class="btn btn-outline-primary" type="button" id="btnExportarCsv">
+                  Exportar CSV
+                </button>
+              </div>
+              <input type="file" id="inputCsvAlunos" accept=".csv" class="d-none">
+            </div>
 
-      <div class="table-responsive">
-        <table class="table table-hover align-middle" id="tabelaNotas">
-          <thead class="table-light">
-            <tr>
-              <th style="width:36px;">
-                <input id="checkAll" class="form-check-input" type="checkbox">
-              </th>
-              <th>RA</th>
-              <th>Nome</th>
-              <th>C1</th>
-              <th>C2</th>
-              <th>C3</th>
-              <th>Média</th>
-              <th class="text-end" style="width:140px;">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyStudents">
-            <!-- Linhas de alunos serão inseridas aqui via JavaScript -->
-          </tbody>
-        </table>
-      </div>
+            <div class="switches">
+              <div class="form-check form-switch ms-2">
+                <input class="form-check-input" type="checkbox" id="switchEdicao">
+                <label class="form-check-label" for="switchEdicao">Modo de edição de notas (C1, C2, C3)</label>
+              </div>
 
-      <small class="text-muted">
-        A tabela sempre abre em modo de visualização. Para salvar notas, crie componentes com siglas C1, C2 e C3 para a disciplina desta turma.
-      </small>
-    </main>
+              <div class="form-check form-switch ms-2">
+                <input class="form-check-input" type="checkbox" id="switchEditarComponentes">
+                <label class="form-check-label" for="switchEditarComponentes">Editar componentes (mostrar excluir nas siglas)</label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="students-card table-card">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle" id="tabelaNotas">
+              <thead class="table-light">
+                <tr>
+                  <th style="width:36px;">
+                    <input id="checkAll" class="form-check-input" type="checkbox">
+                  </th>
+                  <th>RA</th>
+                  <th>Nome</th>
+                  <th>C1</th>
+                  <th>C2</th>
+                  <th>C3</th>
+                  <th>Média</th>
+                  <th class="text-end" style="width:140px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyStudents">
+                <!-- Linhas de alunos serão inseridas aqui via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <small class="text-muted table-hint">
+            A tabela sempre abre em modo de visualização. Para salvar notas, crie componentes com siglas C1, C2 e C3 para a disciplina desta turma.
+          </small>
+        </section>
+      </main>
+    </div>
 
     <!-- Modal Adicionar Aluno -->
     <div class="modal fade" id="modalAddAluno" tabindex="-1">
