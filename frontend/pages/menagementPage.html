@@ -48,9 +48,27 @@
 
 
     <div class="modal" id="exclusion_modal">
-     
+      <div class="modal_content">
+        <div class="modal_top">
+            <img src="/assets/images/danger.svg" alt="Danger Icon" class="modal_icon">
+            <h2>Confirmar Exclusão</h2>
+        </div>
+        <div class="modal_header">
+            <p>Você está prestes a excluir: <strong id="exclusion_item_name">Item</strong></p>
+        </div>
+        <div class="modal_body">
+            <p id="exclusion_body_text">Esta ação é irrevogável.</p>
+        </div>
+        <div id="exclusion_loading" style="display: none; justify-content: center; align-items: center; padding: 10px;">
+            <!-- You might want to add a spinner here -->
+        </div>
+        <div class="modal_buttons">
+            <button id="cancel-btn" class="btn btn-cancel">Cancelar</button>
+            <button id="confirm-btn" class="btn btn-danger">Sim, excluir</button>
+        </div>
+    </div>
     </div>
 
-    <script src="/js/menagementpage.js" defer></script>
+    <script type="module" src="/js/menagementpage.js" defer></script>
   </body>
 </html>
