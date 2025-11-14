@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(password != confirmarSenha){
             return alert("As senhas devem ser iguais!")
         }
-        if(telefone.length < 14){
+        if(telefone.length < 11){
             return alert("Insira um telefone válido")
         }
 

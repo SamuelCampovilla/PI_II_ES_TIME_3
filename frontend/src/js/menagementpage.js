@@ -201,42 +201,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const dependencyCount = await checkDependencies();
 
- if (dependencyCount > 0) {
- // --- INÍCIO DA CORREÇÃO ---
-    let dependencyText = 'itens';
-    let pronoun = 'os';
+    if (dependencyCount > 0) {
 
-    if (type === 'curso') {
-        dependencyText = 'disciplinas';
-        pronoun = 'as';
- }  else if (type === 'disciplina') {
-        dependencyText = 'turmas';
-        pronoun = 'as';
- } else if (type === 'turma') {
-        dependencyText = 'alunos'; 
-        pronoun = 'os';
- }
+        let dependencyText = 'itens';
+        let pronoun = 'os';
 
- bodyTextEl.textContent = `Não é possível excluir. Existem ${dependencyCount} ${dependencyText} vinculadas a esta ${type}. Remova-${pronoun} primeiro.`;
+        if (type === 'curso') {
+            dependencyText = 'disciplinas';
+            pronoun = 'as';
+    }  else if (type === 'disciplina') {
+            dependencyText = 'turmas';
+            pronoun = 'as';
+    } else if (type === 'turma') {
+            dependencyText = 'alunos'; 
+            pronoun = 'os';
+    }
+
+    bodyTextEl.textContent = `Não é possível excluir. Existem ${dependencyCount} ${dependencyText} vinculadas a esta ${type}. Remova-${pronoun} primeiro.`;
 
 
- confirmButton.textContent = 'Exclusão impossível';
- confirmButton.disabled = true;
- } else {
- bodyTextEl.textContent = 'Esta ação é irrevogável. Deseja continuar?';
- confirmButton.disabled = false;
- confirmButton.textContent = 'Sim, excluir';
+    confirmButton.textContent = 'Exclusão impossível';
+    confirmButton.disabled = true;
+    } else {
+    bodyTextEl.textContent = 'Esta ação é irrevogável. Deseja continuar?';
+    confirmButton.disabled = false;
+    confirmButton.textContent = 'Sim, excluir';
 
- // Remove o listener anterior e adiciona o novo
- if (confirmHandler) {
-  confirmButton.removeEventListener('click', confirmHandler);
- }
- confirmHandler = () => {
-  onConfirm(id);
- };
- confirmButton.addEventListener('click', confirmHandler, { once: true });
- }
-    }
+    // Remove o listener anterior e adiciona o novo
+    if (confirmHandler) {
+    confirmButton.removeEventListener('click', confirmHandler);
+    }
+    confirmHandler = () => {
+    onConfirm(id);
+    };
+    confirmButton.addEventListener('click', confirmHandler, { once: true });
+    }
+         }
     
     function closeExclusionModal() {
         const modal = document.getElementById('exclusion_modal');

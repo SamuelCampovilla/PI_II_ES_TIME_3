@@ -372,6 +372,49 @@ app.post('/componentes', async (req, res) => {
     if (connection) await connection.end();
   }
 });
+//-----------------------------------------------------------------------------------------------------------------------------
+
+app.delete('/instituicaoDelete', async (req, res) => {
+    const docenteId = req.query.docenteId;
+    const institutionId = req.query.institutionId; 
+    let connection;
+
+    if (!institutionId || !docenteId) {
+        return res.status(400).json({ message: 'ID da instituição ou Id docente nao encontrados.' });
+    }
+
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        const deleteVinculoQuery = 'DELETE FROM docente_instituicao WHERE id_instituicao = ? AND id_docente = ?';
+        await connection.execute(deleteVinculoQuery, [institutionId, docenteId]);
+        
+        const deleteInstQuery = 'DELETE FROM instituicoes WHERE id_instituicao = ?';
+        const [result] = await connection.execute(deleteInstQuery, [institutionId]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Instituição não encontrada para exclusão.' });
+        }
+        res.status(200).json({ message: 'Instituição excluída com sucesso.' });
+    } catch (error) {
+        console.error('Erro no DELETE da Instituição:', error);
+        
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(409).json({ message: 'A Instituição possui Cursos ou Disciplinas vinculadas. Remova-os primeiro.' });
+        }
+        
+        res.status(500).json({ message: 'Erro interno ao excluir.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+
+
+//-----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
 
 app.delete('/componentes/:id', async (req, res) => {
   const idComponente = Number(req.params.id);
@@ -913,6 +956,8 @@ app.get('/turmas', async (req, res) => {
         if (connection) await connection.end();
     }
 });
+
+//----------------------------------------------------------------------------------------------------------------------------------
 
 app.delete('/deleteCurso', async (req, res) => {
     const courseId = req.query.courseId;
