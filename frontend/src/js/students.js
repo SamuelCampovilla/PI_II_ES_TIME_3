@@ -16,6 +16,7 @@ const thead = document.querySelector('#tabelaNotas thead');
 const btnImportarCsv = document.getElementById('btnImportarCsv');
 const btnExportarCsv = document.getElementById('btnExportarCsv');
 const inputCsvAlunos = document.getElementById('inputCsvAlunos');
+const nomeTurmaSelecionada = document.getElementById('nomeTurmaSelecionada');
 
 // modal adicionar aluno
 const formAddAluno = document.getElementById('formAddAluno');
@@ -157,11 +158,15 @@ function arrumarColunas() {
 async function carregarTela() {
   const res = await fetch(`/notas?id_turma=${ID_TURMA}`);
   const data = await res.json();
-
   const componentes = data.componentes || [];
   listaComponentes = componentes;
   const alunos = data.alunos || [];
   listaAlunos = alunos;
+  const nomeTurma = data.nome_turma;
+
+  if (nomeTurmaSelecionada) {
+    nomeTurmaSelecionada.textContent = nomeTurma || `Turma ${ID_TURMA}`;
+  }
 
   desenharCabecalho();
   corpoTabela.innerHTML = '';

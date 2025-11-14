@@ -34,12 +34,12 @@
       </header>
 
       <main class="students-main">
-        <section class="students-card panel-card">
+        <section class="students-card table-card">
           <div class="panel-head">
             <div>
               <p class="eyebrow">Turma selecionada</p>
               <h2>Quadro de Notas</h2>
-              <small class="text-muted">Alunos da turma selecionada</small>
+              <small class="text-muted">Turma: <span id="nomeTurmaSelecionada">Carregando...</span></small>
             </div>
             <div id="caixaRemocoes" class="bulk-actions ms-auto d-none">
               <button id="btnRemoverMarcados" class="btn btn-outline-danger btn-sm" type="button">
@@ -80,9 +80,7 @@
               </div>
             </div>
           </div>
-        </section>
 
-        <section class="students-card table-card">
           <div class="table-responsive">
             <table class="table table-hover align-middle" id="tabelaNotas">
               <thead class="table-light">

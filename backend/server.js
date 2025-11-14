@@ -215,6 +215,11 @@ app.get('/notas', async (req, res) => {
   let connection;
   try {
     connection = await mysql.createConnection(dbConfig);
+    const [turmaInfo] = await connection.execute(
+      'SELECT nome_turma FROM turmas WHERE id_turma = ? LIMIT 1',
+      [idTurma]
+    );
+    const nomeTurma = turmaInfo.length ? turmaInfo[0].nome_turma : null;
     const componentes = await buscarComponentes(connection, idTurma);
 
     const [matriculas] = await connection.execute(
@@ -258,7 +263,7 @@ app.get('/notas', async (req, res) => {
     }
 
     const resposta = alunos.map(({ _id_matricula, ...rest }) => rest);
-    res.json({ componentes, alunos: resposta });
+    res.json({ componentes, alunos: resposta, nome_turma: nomeTurma });
   } catch (error) {
     console.error('Erro ao carregar notas:', error);
     res.status(500).json({ message: 'Erro ao carregar notas.' });

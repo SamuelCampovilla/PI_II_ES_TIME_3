@@ -211,6 +211,7 @@ body {
   background: #ffffff;
   overflow: hidden;
   box-shadow: inset 0 1px 0 #f8fafc;
+  margin-top: 24px;
 }
 
 #tabelaNotas {
