@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../index.js';
 import nodemailer from 'nodemailer';
+import { createConnection } from 'net';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -110,14 +111,13 @@ async function salvarNota(connection, idMatricula, idComponente, valor) {
   }
 }
 
-// Atualiza / grava nota final do aluno (tabela calculo_final)
-// Agora busca as notas diretamente do banco (lancamento_nota + matricula)
+
 async function atualizarCalculoFinal(connection, idTurma, ra) {
-  // 1) Verifica se existem 3 componentes para a turma
+
   const componentes = await pegarComponentesTurma(connection, idTurma);
   const componentesCount = componentes.length;
 
-  // Se não há componentes cadastrados para a turma, remover qualquer cálculo antigo
+ 
   if (componentesCount === 0) {
     await connection.execute(
       'DELETE FROM calculo_final WHERE id_turma = ? AND id_aluno = ?',
@@ -126,7 +126,7 @@ async function atualizarCalculoFinal(connection, idTurma, ra) {
     return;
   }
 
-  // 2) Busca as notas lançadas para esse aluno/turma
+
   const [rowsNotas] = await connection.execute(
     `SELECT ln.valor_nota
        FROM matricula m
@@ -145,7 +145,6 @@ async function atualizarCalculoFinal(connection, idTurma, ra) {
   }
 
   if (notas.some(n => Number.isNaN(n))) {
-    // erro: não grava cálculo, remove registro antigo para manter consistência
     await connection.execute(
       'DELETE FROM calculo_final WHERE id_turma = ? AND id_aluno = ?',
       [idTurma, ra]
@@ -425,8 +424,8 @@ app.delete('/componentes/:id', async (req, res) => {
 
 
 //---------------------------------------------------------------------------------------------------//
-
 // Rota para buscar uma instituição por ID
+
 app.get('/institution/:id', async (req, res) => {
     const { id } = req.params;
     let connection;
@@ -434,13 +433,13 @@ app.get('/institution/:id', async (req, res) => {
     try {
         connection = await mysql.createConnection(dbConfig);
         const query = 'SELECT * FROM instituicoes WHERE id_instituicao = ?';
-        const [rows] = await connection.execute(query, [id]);
+        const [resultado] = await connection.execute(query, [id]);
 
-        if (rows.length === 0) {
+        if (resultado.length === 0) {
             return res.status(404).json({ message: 'Instituição não encontrada' });
         }
 
-        res.json(rows[0]);
+        res.json(resultado[0]);
     } catch (error) {
         console.error('Erro ao buscar instituição:', error);
         res.status(500).json({ message: 'Erro interno do servidor' });
@@ -450,6 +449,7 @@ app.get('/institution/:id', async (req, res) => {
         }
     }
 });
+
 // Rota para cadastro de usuário - Caio Polo
 app.post('/cadastro', async (req, res) => {
   const { name, email, password, telefone } = req.body;
@@ -817,7 +817,6 @@ app.post('/instituicao', async (req, res) => {
     });
 
 app.get('/disciplinas', async (req, res) => {
-    // aceita query param em inglês (courseId) ou em pt (cursoId)
     const courseId = req.query.courseId ?? req.query.cursoId;
     let connection;
     if (!courseId) {
@@ -838,7 +837,6 @@ app.get('/disciplinas', async (req, res) => {
     }
 });
 
-// ...existing code...
 app.post('/adddisciplina', async (req, res) => {
     const { nome_disciplina, codigo_disciplina, periodo, curso_id, instituicao_id } = req.body;
     let connection;
@@ -878,7 +876,7 @@ app.delete('/deleteDisciplina', async (req, res) => {
     // checa se existem turmas vinculadas
     const [turmas] = await connection.execute('SELECT 1 FROM turmas WHERE id_disciplina = ?', [codigo]);
     if (turmas.length) {
-      return res.status(409).json({ message: 'Não é possível excluir: existem turmas vinculadas a esta disciplina.' });
+      return res.status(409).json({ message: 'Não é possível excluir, pois existem alunos associados às turmas desta disciplina.' });
     }
 
     const query = 'DELETE FROM disciplinas WHERE codigo_disciplina = ?';
@@ -943,6 +941,94 @@ app.delete('/deleteCurso', async (req, res) => {
         if (connection) await connection.end();
     }
 });
+
+app.delete('/deleteTurma', async (req, res) => {
+    const turmaId = req.query.turmaId;
+    if (!turmaId) {
+        return res.status(400).json({ message: 'O ID da turma é obrigatório.' });
+    }
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        
+        const [alunos] = await connection.execute('SELECT 1 FROM matricula WHERE id_turma = ?', [turmaId]);
+        if (alunos.length > 0) {
+            return res.status(409).json({ message: 'Não é possível excluir. Existem alunos vinculados a esta turma.' });
+        }
+
+        const [result] = await connection.execute('DELETE FROM turmas WHERE id_turma = ?', [turmaId]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Turma não encontrada.' });
+        }
+
+        return res.status(200).json({ message: 'Turma excluída com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao deletar turma:', error);
+        return res.status(500).json({ message: 'Erro interno do servidor.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+
+
+//---------------------------------------------------------------------------------------------------------------------
+// adicionar turmas
+
+app.post('/addTurma', async(req, res)=>{
+  const {id_disciplina, codigo_turma, nome_turma} = req.body;
+  let connection;
+
+  if(!id_disciplina){
+    return res.status(400).json({message: 'Erro ao coletar id da disciplina.'});
+  }
+  if(!codigo_turma){
+    return res.status(400).json({message: 'Código de turma é obrigatorio'});
+  }
+  if(!nome_turma){
+    return res.status(400).json({message: 'Nome da turma é obrigatorio'});
+  }
+  try{
+    connection = await mysql.createConnection(dbConfig);
+    const query = 'INSERT INTO turmas (codigo_turma, nome_turma, id_disciplina) VALUES (?,?,?)';
+    const [result] = await connection.execute(query, [codigo_turma, nome_turma, id_disciplina]);
+    return res.status(201).json({message: 'Turma adicionada com sucesso',id: result.insertId});
+  }catch(error){
+      console.error('Erro ao adicionar Turma:', error);
+      return res.status(500).json({ message: 'Erro interno do servidor.' });
+  }finally{
+    if (connection) {
+      await connection.end();
+    }
+  }
+});
+
+//------------------------------------------------------------------------------------------------------
+// buscar turmas adicionada em disciplina
+
+
+app.get('/BuscarTurmas', async(req, res)=>{
+  const disciplinaId = req.query.disciplinaId;
+  let connection
+  if(!disciplinaId){
+    return res.status(400).json({message: "Id de disciplinas não encontrado."});
+  }
+  try{
+    connection = await mysql.createConnection(dbConfig);
+    const query = 'SELECT * FROM turmas WHERE id_disciplina = ?'
+    const [turmas] = await connection.execute(query, [disciplinaId]) 
+    return res.status(200).json({ turmas });
+  }catch(error){
+    console.error('Erro ao buscar turmas:', error);
+    return res.status(500).json({message: 'erro interno do servidor.'});
+  }finally{
+    if(connection){
+      await connection.end();
+    }
+  }
+
+});
+
 
 
 app.listen(port, () => {

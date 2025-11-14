@@ -1,5 +1,23 @@
 // pop-up e adicionar instituição ---- Caio Polo
 
+async function contaCursos(institutionId) {
+    await fetch(`/cursos?institutionId=${encodeURIComponent(institutionId)}`)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Erro ao buscar cursos');
+            }
+        })
+        .then(data => {
+            const cursos = data.cursos || [];
+            return cursos.length;
+        })
+        .catch(error => {
+            console.error('Erro ao contar cursos:', error);
+            return 0;
+        });
+}
 
 async function buscaDocenteId(email) {
     try {
@@ -135,8 +153,8 @@ document.addEventListener('DOMContentLoaded', async() => {
                 
                 data.instituicoes.forEach(institution => {
                     
-      
-                    const cursosCount = 0;
+                 
+                    const cursosCount = contaCursos(institution.id_instituicao);
                     
                     const card = document.createElement('div');
                     card.className = 'card';
