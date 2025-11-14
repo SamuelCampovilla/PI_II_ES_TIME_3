@@ -1,7 +1,6 @@
 import { exclusion_modal } from './exclusion_modal.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const botaoAbrir = document.getElementById('add-course');
 
 //------------------------------------------------------------------------------------------------------------------
 // variaveis
@@ -10,14 +9,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fundoBlur = document.getElementById('blurred-bg');
     const popupConteudo = document.getElementById('pop-up');
     const popupDisciplina = document.getElementById('pop-up-disciplina');
-    const addButton = document.getElementById('btnAdicionar');
-    const addDisciplina = document.getElementById('btnAdicionarDisciplina');
     const popupTurma = document.getElementById('pop-up-turma'); 
     const addButton = document.getElementById('btnAdicionar');
     const addDisciplina = document.getElementById('btnAdicionarDisciplina');
     const addTurma = document.getElementById('btnAdicionarTurma');   
     const listaCursosContainer = document.getElementById('lista_cursos');
-    const popupTurma = document.getElementById('pop-up-turma');
 
     const urlParams = new URLSearchParams(window.location.search);
     const institutionId = urlParams.get('institutionId');
@@ -269,7 +265,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 `;
                 listaCursosContainer.appendChild(card);
-                loadDisciplinesForCourse(cursoId, card);
 
                 loadDisciplinesForCourse(cursoId, card); 
             });
@@ -311,8 +306,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                         <div class="disciplina-acoes">
                             <button class="icon-btn" title="Editar"><img src="/assets/images/pencil.png" alt="Editar" /></button>
-                            <button class="icon-btn btn-delete-disciplina" data-disciplina-code="${escapeHtml(disc.codigo_disciplina ?? '')}" title="Excluir"><img src="/assets/images/trash.png" alt="Excluir" /></button>
-                            <button class="btn-primary btn-add-turma" data-course-id="${escapeHtml(cursoId)}">+ Adicionar Turma</button>
                             <button class="icon-btn" title="Excluir"><img src="/assets/images/trash.png" alt="Excluir" /></button>
                             
                             <button class="btn-primary btn-add-turma" data-disciplina-id="${escapeHtml(disc.codigo_disciplina)}">+ Adicionar Turma</button>
@@ -330,8 +323,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (container) container.innerHTML = '<p style="color: #999; font-size: 0.9rem;">Erro ao carregar disciplinas</p>';
         }
     }
-
-    // --- FUNÇÕES DE POP-UP ---
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // funçao para carregar turmas dentro de disciplina
@@ -460,7 +451,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-     if (addDisciplina) {
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // parte para adicionar disciplinas
@@ -566,31 +556,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (event.target === fundoBlur) {
             fecharPopup();
             fecharPopupDisciplina();
-        }
-    });
-
-    function abrirPopup() {
-        fundoBlur.classList.add('mostrar');
-        popupConteudo.classList.add('mostrar');
-        popupDisciplina.classList.remove('mostrar');
-    }
-
-    function fecharPopup() {
-        fundoBlur.classList.remove('mostrar');
-        popupConteudo.classList.remove('mostrar');
-    }
-
-    function abrirPopupDisciplina() {
-        fundoBlur.classList.add('mostrar');
-        popupDisciplina.classList.add('mostrar');
-        popupConteudo.classList.remove('mostrar');
-    }
-
-    function fecharPopupDisciplina() {
-        fundoBlur.classList.remove('mostrar');
-        popupDisciplina.classList.remove('mostrar');
-    }
-
             fecharPopupTurma();
         }
     });
@@ -606,7 +571,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             .replace(/'/g, '&#39;');
     }
 
-    botaoAbrir?.addEventListener('click', abrirPopup);
 //----------------------------------------------------------------------------------------------------------------------------------
 // listener fixo 
 
