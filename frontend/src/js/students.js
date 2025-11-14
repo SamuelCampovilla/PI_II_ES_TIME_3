@@ -581,12 +581,20 @@ formAddAluno.addEventListener('submit', async (e) => {
     return;
   }
 
-  await guardarAluno(ra, nome, null, null, null);
-
-  formAddAluno.reset();
-  const modal = bootstrap.Modal.getInstance(document.getElementById('modalAddAluno'));
-  modal.hide();
+  try{
+        
+        await guardarAluno(ra, nome, null, null, null, { recarregar: false }); 
+        formAddAluno.reset();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalAddAluno'));
+        if(modal){
+          modal.hide();
+        }
+        await carregarTela(); 
+    }catch(error){
+        console.error("Falha ao adicionar aluno:", error);
+    }
 });
+ 
 
 formAddComponente.addEventListener('submit', async (e) => {
   e.preventDefault();

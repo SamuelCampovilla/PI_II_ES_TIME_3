@@ -35,14 +35,14 @@ app.use(express.static(path.join(__dirname, 'src')));
 // HELPERS -- Samuel Campovilla e Caua Bianchi
 // ---------------------------------------------------------------------
 
-// Garante aluno + matrícula e devolve id_matricula
+
 async function garantirMatricula(connection, idTurma, ra, nomeAluno) {
   await connection.execute(
     'INSERT IGNORE INTO alunos (ra, nome) VALUES (?, ?)',
     [ra, nomeAluno]
   );
 
-  // Verifica se já existe matrícula para esse aluno nessa turma
+ 
   const [existing] = await connection.execute(
     'SELECT id_matricula FROM matricula WHERE id_aluno = ? AND id_turma = ?',
     [ra, idTurma]
@@ -51,13 +51,13 @@ async function garantirMatricula(connection, idTurma, ra, nomeAluno) {
     return existing[0].id_matricula;
   }
 
-  // Insere apenas se não existir
+
   const [ins] = await connection.execute(
     'INSERT INTO matricula (id_aluno, id_turma) VALUES (?, ?)',
     [ra, idTurma]
   );
 
-  // Se insertId não disponível, buscar novamente
+  
   if (ins && ins.insertId) return ins.insertId;
 
   const [rows] = await connection.execute(
@@ -68,7 +68,7 @@ async function garantirMatricula(connection, idTurma, ra, nomeAluno) {
   return rows[0].id_matricula;
 }
 
-// Busca até 3 componentes de nota da disciplina dessa turma
+
 async function buscarComponentes(connection, idTurma) {
   const [rows] = await connection.execute(
     `SELECT cn.id_componente, cn.sigla
@@ -79,14 +79,14 @@ async function buscarComponentes(connection, idTurma) {
       LIMIT 3`,
     [idTurma]
   );
-  return rows; // [{id_componente, sigla}, ...]
+  return rows; 
 }
 
-// Salva, atualiza ou apaga uma nota em lancamento_nota
-async function gravarNota(connection, idMatricula, idComponente, valor) {
-  if (!idComponente) return; // se não existe componente na coluna
 
-  // se valor é nulo, apagamos eventual lançamento
+async function gravarNota(connection, idMatricula, idComponente, valor) {
+  if (!idComponente) return; 
+
+ 
   if (valor === null || valor === undefined || valor === '') {
     await connection.execute(
       'DELETE FROM lancamento_nota WHERE id_matricula = ? AND id_componente = ?',
@@ -114,7 +114,7 @@ async function gravarNota(connection, idMatricula, idComponente, valor) {
 
 async function atualizarCalculoFinal(connection, idTurma, ra) {
 
-  const componentes = await pegarComponentesTurma(connection, idTurma);
+  const componentes = await buscarComponentes(connection, idTurma);
   const componentesCount = componentes.length;
 
  
@@ -289,7 +289,7 @@ app.post('/notas/salvarLinha', async (req, res) => {
       await gravarNota(connection, idMatricula, componentes[i].id_componente, valores[i]);
     }
 
-    await atualizaFinal(connection, id_turma, ra);
+    await atualizarCalculoFinal(connection, id_turma, ra);
     res.json({ message: 'Aluno e notas salvos com sucesso.' });
   } catch (error) {
     console.error('Erro ao salvar aluno/notas:', error);
@@ -300,7 +300,7 @@ app.post('/notas/salvarLinha', async (req, res) => {
 });
 
 app.delete('/notas/:ra', async (req, res) => {
-  const ra = req.params.ra;
+  const ra = req.params.ra; 
   const idTurma = Number(req.query.id_turma);
 
   if (!ra || !idTurma) {
