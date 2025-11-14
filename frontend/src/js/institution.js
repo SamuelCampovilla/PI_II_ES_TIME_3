@@ -1,5 +1,6 @@
 // pop-up e adicionar instituição ---- Caio Polo
 
+
 async function buscaDocenteId(email) {
     try {
         const response = await fetch(`/docente/id?email=${email}`);
@@ -12,7 +13,6 @@ async function buscaDocenteId(email) {
     }
     return null;
 }
-
 
 document.addEventListener('DOMContentLoaded', async() => {
 
@@ -35,22 +35,19 @@ document.addEventListener('DOMContentLoaded', async() => {
 
 
     if (!docenteEmail) {
-        alert('Email não encontrado na URL. Retornando à página de recuperação.');
+        alert('Email não encontrado na URL. Retornando à página inicial.');
         window.location.href = '/';
         return;
     }
 
     const docenteId = await buscaDocenteId(docenteEmail);
-    console.log(docenteId);
 
     function abrirPopup() {
-
         fundoBlur.classList.add('mostrar');
         popupConteudo.classList.add('mostrar');
     }
 
     function fecharPopup() {
-
         fundoBlur.classList.remove('mostrar');
         popupConteudo.classList.remove('mostrar');
     }
@@ -84,6 +81,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ nomeInstituicao }) 
+                body: JSON.stringify({ nomeInstituicao }) 
             });
             
             const result = await resposta.json();
@@ -94,6 +92,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                 location.reload();
             } else {
                 alert(`Erro ao adicionar instituição: ${result.message || 'Tente novamente.'}`);
+            }         
             }         
         }catch(error){
             console.error('Erro ao inserir instituição', error);

@@ -24,3 +24,4 @@ function exclusion_modal() {
     if (e.key === 'Escape') modal.classList.remove('active');
   });
 }
+export { exclusion_modal };
