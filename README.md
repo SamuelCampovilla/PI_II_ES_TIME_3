@@ -19,7 +19,7 @@ independente de sistemas institucionais.
 
 Com o NotaDez, o professor pode:
 - Cadastrar instituições, disciplinas e turmas;
-- Adicionar ou importar alunos via arquivos `.CSV` ou `.JSON`;
+- Adicionar ou importar alunos via arquivos `.CSV`;
 - Criar componentes de nota (provas, atividades, trabalhos);
 - Lançar e editar notas de forma controlada;
 - Gerar cálculos automáticos de nota final com base em fórmulas personalizadas;
