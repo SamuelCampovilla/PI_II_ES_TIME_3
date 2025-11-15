@@ -1,0 +1,173 @@
+<!-- pagina de estudantes -- Samuel Campovilla -- Vinicius Castro-->
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <title>NotaDez - Alunos da Turma</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/pages/students.css">
+    <link rel="stylesheet" href="/styles/components/loading.css">
+  </head>
+  <body>
+    <div class="students-page">
+      <header class="students-header">
+        <div class="header-text">
+          <p class="eyebrow">Dashboard Docente</p>
+          <h1>Gestão de Alunos</h1>
+          <p class="description">Gerencie as notas e componentes da turma selecionada.</p>
+  
+        </div>
+        <div class="header-right">
+          <a class="back-link" href="#" id="voltarParaCursos">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+          </a>
+          <img src="/assets/images/PI - Logo.PNG" alt="Logo NotaDez" class="header-logo" loading="lazy">
+        </div>
+      </header>
+
+      <main class="students-main">
+        <section class="students-card table-card">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Turma selecionada</p>
+              <h2>Quadro de Notas</h2>
+              <small class="text-muted">Turma: <span id="nomeTurmaSelecionada">Carregando...</span></small>
+            </div>
+            <div id="caixaRemocoes" class="bulk-actions ms-auto d-none">
+              <button id="btnRemoverMarcados" class="btn btn-outline-danger btn-sm" type="button">
+                Remover Selecionados
+              </button>
+            </div>
+          </div>
+
+          <div class="actions-grid">
+            <div class="primary-actions">
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddAluno">
+                + Adicionar Aluno
+              </button>
+
+              <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddComponente">
+                + Criar Componente
+              </button>
+              <div class="btn-group">
+                <button class="btn btn-outline-primary" type="button" id="btnImportarCsv">
+                  Importar via CSV
+                </button>
+                <button class="btn btn-outline-primary" type="button" id="btnExportarCsv">
+                  Exportar CSV
+                </button>
+              </div>
+              <input type="file" id="inputCsvAlunos" accept=".csv" class="d-none">
+            </div>
+
+            <div class="switches">
+              <div class="form-check form-switch ms-2">
+                <input class="form-check-input" type="checkbox" id="switchEdicao">
+                <label class="form-check-label" for="switchEdicao">Modo de edição de notas (C1, C2, C3)</label>
+              </div>
+
+              <div class="form-check form-switch ms-2">
+                <input class="form-check-input" type="checkbox" id="switchEditarComponentes">
+                <label class="form-check-label" for="switchEditarComponentes">Editar componentes (mostrar excluir nas siglas)</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle" id="tabelaNotas">
+              <thead class="table-light">
+                <tr>
+                  <th style="width:36px;">
+                    <input id="checkAll" class="form-check-input" type="checkbox">
+                  </th>
+                  <th>RA</th>
+                  <th>Nome</th>
+                  <th>C1</th>
+                  <th>C2</th>
+                  <th>C3</th>
+                  <th>Média</th>
+                  <th class="text-end" style="width:140px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyStudents"></tbody>
+            </table>
+          </div>
+
+          <small class="text-muted table-hint">
+            A tabela sempre abre em modo de visualização. Para salvar notas, crie componentes com siglas C1, C2 e C3 para a disciplina desta turma.
+          </small>
+        </section>
+      </main>
+    </div>
+
+    <!-- Modal Adicionar Aluno -->
+    <div class="modal fade" id="modalAddAluno" tabindex="-1">
+      <div class="modal-dialog">
+        <form class="modal-content" id="formAddAluno">
+          <div class="modal-header">
+            <h5 class="modal-title">Adicionar Aluno</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">RA</label>
+              <input type="text" id="addRa" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nome</label>
+              <input type="text" id="addNome" class="form-control" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+            <button class="btn btn-primary" type="submit">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Criar Componente -->
+    <div class="modal fade" id="modalAddComponente" tabindex="-1">
+      <div class="modal-dialog">
+        <form class="modal-content" id="formAddComponente">
+          <div class="modal-header">
+            <h5 class="modal-title">Criar Componente de Nota</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Nome do componente</label>
+              <input type="text" id="compNome" class="form-control" placeholder="Ex: Prova 1" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Sigla</label>
+              <input type="text" id="compSigla" class="form-control" placeholder="Ex: C1, P1, TF" required>
+              <small class="text-muted">Para este quadro, use C1, C2 e C3 se quiser que apareçam nas colunas.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Descrição (opcional)</label>
+              <textarea id="compDescricao" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+            <button class="btn btn-primary" type="submit">Criar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="/js/loading.js"></script>
+    <script src="/js/students.js"></script>
+  </body>
+</html>

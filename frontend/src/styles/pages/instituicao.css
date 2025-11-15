@@ -1,0 +1,285 @@
+@import url('../main.css');
+@import url('../base/variables.css');
+
+*{
+    font-family: var(--font-family-principal)
+}
+
+body{
+  
+    margin: 0;
+    padding: 20px;
+    font-family: var(--font-family-principal);
+}
+.header{
+    margin: 10px 5px 0px 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 16px;
+    background-color: white;
+    box-shadow: var(--default-shadow-box--);
+    padding: 20px;
+}
+
+.logo{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.name{
+    font-family: var(--font-family-principal);
+    font-weight: 500;
+    font-size: 1.5em;
+}
+
+
+.initial_text{
+    color: var(--gray-);
+    font-family: var(--font-family-principal);
+}
+
+
+.user-info{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 40px;
+}
+
+.user-info > button:hover{
+    background-color: rgb(203, 201, 201);
+}
+
+.nome{
+    font-family: var(--font-family-principal);
+}
+
+button{
+    background-color: white;
+    border: 1px solid var(-button-border-);
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: var(--font-family-principal);
+}
+
+main{
+    margin-left: 3%;
+    margin-top: 3%;
+}
+
+.message{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+}
+
+.message > button{
+    font-family: var(--font-family-principal);
+    font-size: 1.1em;
+}
+.message > button:hover{
+    background-color: black;
+    color: white;
+
+}
+
+.welcome{
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+.welcome_message{
+   color: var(--gray-);
+}
+
+.add_instituition  {
+    margin-top: 20px;
+    width: 16%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.card_container{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 24px;
+    margin-top: 25px;
+    padding: 12px;
+}
+
+@media (max-width: 1024px) {
+    .card_container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 600px) {
+    .card_container {
+        grid-template-columns: 1fr; 
+    }
+    .add_instituition p:nth-child(2) {
+        display: none;
+    }   
+    
+    .add_instituition {
+        width: fit-content; 
+        padding: 10px;
+    }
+    }
+
+.card{
+    box-shadow: var(--default-shadow-box--);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    justify-content: center;
+    border-radius: 16px;
+
+}
+
+
+
+.institution_info{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 0 45px 0;
+}
+
+.institution_info h2{
+    font-weight: 600;
+    font-size: 1.1em;
+    font-family: var(--font-family-principal);
+}
+
+.institution_info > button{
+    border: none;
+    width: 0.5%;
+}
+
+
+.info{
+    display: flex;
+    justify-content: space-between;
+    margin: 18px 0 0 0;
+    font-family: var(--font-family-principal);
+}
+
+.info > div{
+    display: flex;
+    gap: 10px;
+}
+
+
+.card > button{
+    margin-top: 25px;
+    border: solid 1px var(--button-border-);
+    background-color: none;
+}
+
+.card > button:hover{
+    color: white;
+    border: solid 1px var(--button-border-);
+    background-color: var(--button-border-);
+}
+
+.card > button:active{
+    transform: scale(0.98);
+    background-color: #599ae4;;
+}
+
+#blurred-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    background-color: rgba(233, 227, 227, 0.5);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    opacity: 0;
+    visibility: hidden;
+
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#blurred-bg.mostrar {
+    opacity: 1;
+    visibility: visible;
+}
+#pop-up{
+
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 10px 30px 30px 30px;
+    box-shadow: var(--default-shadow-box--);
+    border-radius: 16px;
+    z-index: 1000;
+    width: 30%;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    
+}
+#pop-up.mostrar {
+    display: inline;
+    
+}
+
+#close-pop-up{
+    top: 10px;
+    right: 10px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+}
+
+#pop-up div{
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+}
+
+#pop-up h2{
+    font-size: 2em;
+    font-weight: 700;
+}
+#pop-up input{
+    border-radius: 6px;
+    text-align: center;
+    padding: 3px;
+    font-size: 1.2em
+}
+
+
+#pop-up div > button{
+    border: solid 1px var(--button-border-);
+    
+}
+
+#pop-up div > button:hover{
+    color: white;
+    border: solid 1px var(--button-border-);
+    background-color: var(--button-border-);
+}
+
+#pop-up div > button:active{
+    transform: scale(0.98);
+    background-color: #599ae4;
+}

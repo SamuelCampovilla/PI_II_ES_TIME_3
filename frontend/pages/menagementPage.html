@@ -1,0 +1,87 @@
+<!-- pagina de gerencias cursos -- Vinicius Castro-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Modelo de Cursos</title>
+    <link rel="stylesheet" href="/styles/pages/menagement.css" />
+    <link rel="stylesheet" href="/styles/components/exclusion_modal.css" />
+    <script src="/js/exclusion_modal.js" defer></script>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-card">
+        <div class="header-row">
+          <div class="header-text">
+            <h1 id="nome_instituicao" class="title">Universidade Federal de São Paulo</h1>
+            <p class="subtitle">Gerenciamento de Cursos e Disciplinas</p>
+          </div>
+          <img src="/assets/images/PI%20-%20Logo.PNG" alt="Logo NotaDez" class="header-logo" />
+        </div>
+        <a class="back-link" href="#" id="voltarParaInstituicao">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Voltar</span>
+        </a>
+      </div>
+    </header>
+
+    <button id="add-course">+ Adicionar Novo Curso</button>
+
+    <div id="lista_cursos"></div>
+
+    <!-- single backdrop containing both popups -->
+       <div id="blurred-bg">
+      <div id="pop-up" class="popup">
+        <button class="close-pop-up" aria-label="Fechar pop-up"><img src="/assets/images/cancel.png" alt=""></button>
+        <h2>Adicionar Curso</h2>
+        <input type="text" id="course-name-pop-up" placeholder="Nome do Curso">
+        <button id="btnAdicionar">Adicionar</button>
+      </div>
+      <!-- pop-up de disciplina agora dentro do mesmo backdrop -->
+      <div id="pop-up-disciplina" class="popup">
+        <button class="close-pop-up" aria-label="Fechar pop-up"><img src="/assets/images/cancel.png" alt=""></button>
+        <h2>Adicionar Disciplina</h2>
+        <input type="text" id="nomeDisciplina" placeholder="Nome da Disciplina">
+        <input type="text" id="codDisciplina" placeholder="Codigo da Disciplina">
+        <input type="text" id="PerDisciplina" placeholder="Período da Disciplina">
+        <button id="btnAdicionarDisciplina">Adicionar</button>
+      </div>
+    </div>
+ <!-- Pop-up para adicionar turmas -- Caio Polo -->
+    <div id="pop-up-turma" class="popup">
+      <button class="close-pop-up" aria-label="Fechar pop-up"><img src="/assets/images/cancel.png" alt=""></button>
+      <h2>Adicionar Turma</h2>
+      <input type="text" id="codTurma" placeholder="Código da Turma (Ex: T1)">
+      <input type="text" id="nomeTurma" placeholder="Nome da Turma (Ex: Noturno A)">
+      <button id="btnAdicionarTurma">Adicionar</button>
+    </div>  
+
+
+    <div class="modal" id="exclusion_modal">
+      <div class="modal_content">
+        <div class="modal_top">
+            <img src="/assets/images/danger.svg" alt="Danger Icon" class="modal_icon">
+            <h2>Confirmar Exclusão</h2>
+        </div>
+        <div class="modal_header">
+            <p>Você está prestes a excluir: <strong id="exclusion_item_name">Item</strong></p>
+        </div>
+        <div class="modal_body">
+            <p id="exclusion_body_text">Esta ação é irrevogável.</p>
+        </div>
+        <div id="exclusion_loading" style="display: none; justify-content: center; align-items: center; padding: 10px;">
+
+        </div>
+        <div class="modal_buttons">
+            <button id="cancel-btn" class="btn btn-cancel">Cancelar</button>
+            <button id="confirm-btn" class="btn btn-danger">Sim, excluir</button>
+        </div>
+    </div>
+    </div>
+
+    <script type="module" src="/js/menagementpage.js" defer></script>
+  </body>
+</html>

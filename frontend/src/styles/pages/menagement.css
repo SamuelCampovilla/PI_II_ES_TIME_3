@@ -1,0 +1,495 @@
+* {
+ box-sizing: border-box;
+}
+body {
+ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Arial, sans-serif;
+ background-color: #f5f7fa;
+ color: #333;
+ margin: 0;
+ padding: 24px 40px 48px;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+ margin: 0;
+padding: 0;
+}
+
+.header {
+ margin-bottom: 32px;
+}
+
+.header-card {
+ background: #fff;
+ border-radius: 24px;
+ padding: 26px clamp(20px, 4vw, 40px);
+ box-shadow: 0 25px 45px rgba(15, 23, 42, 0.12);
+ border: 1px solid rgba(15, 23, 42, 0.08);
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 24px;
+ flex-wrap: wrap;
+}
+
+.header-row {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 16px;
+ flex: 1 1 300px;
+}
+
+.header-text {
+ max-width: 70%;
+}
+
+.header-logo {
+ height: 64px;
+ width: auto;
+ object-fit: contain;
+ filter: drop-shadow(0 6px 12px rgba(15, 23, 36, 0.15));
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #0f1724;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: #6b7280;
+}
+
+.back-link{
+    text-decoration: none;
+    color: #111827;
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    padding: 10px 18px;
+    background: #f9fafb;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 6px 15px rgba(15, 23, 42, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.back-link svg {
+    width: 20px;
+    height: 20px;
+}
+.back-link:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(17, 24, 39, 0.15);
+}
+
+#add-course {
+ background-color: #0b1220;
+color: white;
+border: none;
+border-radius: 8px;
+ padding: 10px 18px;
+ font-size: 0.95rem;
+ font-weight: 600;
+ cursor: pointer;
+ transition: all 0.2s ease;
+ margin-bottom: 24px;
+ display: inline-flex;
+ align-items: center;
+ gap: 6px;
+}
+
+#add-course:hover {
+ background-color: #1a2b3d;
+ transform: translateY(-1px);
+}
+
+#lista_cursos {
+ display: flex;
+ flex-direction: column;
+ gap: 20px;
+}
+
+.course {
+ background: #fff;
+ border-radius: 12px;
+ padding: 20px;
+ box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+ border: 1px solid #eef2f6;
+ transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.course:hover {
+ transform: translateY(-4px);
+ border-color: #c7d7f5;
+ box-shadow: 0 12px 30px rgba(36, 64, 115, 0.12);
+}
+
+.course-header {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ margin-bottom: 16px;
+ gap: 14px;
+ padding-bottom: 16px;
+ border-bottom: 1px solid #f0f4f8;
+}
+
+.course-header .icon {
+ width: 40px;
+ height: 40px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ background: linear-gradient(135deg, #eef6ff 0%, #f6fbff 100%);
+ border-radius: 10px;
+ font-size: 24px;
+color: #2b7be4;
+ flex-shrink: 0;
+ box-shadow: 0 2px 8px rgba(43, 123, 228, 0.06);
+}
+
+.course-header h2 {
+ font-size: 1.15rem;
+ font-weight: 700;
+ color: #0f1724;
+ flex: 1;
+ margin: 0;
+}
+
+.course-header .btn-group {
+ display: flex;
+ gap: 8px;
+ align-items: center;
+ flex-shrink: 0;
+}
+
+.btn-primary {
+ background: #fff;
+ color: #1e3a8a;
+ border: 1px solid #dbeafe;
+ border-radius: 8px;
+ padding: 8px 14px;
+ font-size: 0.9rem;
+ cursor: pointer;
+ transition: all 0.2s ease;
+ font-weight: 600;
+ display: inline-flex;
+ align-items: center;
+ gap: 4px;
+}
+
+.btn-primary:hover {
+ background: #eef8ff;
+ border-color: #bfdbfe;
+}
+
+.btn-primary.delete {
+ color: #dc2626;
+ border-color: #fecaca;
+}
+
+.btn-primary.delete:hover {
+ background: #fee2e2;
+ border-color: #fca5a5;
+}
+
+.btn-primary.edit {
+ color: #666;
+}
+
+.btn-primary.edit:hover {
+ background: #f3f4f6;
+}
+
+.disciplinas-container {
+ display: flex;
+ flex-direction: column;
+ gap: 14px;
+}
+
+.disciplina-card {
+ background: #fbfdff;
+ border-radius: 10px;
+ padding: 14px;
+ border: 1px solid #f0f4f8;
+ transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.disciplina-card:hover {
+ transform: translateY(-3px);
+ border-color: #bfd7ff;
+ box-shadow: 0 10px 20px rgba(43, 123, 228, 0.15);
+}
+
+.disciplina-header {
+ display: flex;
+ align-items: flex-start;
+ justify-content: space-between;
+ gap: 12px;
+ margin-bottom: 12px;
+}
+
+.disciplina-info h3 {
+ font-size: 1rem;
+ font-weight: 700;
+ color: #0f1724;
+margin-bottom: 4px;
+}
+
+.disciplina-info p {
+ font-size: 0.85rem;
+ color: #2563eb;
+ margin: 2px 0;
+}
+
+.disciplina-acoes {
+ display: flex;
+ gap: 8px;
+ flex-shrink: 0;
+}
+
+.icon-btn {
+ background: none;
+ border: none;
+ cursor: pointer;
+ font-size: 1.1rem;
+ transition: all 0.2s ease;
+ padding: 4px 6px;
+ color: #9ca3af;
+}
+
+.icon-btn:hover {
+ color: #ef4444;
+ transform: scale(1.05);
+}
+
+.add-disciplina-link {
+ color: #2563eb;
+ font-size: 0.85rem;
+ cursor: pointer;
+ font-weight: 600;
+ display: inline-block;
+ margin-top: 8px;
+}
+
+.add-disciplina-link:hover {
+ text-decoration: underline;
+}
+
+.turmas-label {
+ font-size: 0.9rem;
+ font-weight: 700;
+ color: #0f1724;
+ margin: 10px 0 8px 0;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+}
+
+.turmas-container {
+ display: grid;
+ grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+ gap: 10px;
+ margin-top: 8px;
+}
+
+.turma-card {
+ background: #fff;
+ border-radius: 8px;
+ border: 1px solid #e5e7eb;
+ padding: 10px 12px;
+ display: flex;
+ justify-content: space-around ;
+ align-items: center;
+ gap: 8px;
+ box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+ transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.turma-card:hover {
+ border-color: #9ac3ff;
+ background: linear-gradient(135deg, #fdfcff 0%, #eef6ff 100%);
+ transform: translateY(-2px);
+ box-shadow: 0 10px 24px rgba(36, 64, 115, 0.18);
+}
+
+.turma-info h4 {
+ font-size: 0.95rem;
+ font-weight: 700;
+ color: #0f1724;
+ margin-bottom: 3px;
+}
+
+.turma-info p {
+ font-size: 0.85rem;
+ color: #6b7280;
+ margin: 0;
+}
+
+.turma-botoes {
+ display: flex;
+ gap: 4px;
+ flex-shrink: 0;
+}
+
+.add-turma-link {
+ color: #2563eb;
+ font-size: 0.85rem;
+ cursor: pointer;
+ font-weight: 600;
+ margin-top: 6px;
+ display: inline-block;
+}
+
+.add-turma-link:hover {
+ text-decoration: underline;
+}
+
+.turma-header{
+    display: flex;
+    justify-content: space-around;
+
+}
+#blurred-bg {
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+height: 100%;
+z-index: 999;
+ background-color: rgba(233, 227, 227, 0.5);
+ backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  opacity: 0;
+ visibility: hidden;
+ transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#blurred-bg.mostrar {
+ opacity: 1;
+ visibility: visible;
+}
+
+.popup {
+ display: none; 
+ position: fixed;
+ top: 50%;
+ left: 50%;
+ transform: translate(-50%, -50%);
+ background-color: white;
+ padding: 10px 30px 30px 30px;
+ box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
+ border-radius: 16px;
+ z-index: 1000;
+ width: 90%; 
+max-width: 450px; 
+flex-direction: column;
+ align-items: center;
+ gap: 20px;
+ transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.popup.mostrar {
+ display: flex;
+}
+    
+.close-pop-up {
+ border: none;
+ background-color: transparent;
+ cursor: pointer;
+ align-self: flex-end;
+ padding: 5px; 
+}
+
+.close-pop-up img {
+ width: 16px;
+ height: 16px;
+}
+
+.popup h2 {
+ font-size: 1.5em; 
+ font-weight: 700;
+ text-align: center;
+ width: 100%;
+}
+.popup input {
+ border-radius: 6px;
+ text-align: left;
+ padding: 10px; 
+ font-size: 1em; 
+ border: 1px solid #ccc;
+ width: 100%;
+}
+
+.popup button[id^="btnAdicionar"] { 
+ background-color: #0b1220;
+ color: white;
+ border: none;
+ border-radius: 8px;
+ padding: 10px 18px;
+font-size: 0.95rem;
+ font-weight: 600;
+ cursor: pointer;
+ transition: all 0.2s ease;
+width: 100%;
+}
+
+.popup button[id^="btnAdicionar"]:hover {
+ background-color: #1a2b3d;
+}
+
+.modal {
+ display: none;
+ position: fixed;
+ inset: 0;
+ background: rgba(0, 0, 0, 0.5);
+ backdrop-filter: blur(4px);
+ z-index: 1001;
+ align-items: center;
+ justify-content: center;
+}
+
+.modal.show {
+ display: flex;
+}
+
+
+@media (max-width: 768px) {
+ body {
+ padding: 16px 20px 32px;
+ }
+
+.header-card {
+ flex-direction: column;
+ align-items: flex-start;
+}
+
+.header-row {
+ width: 100%;
+}
+
+.header-text {
+ max-width: 100%;
+}
+
+.header-logo {
+ align-self: flex-start;
+ height: 52px;
+}
+
+ .title {
+ font-size: 1.4rem;
+ }
+
+.course-header {
+ flex-wrap: wrap;
+ }
+
+ .turmas-container {
+ grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+ }
+}
