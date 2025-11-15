@@ -1,8 +1,8 @@
 // Samuel Campovilla
-// Aguarda todo o HTML ser carregado antes de rodar o script
+// Aguarda todo o HTML ser carregado antes de rodar
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Pega o link/botão que abre o modal
+  // Pega o botão que abre o modal
   const openBtn = document.getElementById('conditions_popup');
 
   // Pega o botão que fecha o modal
@@ -14,13 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!openBtn || !closeBtn || !modal) {
     return;
   }
-  // Ao clicar no botão, abre o modal
+  // Abre o modal
   openBtn.addEventListener('click', (e) => {
     e.preventDefault(); 
     modal.classList.add('active');
   });
 
-  // Ao clicar fecha o modal
+  // fecha o modal
   closeBtn.addEventListener('click', () => {
     modal.classList.remove('active');
   });
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === modal) modal.classList.remove('active');
   });
 
-  // Pressionar a tecla Esc fecha o modal
+  // Esc fecha o modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') modal.classList.remove('active');
   });

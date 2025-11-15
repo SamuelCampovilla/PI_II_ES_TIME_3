@@ -12,6 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const port = 3000;
+let auditoriaTabelaCriada = false;
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com', 
@@ -30,6 +31,59 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../frontend/src')));
 app.use(express.static(path.join(__dirname, 'src')));
+
+async function prepararAuditoria(connection) {
+  if (auditoriaTabelaCriada) return;
+  await connection.execute(`
+    CREATE TABLE IF NOT EXISTS auditoria_notas (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      id_turma INT NOT NULL,
+      ra VARCHAR(64) NOT NULL,
+      nome_aluno VARCHAR(255) NOT NULL,
+      valor_anterior DECIMAL(5,2),
+      valor_novo DECIMAL(5,2),
+      mensagem TEXT NOT NULL,
+      criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  auditoriaTabelaCriada = true;
+}
+
+function normalizarValorNota(valor) {
+  if (valor === null || valor === undefined) return null;
+  if (typeof valor === 'number') return Number.isNaN(valor) ? null : valor;
+  const texto = String(valor).trim();
+  if (!texto) return null;
+  if (texto.toUpperCase() === 'NULL') return null;
+  const convertido = Number(texto.replace(',', '.'));
+  if (Number.isNaN(convertido)) return null;
+  return convertido;
+}
+
+function formatarNumeroAuditoria(valor) {
+  if (valor === null || valor === undefined) return 'NULL';
+  return Number(valor).toFixed(1);
+}
+
+function gerarMensagemAuditoria(nome, anterior, novo) {
+  const agora = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const data = `${pad(agora.getDate())}/${pad(agora.getMonth() + 1)}/${agora.getFullYear()} ${pad(agora.getHours())}:${pad(agora.getMinutes())}:${pad(agora.getSeconds())}`;
+  return `${data} - (Aluno ${nome || ''}) - Nota de ${formatarNumeroAuditoria(anterior)} para ${formatarNumeroAuditoria(novo)} modificada e salva.`;
+}
+
+async function registrarAuditoriaNota(connection, dados) {
+  await prepararAuditoria(connection);
+  const mensagem = gerarMensagemAuditoria(dados.nome, dados.valorAnterior, dados.valorNovo);
+  await connection.execute(
+    'INSERT INTO auditoria_notas (id_turma, ra, nome_aluno, valor_anterior, valor_novo, mensagem) VALUES (?, ?, ?, ?, ?, ?)',
+    [dados.idTurma, dados.ra, dados.nome, dados.valorAnterior, dados.valorNovo, mensagem]
+  );
+}
+
+function arredondarMediaFinal(valor) {
+  return Math.round(valor * 2) / 2;
+}
 
 // ---------------------------------------------------------------------
 // HELPERS -- Samuel Campovilla e Caua Bianchi
@@ -83,31 +137,52 @@ async function buscarComponentes(connection, idTurma) {
 }
 
 
-async function gravarNota(connection, idMatricula, idComponente, valor) {
-  if (!idComponente) return; 
-
- 
-  if (valor === null || valor === undefined || valor === '') {
-    await connection.execute(
-      'DELETE FROM lancamento_nota WHERE id_matricula = ? AND id_componente = ?',
-      [idMatricula, idComponente]
-    );
+async function gravarNota(connection, idMatricula, idComponente, valor, auditoria) {
+  if (!idComponente) return;
+  const notaNormalizada = normalizarValorNota(valor);
+  const [registroExistente] = await connection.execute(
+    'SELECT valor_nota FROM lancamento_nota WHERE id_matricula = ? AND id_componente = ?',
+    [idMatricula, idComponente]
+  );
+  const tinhaRegistro = registroExistente.length > 0;
+  const valorAnterior = tinhaRegistro ? (registroExistente[0].valor_nota == null ? null : Number(registroExistente[0].valor_nota)) : null;
+  if (notaNormalizada === null) {
+    if (tinhaRegistro) {
+      await connection.execute(
+        'DELETE FROM lancamento_nota WHERE id_matricula = ? AND id_componente = ?',
+        [idMatricula, idComponente]
+      );
+      if (auditoria && valorAnterior !== null) {
+        await registrarAuditoriaNota(connection, {
+          idTurma: auditoria.idTurma,
+          ra: auditoria.ra,
+          nome: auditoria.nome,
+          valorAnterior,
+          valorNovo: null
+        });
+      }
+    }
     return;
   }
-
-  const notaNum = Number(valor);
-  if (isNaN(notaNum)) return;
-
-  const [resultUpdate] = await connection.execute(
-    'UPDATE lancamento_nota SET valor_nota = ? WHERE id_matricula = ? AND id_componente = ?',
-    [notaNum, idMatricula, idComponente]
-  );
-
-  if (resultUpdate.affectedRows === 0) {
+  if (tinhaRegistro) {
+    await connection.execute(
+      'UPDATE lancamento_nota SET valor_nota = ? WHERE id_matricula = ? AND id_componente = ?',
+      [notaNormalizada, idMatricula, idComponente]
+    );
+  } else {
     await connection.execute(
       'INSERT INTO lancamento_nota (id_matricula, id_componente, valor_nota) VALUES (?, ?, ?)',
-      [idMatricula, idComponente, notaNum]
+      [idMatricula, idComponente, notaNormalizada]
     );
+  }
+  if (auditoria && valorAnterior !== notaNormalizada) {
+    await registrarAuditoriaNota(connection, {
+      idTurma: auditoria.idTurma,
+      ra: auditoria.ra,
+      nome: auditoria.nome,
+      valorAnterior,
+      valorNovo: notaNormalizada
+    });
   }
 }
 
@@ -153,7 +228,8 @@ async function atualizarCalculoFinal(connection, idTurma, ra) {
   }
 
   const soma = notas.reduce((acc, n) => acc + n, 0);
-  const media = Number((soma / 3).toFixed(2));
+  const mediaBase = soma / 3;
+  const media = Number(arredondarMediaFinal(mediaBase).toFixed(1));
 
   await connection.execute(
     `INSERT INTO calculo_final (id_turma, id_aluno, nota_final)
@@ -262,7 +338,15 @@ app.get('/notas', async (req, res) => {
     }
 
     const resposta = alunos.map(({ _id_matricula, ...rest }) => rest);
-    res.json({ componentes, alunos: resposta, nome_turma: nomeTurma });
+    await prepararAuditoria(connection);
+    const [auditoria] = await connection.execute(
+      `SELECT id, id_turma, ra, nome_aluno, valor_anterior, valor_novo, mensagem, criado_em
+         FROM auditoria_notas
+        WHERE id_turma = ?
+        ORDER BY criado_em DESC`,
+      [idTurma]
+    );
+    res.json({ componentes, alunos: resposta, nome_turma: nomeTurma, auditoria });
   } catch (error) {
     console.error('Erro ao carregar notas:', error);
     res.status(500).json({ message: 'Erro ao carregar notas.' });
@@ -286,7 +370,11 @@ app.post('/notas/salvarLinha', async (req, res) => {
     const valores = [c1, c2, c3];
 
     for (let i = 0; i < componentes.length && i < 3; i++) {
-      await gravarNota(connection, idMatricula, componentes[i].id_componente, valores[i]);
+      await gravarNota(connection, idMatricula, componentes[i].id_componente, valores[i], {
+        idTurma: id_turma,
+        ra,
+        nome
+      });
     }
 
     await atualizarCalculoFinal(connection, id_turma, ra);
@@ -457,7 +545,7 @@ app.delete('/componentes/:id', async (req, res) => {
       );
 
       for (const aluno of alunosTurma) {
-        await atualizaFinal(connection, turmaId, aluno.id_aluno);
+        await atualizarCalculoFinal(connection, turmaId, aluno.id_aluno);
       }
     }
 
