@@ -79,4 +79,6 @@ git clone https://github.com/SamuelCampovilla/PI_II_ES_TIME_3.git
 cd PI_II_ES_TIME_3
 > Entre na pasta com o caminho adequado para acessar o conteúdo do projeto.
 
+cd backend
+> Entre na parta backend para rodar o comando "node server.js".
 
