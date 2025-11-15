@@ -27,6 +27,7 @@ const btnExportarCsv = document.getElementById('btnExportarCsv');
 const inputCsvAlunos = document.getElementById('inputCsvAlunos');
 const nomeTurmaSelecionada = document.getElementById('nomeTurmaSelecionada');
 const institutionId = urlParams.get('instituicaoId');
+const docenteEmail = urlParams.get('email');
 
 // modal adicionar aluno
 const formAddAluno = document.getElementById('formAddAluno');
@@ -47,8 +48,10 @@ const compDescricao = document.getElementById('compDescricao');
 
 const voltar = document.getElementById('voltarParaCursos');
 voltar.addEventListener('click', ()=>{
-  window.location.href = `/frontend/pages/menagementPage.html?institutionId=${institutionId}`;
+  window.location.href = `/frontend/pages/menagementPage.html?institutionId=${institutionId}&email=${docenteEmail}`;
 })
+
+
 
 // ------------------------------------------------------------------------------------------------------------------
 // funcao para media de notas
