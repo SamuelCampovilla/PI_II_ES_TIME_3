@@ -56,10 +56,9 @@ Com o NotaDez, o professor pode:
 
 Siga as etapas abaixo para rodar o projeto localmente:
 1. Ter o node.js instalado. 
-2. Ter o Live Server instalado.
-3. Ter conexão com internet.
-4. Ter um navegador compativel com js.
-5. 
+2. Ter conexão com internet.
+3. Ter um navegador compativel com js.
+ 
 
 
 --- 
@@ -71,14 +70,25 @@ Este projeto foi desenvolvido para fins acadêmicos no contexto da disciplina Pr
 
 ---
 
+## 🧾 Log-in do avaliador no banco com permissões limitadas
+
+username: professorAvaliador
+senha: professorAvaliador2500
+porta: 31256
+hostname: caboose.proxy.rlwy.net
+
+---
 ### 1️⃣ Clone o repositório
 ```bash (use os seguintes comandos no terminal)
 git clone https://github.com/SamuelCampovilla/PI_II_ES_TIME_3.git 
 > Baixe (clone) o repositório do GitHub para o seu computador.
 
+npm i 
+> use este comando para instalar todas as dependencias.
+
 cd PI_II_ES_TIME_3
 > Entre na pasta com o caminho adequado para acessar o conteúdo do projeto.
 
 cd backend
-> Entre na parta backend para rodar o comando "node server.js".
+> Entre na pasta backend para rodar o comando "node server.js".
 
