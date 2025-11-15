@@ -62,8 +62,8 @@ function mediaNotas(c1, c2, c3) {
 
   const m = (v1 + v2 + v3) / 3;
   if (isNaN(m)) return null;
-  const arredondada = Math.round(m * 2) / 2;
-  return Number(arredondada.toFixed(1));
+  const rounded = Math.round(m * 2) / 2;
+  return Number(rounded.toFixed(1));
 }
 
 
