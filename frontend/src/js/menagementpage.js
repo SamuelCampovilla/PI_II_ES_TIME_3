@@ -14,15 +14,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addDisciplina = document.getElementById('btnAdicionarDisciplina');
     const addTurma = document.getElementById('btnAdicionarTurma');   
     const listaCursosContainer = document.getElementById('lista_cursos');
-
+    const voltar = document.getElementById('voltarParaInstituicao');
     const urlParams = new URLSearchParams(window.location.search);
     const institutionId = urlParams.get('institutionId');
 
     // Inicializa o modal de exclusão
     exclusion_modal();
     const docenteEmail = urlParams.get('email');
+
 //------------------------------------------------------------------------------------------------------------------
 // busca por cursos cadastrados na instituição
+
+
+    voltar.addEventListener('click', ()=>{
+        window.location.href = `/frontend/pages/instituicao.html?email=${docenteEmail}`;
+    });
+
 
     if (institutionId) {
         try {
@@ -41,6 +48,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         if (listaCursosContainer) listaCursosContainer.innerHTML = '<p>ID da instituição não fornecido na URL.</p>';
     }
+
+//------------------------------------------------------------------------------------------------------------------
+// botao para voltar para instituições
+
+
+
+
+
 
     // --- DELEGAÇÃO DE EVENTOS PARA AÇÕES ---
     listaCursosContainer.addEventListener('click', async (e) => {
@@ -115,7 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (turmaCardClick) {
             const turmaId = turmaCardClick.getAttribute('data-turma-id');
-            window.location.href = `/frontend/pages/students.html?turmaId=${turmaId}`;
+            window.location.href = `/frontend/pages/students.html?turmaId=${turmaId}&instituicaoId=${institutionId}`;
             return;
         }
     });

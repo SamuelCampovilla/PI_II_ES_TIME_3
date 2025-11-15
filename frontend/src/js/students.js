@@ -12,7 +12,9 @@ let listaComponentes = [];
 let listaAlunos = [];
 let modoComponentes = false;
 
-// elementos da tabela
+//-----------------------------------------------------------------------------------------------------------------------------
+// variaveis para a pagina de alunos
+
 const corpoTabela = document.getElementById('tbodyStudents');
 const checkAll = document.getElementById('checkAll');
 const switchEdicao = document.getElementById('switchEdicao');
@@ -24,6 +26,7 @@ const btnImportarCsv = document.getElementById('btnImportarCsv');
 const btnExportarCsv = document.getElementById('btnExportarCsv');
 const inputCsvAlunos = document.getElementById('inputCsvAlunos');
 const nomeTurmaSelecionada = document.getElementById('nomeTurmaSelecionada');
+const institutionId = urlParams.get('instituicaoId');
 
 // modal adicionar aluno
 const formAddAluno = document.getElementById('formAddAluno');
@@ -35,6 +38,20 @@ const formAddComponente = document.getElementById('formAddComponente');
 const compNome = document.getElementById('compNome');
 const compSigla = document.getElementById('compSigla');
 const compDescricao = document.getElementById('compDescricao');
+
+
+
+
+// ----------------------------------------------------------------------------------------------------------------
+// botao para voltar -- Caio Polo
+
+const voltar = document.getElementById('voltarParaCursos');
+voltar.addEventListener('click', ()=>{
+  window.location.href = `/frontend/pages/menagementPage.html?institutionId=${institutionId}`;
+})
+
+// ------------------------------------------------------------------------------------------------------------------
+// funcao para media de notas
 
 function mediaNotas(c1, c2, c3) {
   if (listaComponentes.length < 3) return null;
@@ -49,11 +66,7 @@ function mediaNotas(c1, c2, c3) {
   return Number(arredondada.toFixed(1));
 }
 
-function pintaMedia(td, media) {
-  td.classList.remove('grade-green', 'grade-red');
-  if (media >= 7) td.classList.add('grade-green');
-  else td.classList.add('grade-red');
-}
+
 
 function atualizaBotaoRemover() {
   const anyChecked = corpoTabela.querySelector('.row-check:checked');
@@ -207,7 +220,7 @@ async function carregarTela() {
         tdMedia.classList.remove('grade-green', 'grade-red');
       } else {
         tdMedia.textContent = media.toFixed(1);
-        pintaMedia(tdMedia, media);
+    
       }
     }
 
@@ -514,7 +527,7 @@ corpoTabela.addEventListener('blur', async (e) => {
         tdMedia.classList.remove('grade-green', 'grade-red');
       } else {
         tdMedia.textContent = media.toFixed(1);
-        pintaMedia(tdMedia, media);
+      
       }
     }
     const okNode = document.createElement('span');
@@ -633,18 +646,6 @@ if (btnExportarCsv) {
 
 async function apagarComponente(id) {
   const res = await fetch(`/componentes/${id}`, { method: 'DELETE' });
-
-  if (res.status !== 204) {
-    let msg = 'Erro ao remover componente.';
-    try {
-      const data = await res.json();
-      if (data.message) msg = data.message;
-    } catch (e) {
-
-    }
-    alert(msg);
-    return;
-  }
 
   await carregarTela();
 }

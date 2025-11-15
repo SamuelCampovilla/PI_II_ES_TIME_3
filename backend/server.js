@@ -191,8 +191,6 @@ async function atualizarCalculoFinal(connection, idTurma, ra) {
 
   const componentes = await buscarComponentes(connection, idTurma);
   const componentesCount = componentes.length;
-
- 
   if (componentesCount === 0) {
     await connection.execute(
       'DELETE FROM calculo_final WHERE id_turma = ? AND id_aluno = ?',
