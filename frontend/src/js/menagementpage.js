@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
 
+    
+
     if (institutionId) {
         try {
             const response = await fetch(`/institution/${institutionId}`);
@@ -130,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (turmaCardClick) {
             const turmaId = turmaCardClick.getAttribute('data-turma-id');
-            window.location.href = `/frontend/pages/students.html?turmaId=${turmaId}&instituicaoId=${institutionId}`;
+            window.location.href = `/frontend/pages/students.html?turmaId=${turmaId}&instituicaoId=${institutionId}&email=${docenteEmail}`;
             return;
         }
     });
