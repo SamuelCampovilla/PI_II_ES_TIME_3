@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const institutionId = urlParams.get('institutionId');
 
-    // Inicializa o modal de exclusão
+    
     exclusion_modal();
     const docenteEmail = urlParams.get('email');
 
@@ -52,14 +52,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
 //------------------------------------------------------------------------------------------------------------------
-// botao para voltar para instituições
+// Modal e exclusao
 
-
-
-
-
-
-    // --- DELEGAÇÃO DE EVENTOS PARA AÇÕES ---
     listaCursosContainer.addEventListener('click', async (e) => {
         const addDiscBtn = e.target.closest('.btn-add-disciplina');
         const delDiscBtn = e.target.closest('.btn-delete-disciplina');
@@ -136,8 +130,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
     });
-
-    // --- FUNÇÕES DE EXCLUSÃO ---
+//-----------------------------------------------------------------------------------------------------------------------------
+// Funções para excluir
 
     async function excluirDisciplina(disciplinaCodigo) {
         try {
@@ -146,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             if (response.ok) {
                 alert('Disciplina excluída com sucesso!');
-                loadCoursesForInstitution(institutionId); // Recarrega os cursos para atualizar a lista
+                loadCoursesForInstitution(institutionId);
             } else {
                 const err = await response.json().catch(() => null);
                 alert(err?.message || 'Erro ao excluir disciplina.');
@@ -186,7 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             if (response.ok) {
                 alert('Turma excluída com sucesso!');
-                loadCoursesForInstitution(institutionId); // Recarrega para atualizar lista
+                loadCoursesForInstitution(institutionId); 
             } else {
                 const err = await response.json().catch(() => null);
                 alert(err?.message || 'Erro ao excluir turma.');
@@ -199,9 +193,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // --- LÓGICA DO MODAL DE EXCLUSÃO ---
+//-----------------------------------------------------------------------------------------------------------------------------
+// Logica do modal de excluir
 
-    let confirmHandler = null; // Armazena o handler de confirmação
+    let confirmHandler = null; 
 
     async function handleExclusion(type, id, name, checkDependencies, onConfirm) {
         const itemNameEl = document.getElementById('exclusion_item_name');
@@ -262,8 +257,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-    // ----------------------------------------------------------------------------------------------------
-    // funções para modal
+// ----------------------------------------------------------------------------------------------------
+// funções para modal
 
     function abrirPopup() {
         fundoBlur.classList.add('mostrar');
@@ -431,7 +426,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const turmaCard = document.createElement('div');
                 turmaCard.className = 'turma-card';
-                turmaCard.setAttribute('data-turma-id', turma.id_turma); // Adicionar ID ao card
+                turmaCard.setAttribute('data-turma-id', turma.id_turma);
  
                 turmaCard.innerHTML = `
                     <div class="turma-header">

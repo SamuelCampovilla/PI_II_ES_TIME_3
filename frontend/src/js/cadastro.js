@@ -1,3 +1,5 @@
+// js para cadastro de usuario -- Caio Polo
+
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('signup-form');
 

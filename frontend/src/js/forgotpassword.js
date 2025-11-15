@@ -1,3 +1,5 @@
+// js para esqueci senha -- Caio Polo
+
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('forgot-form');
 

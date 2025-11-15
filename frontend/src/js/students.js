@@ -1,3 +1,5 @@
+// pagina de estudante -- Caio Polo -- Samuel Campovilla -- Caua Bianchi
+
 let urlParams = new URLSearchParams(window.location.search);
 let ID_TURMA = urlParams.get('turmaId') ? Number(urlParams.get('turmaId')) : 1;
 
@@ -29,11 +31,13 @@ const nomeTurmaSelecionada = document.getElementById('nomeTurmaSelecionada');
 const institutionId = urlParams.get('instituicaoId');
 const docenteEmail = urlParams.get('email');
 
+//-----------------------------------------------------------------------------------------------------------------------------
 // modal adicionar aluno
 const formAddAluno = document.getElementById('formAddAluno');
 const addRa = document.getElementById('addRa');
 const addNome = document.getElementById('addNome');
 
+//-----------------------------------------------------------------------------------------------------------------------------
 // modal criar componente
 const formAddComponente = document.getElementById('formAddComponente');
 const compNome = document.getElementById('compNome');
@@ -353,7 +357,9 @@ function baixarCsv() {
   URL.revokeObjectURL(url);
 }
 
-// remove aluno
+//-----------------------------------------------------------------------------------------------------------------------------
+// remover aluno
+
 async function apagarAluno(ra) {
   if (!confirm(`Remover aluno ${ra} desta turma?`)) return;
 
@@ -370,7 +376,10 @@ async function apagarAluno(ra) {
   await carregarTela();
 }
 
+
+//-----------------------------------------------------------------------------------------------------------------------------
 // criar componente de nota
+
 async function guardarComponente(nome, sigla, descricao) {
   const body = { id_turma: ID_TURMA, nome, sigla, descricao };
   const res = await fetch('/componentes', {
@@ -558,7 +567,9 @@ corpoTabela.addEventListener('click', (e) => {
   }
 });
 
-// remover selecionados
+//-----------------------------------------------------------------------------------------------------------------------------
+// remover alunos selecionados
+
 btnRemoverMarcados.addEventListener('click', async () => {
   const selecionados = Array.from(corpoTabela.querySelectorAll('.row-check:checked'));
   if (!selecionados.length) return;
@@ -586,7 +597,9 @@ btnRemoverMarcados.addEventListener('click', async () => {
   await carregarTela();
 });
 
+//-----------------------------------------------------------------------------------------------------------------------------
 // adicionar aluno
+
 formAddAluno.addEventListener('submit', async (e) => {
   e.preventDefault();
 

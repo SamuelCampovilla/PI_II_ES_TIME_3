@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     disciplinesContainer.innerHTML = disciplinesHtml;
 
-                    // Após renderizar as disciplinas, buscar e exibir as turmas de cada uma
+                 
                     fetchAndDisplayTurmas();
 
                 } catch (error) {

@@ -32,7 +32,7 @@ app.use(express.static(path.join(__dirname, '../frontend/src')));
 app.use(express.static(path.join(__dirname, 'src')));
 
 // ---------------------------------------------------------------------
-// HELPERS -- Samuel Campovilla e Caua Bianchi
+// helpers -- Samuel Campovilla e Caua Bianchi
 // ---------------------------------------------------------------------
 
 
@@ -175,7 +175,7 @@ async function atualizarCalculoFinal(connection, idTurma, ra) {
     [idTurma, ra]
   );
 
-  // Mapear notas; tratar null como 0 para o cálculo (requisito). Sempre calculamos divisor = 3 (C1,C2,C3)
+ 
   const notas = [0, 0, 0];
   for (let i = 0; i < rowsNotas.length && i < 3; i++) {
     const val = rowsNotas[i].valor_nota;
@@ -951,7 +951,7 @@ app.post('/adddisciplina', async (req, res) => {
         }
     }
 });
-// Deletar disciplina por código (codigo_disciplina)
+
 app.delete('/deleteDisciplina', async (req, res) => {
   const codigo = req.query.codigo;
   if (!codigo) {
@@ -960,7 +960,7 @@ app.delete('/deleteDisciplina', async (req, res) => {
   let connection;
   try {
     connection = await mysql.createConnection(dbConfig);
-    // checa se existem turmas vinculadas
+  
     const [turmas] = await connection.execute('SELECT 1 FROM turmas WHERE id_disciplina = ?', [codigo]);
     if (turmas.length) {
       return res.status(409).json({ message: 'Não é possível excluir, pois existem alunos associados às turmas desta disciplina.' });
@@ -983,13 +983,11 @@ app.delete('/deleteDisciplina', async (req, res) => {
 app.get('/turmas', async (req, res) => {
     const disciplinaCodigo = req.query.codigo_disciplina;
     if (!disciplinaCodigo) {
-        // Return empty array if no code is provided, as the frontend might call this without a code
         return res.status(200).json({ turmas: [] });
     }
     let connection;
     try {
         connection = await mysql.createConnection(dbConfig);
-        // This assumes the foreign key in 'turmas' is 'id_disciplina' but it holds the 'codigo_disciplina' value.
         const query = 'SELECT * FROM turmas WHERE id_disciplina = ?';
         const [turmas] = await connection.execute(query, [disciplinaCodigo]);
         return res.status(200).json({ turmas });

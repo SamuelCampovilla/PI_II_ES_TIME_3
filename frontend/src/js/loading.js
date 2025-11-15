@@ -1,3 +1,6 @@
+// modal de loading -- Samuel Campovilla
+
+
 (function setupLoaderBox() {
     if (window.__loadInit) {
         return;

@@ -10,7 +10,6 @@ function exclusion_modal() {
     modal.classList.add('active');
   };
 
-  // fecha
   cancel.addEventListener('click', () => modal.classList.remove('active'));
   confirm.addEventListener('click', () => modal.classList.remove('active'));
 

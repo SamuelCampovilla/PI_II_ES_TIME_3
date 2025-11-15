@@ -1,7 +1,6 @@
 // codigo para recuperação de senha - Vinicius Castro
 
 document.addEventListener('DOMContentLoaded', () => {
-    // o id no HTML é 'formularioRecuperacao'
     const form = document.getElementById('formularioRecuperacao');
 
     form.addEventListener('submit', async(event) => {

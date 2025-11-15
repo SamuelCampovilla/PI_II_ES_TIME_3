@@ -1,4 +1,5 @@
 // redefinir senha - Vinicius Castro
+
 console.log('redefinepass.js carregado');
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('formularioRedefinir');
