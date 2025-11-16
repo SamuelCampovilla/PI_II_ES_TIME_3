@@ -58,6 +58,7 @@ Siga as etapas abaixo para rodar o projeto localmente:
 1. Ter o node.js instalado. 
 2. Ter conexão com internet.
 3. Ter um navegador compativel com js.
+4. Instalar todas as dependencias com npm i
  
 
 
