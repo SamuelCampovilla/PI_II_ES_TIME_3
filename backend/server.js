@@ -125,12 +125,17 @@ async function gravarNota(connection, idMatricula, idComponente, valor, nomeAlun
   }
 
   const notaNum = Number(valor);
-  if (isNaN(notaNum)) return;
 
+  if (isNaN(notaNum)) return;
   const [rows] = await connection.execute(
     'SELECT valor_nota FROM lancamento_nota WHERE id_matricula = ? AND id_componente = ? LIMIT 1',
     [idMatricula, idComponente]
   );
+
+  if (notaNum < 0 || notaNum > 10) {
+        console.warn(`Tentativa de gravar nota fora do limite (0-10): ${notaNum} para RA ${idMatricula}`);
+        return; 
+    }
   const valorAnterior = rows.length ? Number(rows[0].valor_nota) : null;
   const mudou = valorAnterior === null || Math.abs(Number(valorAnterior) - notaNum) >= 0.0001;
 
