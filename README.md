@@ -72,7 +72,7 @@ Este projeto foi desenvolvido para fins acadêmicos no contexto da disciplina Pr
 
 ## 🧾 Log-in do avaliador no banco com permissões limitadas
 
-username: professorAvaliador<br>senha: professorAvaliador2500<br>porta: 31256<br>hostname: caboose.proxy.rlwy.net
+username: professorAvaliador<br>senha: professorAvaliador2500<br>porta: 31256<br>hostname: caboose.proxy.rlwy.net<br>USE railway; para usar o banco no Workbench
 
 ---
 ### 1️⃣ Clone o repositório
