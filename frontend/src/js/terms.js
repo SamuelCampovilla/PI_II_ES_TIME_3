@@ -1,14 +1,9 @@
 // Samuel Campovilla
 // Aguarda todo o HTML ser carregado antes de rodar
 document.addEventListener('DOMContentLoaded', () => {
-
-  // Pega o botão que abre o modal
+  
   const openBtn = document.getElementById('conditions_popup');
-
-  // Pega o botão que fecha o modal
   const closeBtn = document.getElementById('close_modal');
-
-  // Pega o elemento do modal
   const modal   = document.getElementById('terms_modal');
 
   if (!openBtn || !closeBtn || !modal) {

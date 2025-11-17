@@ -58,12 +58,4 @@
         };
     }
 
-    window.loaderBox = {
-        show: addReq,
-        hide: endReq,
-        reset: () => {
-            reqCount = 0;
-            toggleOverlay();
-        }
-    };
 })();
