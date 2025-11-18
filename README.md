@@ -28,6 +28,36 @@ Com o NotaDez, o professor pode:
 - Garantir segurança e rastreabilidade através do painel de auditoria.
 
 ---
+## 📁 Estrutura de Pastas
+
+Projeto/
+├── .vscode/
+│
+├── backend/
+│   └── src/
+│       └── server.js
+│
+├── frontend/
+│   ├── pages/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── js/
+│   │   └── styles/
+│   │       ├── base/
+│   │       ├── components/
+│   │       ├── pages/
+│   │       └── main.css
+│   │
+│   └── index.html
+│
+├── node_modules/
+│
+├── .env
+├── .gitignore
+├── index.js
+├── package-lock.json
+├── package.json
+└── README.md
 
 ## 🚀 Tecnologias Utilizadas
 
