@@ -36,6 +36,8 @@ app.use(express.static(path.join(__dirname, 'src')));
 // ---------------------------------------------------------------------
 
 
+// criar  e verificar a matricula do aluno
+
 async function garantirMatricula(connection, idTurma, ra, nomeAluno) {
   await connection.execute(
     'INSERT IGNORE INTO alunos (ra, nome) VALUES (?, ?)',
@@ -68,7 +70,7 @@ async function garantirMatricula(connection, idTurma, ra, nomeAluno) {
   return rows[0].id_matricula;
 }
 
-
+//busca de componente nota
 async function buscarComponentes(connection, idTurma) {
   const [rows] = await connection.execute(
     `SELECT cn.id_componente, cn.sigla
@@ -82,12 +84,15 @@ async function buscarComponentes(connection, idTurma) {
   return rows; 
 }
 
+
+//arredondamento de media
 function arredondarMedia(valor) {
   if (valor === null || Number.isNaN(valor)) return null;
   const arredondado = Math.round(valor * 2) / 2;
   return Number(arredondado.toFixed(1));
 }
 
+//tranformar a data e hora em uma string para a mensagem
 function formatarDataHora(date) {
   const pad = (num) => String(num).padStart(2, '0');
   const dia = pad(date.getDate());
@@ -99,6 +104,7 @@ function formatarDataHora(date) {
   return `${dia}/${mes}/${ano} ${hora}:${minuto}:${segundo}`;
 }
 
+// criar a mensagem para o log quando uma nota é alterada
 async function registrarAuditoriaNota(connection, idMatricula, nomeAluno, valorAnterior, valorNovo) {
   const dataHora = new Date();
   const aluno = (nomeAluno || '').trim() || 'Desconhecido';
@@ -112,6 +118,7 @@ async function registrarAuditoriaNota(connection, idMatricula, nomeAluno, valorA
 }
 
 
+// inserir as naotas no banco de dados
 async function gravarNota(connection, idMatricula, idComponente, valor, nomeAluno) {
   if (!idComponente) return; 
 
@@ -156,7 +163,7 @@ async function gravarNota(connection, idMatricula, idComponente, valor, nomeAlun
   }
 }
 
-
+// atualizar calculo final de notas
 async function atualizarCalculoFinal(connection, idTurma, ra) {
 
   const componentes = await buscarComponentes(connection, idTurma);

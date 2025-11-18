@@ -402,6 +402,9 @@ async function guardarComponente(nome, sigla, descricao) {
   alert('Componente criado com sucesso!');
   await carregarTela();
 }
+//-----------------------------------------------------------------------------------------------------------------------------
+
+
 
 function alternarNotas() {
   const editable = switchEdicao.checked;
@@ -414,10 +417,14 @@ function alternarNotas() {
     });
 }
 
+//-----------------------------------------------------------------------------------------------------------------------------
+
 function alternarComponentes() {
   modoComponentes = switchEditarComponentes.checked;
   desenharCabecalho();
 }
+
+//-----------------------------------------------------------------------------------------------------------------------------
 
 async function carregarLinksMenu() {
   try {
@@ -466,26 +473,36 @@ async function carregarLinksMenu() {
   }
 }
 
+//-----------------------------------------------------------------------------------------------------------------------------
+
 window.addEventListener('DOMContentLoaded', async () => {
   await carregarLinksMenu();
   carregarTela();
 });
 
+//-----------------------------------------------------------------------------------------------------------------------------
 switchEdicao.addEventListener('change', alternarNotas);
 
 switchEditarComponentes.addEventListener('change', alternarComponentes);
 
+
+//-----------------------------------------------------------------------------------------------------------------------------
 checkAll.addEventListener('change', () => {
   const checks = corpoTabela.querySelectorAll('.row-check');
   checks.forEach(chk => { chk.checked = checkAll.checked; });
   atualizaBotaoRemover();
 });
 
+//-----------------------------------------------------------------------------------------------------------------------------
+
 corpoTabela.addEventListener('change', (e) => {
   if (e.target.classList.contains('row-check')) {
     atualizaBotaoRemover();
   }
 });
+
+
+//-----------------------------------------------------------------------------------------------------------------------------
 
 corpoTabela.addEventListener('keydown', (e) => {
   const td = e.target;
@@ -497,6 +514,8 @@ corpoTabela.addEventListener('keydown', (e) => {
     td.blur();
   }
 });
+
+//-----------------------------------------------------------------------------------------------------------------------------
 
 corpoTabela.addEventListener('blur', async (e) => {
   const td = e.target;
@@ -558,6 +577,8 @@ corpoTabela.addEventListener('blur', async (e) => {
     if (savingNode && savingNode.parentNode) savingNode.parentNode.removeChild(savingNode);
   }
 }, true);
+
+//-----------------------------------------------------------------------------------------------------------------------------
 
 corpoTabela.addEventListener('click', (e) => {
   if (e.target.classList.contains('btn-remover')) {
@@ -625,6 +646,7 @@ formAddAluno.addEventListener('submit', async (e) => {
     }
 });
  
+//-----------------------------------------------------------------------------------------------------------------------------
 
 formAddComponente.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -645,6 +667,8 @@ formAddComponente.addEventListener('submit', async (e) => {
   modal.hide();
 });
 
+//-----------------------------------------------------------------------------------------------------------------------------
+
 if (btnImportarCsv && inputCsvAlunos) {
   btnImportarCsv.addEventListener('click', () => inputCsvAlunos.click());
   inputCsvAlunos.addEventListener('change', async (e) => {
@@ -656,15 +680,21 @@ if (btnImportarCsv && inputCsvAlunos) {
   });
 }
 
+//-----------------------------------------------------------------------------------------------------------------------------
+
 if (btnExportarCsv) {
   btnExportarCsv.addEventListener('click', baixarCsv);
 }
+
+//-----------------------------------------------------------------------------------------------------------------------------
 
 async function apagarComponente(id) {
   const res = await fetch(`/componentes/${id}`, { method: 'DELETE' });
 
   await carregarTela();
 }
+
+//-----------------------------------------------------------------------------------------------------------------------------
 
 thead.addEventListener('click', async (e) => {
   if (!modoComponentes) return;
