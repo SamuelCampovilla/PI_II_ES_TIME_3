@@ -252,9 +252,6 @@ app.get('/frontend/pages/students.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/pages/students.html'));
 });
 
-app.get('/me', (req, res) => {
-  res.status(401).json({ message: 'Sessão não autenticada.' });
-});
 
 app.get('/notas', async (req, res) => {
   const idTurma = Number(req.query.id_turma);

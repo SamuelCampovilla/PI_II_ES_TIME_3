@@ -73,6 +73,7 @@ function mediaNotas(c1, c2, c3) {
   return Number(rounded.toFixed(1));
 }
 
+// ------------------------------------------------------------------------------------------------------------------
 
 
 function atualizaBotaoRemover() {
@@ -80,9 +81,13 @@ function atualizaBotaoRemover() {
   caixaRemocoes.classList.toggle('d-none', !anyChecked);
 }
 
+// ------------------------------------------------------------------------------------------------------------------
+
 function mostrarNota(valor) {
   return valor == null ? 'NULL' : valor;
 }
+
+// ------------------------------------------------------------------------------------------------------------------
 
 function lerNota(texto) {
   const t = texto.trim().replace(',', '.');
@@ -91,6 +96,8 @@ function lerNota(texto) {
   if (isNaN(n)) return null;
   return n;
 }
+
+// ------------------------------------------------------------------------------------------------------------------
 
 function quebrarLinhaCsv(linha) {
   const trimmed = linha.trim();
@@ -107,6 +114,8 @@ function quebrarLinhaCsv(linha) {
   return [trimmed];
 }
 
+// ------------------------------------------------------------------------------------------------------------------
+
 function pareceCabecalho(idColuna, nomeColuna) {
   const id = (idColuna || '').toLowerCase();
   const nome = (nomeColuna || '').toLowerCase();
@@ -114,6 +123,8 @@ function pareceCabecalho(idColuna, nomeColuna) {
   const possiveisNomes = ['nome', 'nome completo', 'aluno', 'estudante'];
   return possiveisIds.includes(id) || possiveisNomes.includes(nome);
 }
+
+// ------------------------------------------------------------------------------------------------------------------
 
 async function montarListaCsv(file) {
   const texto = await file.text();
@@ -140,6 +151,8 @@ async function montarListaCsv(file) {
   return alunos;
 }
 
+// ------------------------------------------------------------------------------------------------------------------
+
 function desenharCabecalho() {
   const ths = document.querySelectorAll('#tabelaNotas thead th');
 
@@ -165,6 +178,8 @@ function desenharCabecalho() {
   arrumarColunas();
 }
 
+// ------------------------------------------------------------------------------------------------------------------
+
 function arrumarColunas() {
   const ths = document.querySelectorAll('#tabelaNotas thead th');
   const rows = corpoTabela.querySelectorAll('tr');
@@ -182,6 +197,7 @@ function arrumarColunas() {
   }
 }
 
+// ------------------------------------------------------------------------------------------------------------------
 
 async function carregarTela() {
   const res = await fetch(`/notas?id_turma=${ID_TURMA}`);
@@ -239,6 +255,8 @@ async function carregarTela() {
   atualizaBotaoRemover();
 }
 
+// ------------------------------------------------------------------------------------------------------------------
+
 async function guardarAluno(ra, nome, c1, c2, c3, { recarregar = true } = {}) {
   const body = { id_turma: ID_TURMA, ra, nome, c1, c2, c3 };
   const res = await fetch('/notas/salvarLinha', {
@@ -265,6 +283,9 @@ async function guardarAluno(ra, nome, c1, c2, c3, { recarregar = true } = {}) {
   }
   return true;
 }
+
+// ------------------------------------------------------------------------------------------------------------------
+
 
 async function importarCsv(file) {
   const registros = await montarListaCsv(file);
@@ -311,6 +332,9 @@ async function importarCsv(file) {
     alert('Erro ao importar alunos. Verifique o arquivo e tente novamente.');
   }
 }
+
+// ------------------------------------------------------------------------------------------------------------------
+
 
 function baixarCsv() {
   if (!listaAlunos.length) {
@@ -402,8 +426,8 @@ async function guardarComponente(nome, sigla, descricao) {
   alert('Componente criado com sucesso!');
   await carregarTela();
 }
-//-----------------------------------------------------------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------------------------------------------------------
 
 
 function alternarNotas() {
@@ -424,59 +448,13 @@ function alternarComponentes() {
   desenharCabecalho();
 }
 
-//-----------------------------------------------------------------------------------------------------------------------------
 
-async function carregarLinksMenu() {
-  try {
-    let idDoc = null;
-    let email = null;
-    try {
-      const meRes = await fetch('/me');
-      if (meRes.ok) {
-        const me = await meRes.json();
-        idDoc = me.id_docente;
-        email = me.email;
-      }
-    } catch (e) {
-    }
 
-    if (!idDoc) {
-      const urlParams = new URLSearchParams(window.location.search);
-      email = email || urlParams.get('email') || localStorage.getItem('user_email') || (document.cookie.match(/(?:^|; )email=([^;]*)/) || [])[1];
-      if (email) {
-        try {
-          const r = await fetch(`/docente/id?email=${encodeURIComponent(email)}`);
-          if (r.ok) {
-            const j = await r.json();
-            idDoc = j.id;
-          }
-        } catch (e) {
-          console.error('Erro ao obter id do docente via fallback:', e);
-        }
-      }
-    }
-
-    if (!idDoc) return;
-    const menuLinks = document.querySelectorAll('.dropdown-menu a');
-    menuLinks.forEach(a => {
-      if (!a || !a.getAttribute) return;
-      const href = a.getAttribute('href') || '';
-      if (href.includes('instituicao.html')) {
-        a.setAttribute('href', `/frontend/pages/instituicao.html?id_docente=${encodeURIComponent(idDoc)}`);
-      }
-      if (href.includes('menagementPage.html')) {
-        a.setAttribute('href', `/frontend/pages/menagementPage.html?id_docente=${encodeURIComponent(idDoc)}`);
-      }
-    });
-  } catch (err) {
-    console.error('Erro em carregarLinksMenu:', err);
-  }
-}
 
 //-----------------------------------------------------------------------------------------------------------------------------
 
 window.addEventListener('DOMContentLoaded', async () => {
-  await carregarLinksMenu();
+
   carregarTela();
 });
 
